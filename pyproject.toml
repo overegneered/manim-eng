@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "manim-eng"
+version = "0.1.0"
+description = "A Manim CE plugin for engineering communication"
+authors = ["overegneered <git@egneer.ing>"]
+readme = "README.md"
+packages = [{include = "manim_eng", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "~3.11"
+manim = ">=0.18.1"
+
+[tool.poetry.plugins."manim.plugins"]
+"manim_eng" = "manim_eng"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
