@@ -47,11 +47,8 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         for terminal in self._terminals:
             self._anchors.add(Anchor(debug, TERMINAL_COLOUR).shift(terminal.position))
 
-        # Adding these here helps to avoid an issue with there being a persistent label or annotation being left on the
-        # screen, which was quite annoying
-        self._label: mn.MathTex = mn.MathTex("")
-        self._annotation: mn.MathTex = mn.MathTex("")
-        self._marks.add(self._label, self._annotation)
+        self._label: mn.MathTex | None = None
+        self._annotation: mn.MathTex | None = None
 
     @abc.abstractmethod
     def _construct(self) -> None:
@@ -77,7 +74,8 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         return self
 
     def clear_label(self) -> Self:
-        self.set_label("")
+        self._marks.remove(self._label)
+        self._annotation = None
         return self
 
     def set_annotation(self, annotation: str) -> Self:
@@ -89,21 +87,70 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         self._annotation = self._replace_mark(self._annotation, annotation, self._annotation_anchor)
         return self
 
-    def _replace_mark(self, mark_to_remove: mn.MathTex, mark_text: str, anchor: Anchor) -> mn.MathTex:
+    def clear_annotation(self) -> Self:
+        self._marks.remove(self._annotation)
+        self._label = None
+        return self
+
+    def _replace_mark(self, old_mark: mn.MathTex, mark_text: str, anchor: Anchor) -> mn.MathTex:
         """
         Replaces a mark with a new mark, and returns that mark.
-        :param mark_to_remove: The mark to replace.
+        :param old_mark: The mark to replace.
         :param mark_text: The text to use for the new mark. Takes a TeX math mode string.
         :param anchor: The anchor to affix the mark to.
         :return: The new mark, a ``manim.MathTex`` object.
         """
         def mark_updater(mark: mn.Mobject):
-            mark.next_to(anchor, direction=np.array([0, 0, 0]), buff=np.array([0, 0, 0]))
-        self._marks.remove(mark_to_remove)
-        new_mark = mn.MathTex(mark_text)
+            mark.move_to(anchor)
+        new_mark = mn.MathTex(mark_text).move_to(anchor)
         new_mark.add_updater(mark_updater)
+        if old_mark is not None:
+            self._marks.remove(old_mark)
         self._marks.add(new_mark)
         return new_mark
+
+    @mn.override_animate(set_label)
+    def _animate_set_label(self, *set_label_args, anim_args=None, **set_label_kwargs) -> mn.Animation:
+        old_label = self._label
+        self.set_label(*set_label_args, **set_label_kwargs)
+        return self._animate_set_mark(old_label, self._label, anim_args)
+
+    @mn.override_animate(clear_label)
+    def _animate_clear_label(self, anim_args=None) -> mn.Animation:
+        anim = self._animate_clear_mark(self._label, anim_args)
+        self.clear_label()
+        return anim
+
+    @mn.override_animate(set_annotation)
+    def _animate_set_annotation(self, *set_annotation_args, anim_args=None, **set_annotation_kwargs) -> mn.Animation:
+        old_annotation = self._annotation
+        self.set_annotation(*set_annotation_args, **set_annotation_kwargs)
+        return self._animate_set_mark(old_annotation, self._annotation, anim_args)
+
+    @mn.override_animate(clear_annotation)
+    def _animate_clear_annotation(self, anim_args=None) -> mn.Animation:
+        anim = self._animate_clear_mark(self._annotation, anim_args)
+        self.clear_annotation()
+        return anim
+
+    @staticmethod
+    def _animate_set_mark(old_mark: mn.MathTex | None, new_mark: mn.MathTex, anim_args) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        if old_mark is None:
+            return mn.Create(new_mark, **anim_args)
+        else:
+            return mn.AnimationGroup(
+                mn.FadeOut(old_mark, shift=mn.DOWN, **anim_args),
+                mn.FadeIn(new_mark, shift=mn.DOWN, **anim_args)
+            )
+
+    @staticmethod
+    def _animate_clear_mark(old_mark: mn.MathTex, anim_args) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+        return mn.Uncreate(old_mark, **anim_args)
 
 
 class Bipole(Component, metaclass=abc.ABCMeta):
