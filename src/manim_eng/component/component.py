@@ -68,12 +68,16 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         """
         Set the label of the component.
         :param label: The label to set. Takes a TeX math mode string.
-        :return: The ``Component`` on which the method was called.
+        :return: The (modified) component on which the method was called.
         """
         self._label = self._replace_mark(self._label, label, self._label_anchor)
         return self
 
     def clear_label(self) -> Self:
+        """
+        Clear the label of the component.
+        :return: The (modified) component on which the method was called.
+        """
         self._marks.remove(self._label)
         self._annotation = None
         return self
@@ -82,12 +86,16 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         """
         Set the annotation of the component.
         :param annotation: The annotation to set. Takes a TeX math mode string.
-        :return: The ``Component`` on which the method was called.
+        :return: The (modified) component on which the method was called.
         """
         self._annotation = self._replace_mark(self._annotation, annotation, self._annotation_anchor)
         return self
 
     def clear_annotation(self) -> Self:
+        """
+        Clear the annotation of the component.
+        :return: The (modified) component on which the method was called
+        """
         self._marks.remove(self._annotation)
         self._label = None
         return self
