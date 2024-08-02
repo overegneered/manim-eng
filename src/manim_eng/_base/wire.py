@@ -1,7 +1,7 @@
 import manim as mn
 import numpy as np
 
-from manim_eng.component.component import _Terminal
+from manim_eng.component.component import Terminal
 
 WIRE_STROKE_WIDTH: float = 2.5
 COMPONENT_STROKE_WIDTH: float = 4.0
@@ -13,7 +13,7 @@ class Wire(mn.Line):
 
 
 class Connection(Wire):
-    def __init__(self, end_1: _Terminal, end_2: _Terminal, *args, **kwargs):
+    def __init__(self, end_1: Terminal, end_2: Terminal, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # TODO: All of this logic. Will probably end up being pretty complicated
         #       It currently doesn't work because the Component types don't take their translations into account when

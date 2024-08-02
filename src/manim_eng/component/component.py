@@ -18,7 +18,7 @@ from .._debug.anchor import (
 
 
 @dataclass
-class _Terminal:
+class Terminal:
     position: npt.NDArray[np.float64]
     direction: npt.NDArray[np.float64]
 
@@ -40,7 +40,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         self._rotate = mn.VGroup(self._body, self._anchors)
         self.add(self._rotate, self._marks)
 
-        self._terminals: list[_Terminal] = []
+        self._terminals: list[Terminal] = []
 
         self._construct()
 
@@ -205,8 +205,8 @@ class Bipole(Component, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        left: _Terminal = _Terminal(position=mn.LEFT, direction=mn.RIGHT),
-        right: _Terminal = _Terminal(position=mn.RIGHT, direction=mn.LEFT),
+        left: Terminal = Terminal(position=mn.LEFT, direction=mn.RIGHT),
+        right: Terminal = Terminal(position=mn.RIGHT, direction=mn.LEFT),
         *args,
         **kwargs,
     ):
