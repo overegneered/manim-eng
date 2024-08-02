@@ -4,6 +4,7 @@ import manim as mn
 LABEL_COLOUR = mn.RED
 ANNOTATION_COLOUR = mn.BLUE
 TERMINAL_COLOUR = mn.GREEN
+CENTRE_COLOUR = mn.PURPLE
 
 
 class Anchor(mn.Arc):

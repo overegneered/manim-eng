@@ -6,8 +6,15 @@ import numpy as np
 import numpy.typing as npt
 
 import manim as mn
+import manim.typing as mnt
 
-from .._debug.anchor import Anchor, LABEL_COLOUR, TERMINAL_COLOUR, ANNOTATION_COLOUR
+from .._debug.anchor import (
+    Anchor,
+    LABEL_COLOUR,
+    TERMINAL_COLOUR,
+    ANNOTATION_COLOUR,
+    CENTRE_COLOUR,
+)
 
 
 @dataclass
@@ -37,13 +44,16 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
 
         self._construct()
 
+        self._centre_anchor = Anchor(debug, CENTRE_COLOUR)
         self._label_anchor = Anchor(debug, LABEL_COLOUR).shift(
             self._body.get_top() + 0.5 * mn.UP
         )
         self._annotation_anchor = Anchor(debug, ANNOTATION_COLOUR).shift(
             self._body.get_bottom() + 0.5 * mn.DOWN
         )
-        self._anchors.add(self._label_anchor, self._annotation_anchor)
+        self._anchors.add(
+            self._centre_anchor, self._label_anchor, self._annotation_anchor
+        )
 
         for terminal in self._terminals:
             self._anchors.add(Anchor(debug, TERMINAL_COLOUR).shift(terminal.position))
@@ -60,9 +70,23 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         """
         pass
 
-    def rotate(self, angle: float = mn.PI, *args, **kwargs) -> Self:
-        # TODO: adjust this so it rotates about the centre as found from the terminals
-        self._rotate.rotate(angle, *args, **kwargs)
+    def get_center(self) -> mnt.Point3D:
+        """
+        Get the centre of the component. **This is not necessarily the exact centre of the box the component symbol
+        occupies**. It is rather the point about which it is most logical to rotate the component. For bipoles, it will
+        be at the midpoint of the line between the two terminals.
+        :return: The centre of the component.
+        """
+        return self._centre_anchor.get_center()
+
+    def rotate(
+        self,
+        angle: float = mn.PI,
+        about_point: mnt.Point3D | None = None,
+        *args,
+        **kwargs,
+    ) -> Self:
+        self._rotate.rotate(angle=angle, about_point=about_point, *args, **kwargs)
         return self
 
     def set_label(self, label: str) -> Self:
