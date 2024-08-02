@@ -17,6 +17,9 @@ from .._debug.anchor import (
 )
 
 
+MARK_FONT_SIZE = 36
+
+
 @dataclass
 class Terminal:
     position: npt.NDArray[np.float64]
@@ -46,10 +49,10 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
 
         self._centre_anchor = Anchor(debug, CENTRE_COLOUR)
         self._label_anchor = Anchor(debug, LABEL_COLOUR).shift(
-            self._body.get_top() + 0.5 * mn.UP
+            self._body.get_top() + 0.4 * mn.UP
         )
         self._annotation_anchor = Anchor(debug, ANNOTATION_COLOUR).shift(
-            self._body.get_bottom() + 0.5 * mn.DOWN
+            self._body.get_bottom() + 0.4 * mn.DOWN
         )
         self._anchors.add(
             self._centre_anchor, self._label_anchor, self._annotation_anchor
@@ -141,7 +144,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         def mark_updater(mark: mn.Mobject):
             mark.move_to(anchor)
 
-        new_mark = mn.MathTex(mark_text).move_to(anchor)
+        new_mark = mn.MathTex(mark_text, font_size=MARK_FONT_SIZE).move_to(anchor)
         new_mark.add_updater(mark_updater)
         if old_mark is not None:
             self._marks.remove(old_mark)

@@ -14,5 +14,5 @@ class Anchor(mn.Arc):
             start_angle=0,
             angle=2 * mn.PI,
             color=color,
-            stroke_width=3,
+            stroke_width=2,
         )
