@@ -1,6 +1,5 @@
 import manim as mn
 
-
 LABEL_COLOUR = mn.RED
 ANNOTATION_COLOUR = mn.BLUE
 TERMINAL_COLOUR = mn.GREEN

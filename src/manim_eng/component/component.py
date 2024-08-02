@@ -2,20 +2,18 @@ import abc
 from dataclasses import dataclass
 from typing import Self
 
+import manim as mn
+import manim.typing as mnt
 import numpy as np
 import numpy.typing as npt
 
-import manim as mn
-import manim.typing as mnt
-
 from .._debug.anchor import (
-    Anchor,
-    LABEL_COLOUR,
-    TERMINAL_COLOUR,
     ANNOTATION_COLOUR,
     CENTRE_COLOUR,
+    LABEL_COLOUR,
+    TERMINAL_COLOUR,
+    Anchor,
 )
-
 
 MARK_FONT_SIZE = 36
 

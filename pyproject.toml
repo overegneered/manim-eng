@@ -25,6 +25,9 @@ build-backend = "poetry.core.masonry.api"
 fix = true
 
 [tool.ruff.lint]
+select = [
+    "I"
+]
 ignore = [
     # Required to allow manim-eng to mirror Manim's `from manim import *` usage style.
     "F403"

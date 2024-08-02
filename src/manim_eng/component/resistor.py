@@ -1,8 +1,8 @@
 import manim as mn
 import numpy as np
-from .._base.wire import Wire, COMPONENT_STROKE_WIDTH
-from .component import Bipole
 
+from .._base.wire import COMPONENT_STROKE_WIDTH, Wire
+from .component import Bipole
 
 __all__ = ["Resistor", "Thermistor", "VariableResistor"]
 
