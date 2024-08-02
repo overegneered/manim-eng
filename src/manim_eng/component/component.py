@@ -1,5 +1,4 @@
 import abc
-from copy import deepcopy
 from dataclasses import dataclass
 from typing import Self
 
@@ -7,12 +6,8 @@ import numpy as np
 import numpy.typing as npt
 
 import manim as mn
-import manim.typing as mnt
 
-from .._debug import *
-
-
-__all__ = ["Component", "Bipole"]
+from .._debug.anchor import Anchor, LABEL_COLOUR, TERMINAL_COLOUR, ANNOTATION_COLOUR
 
 
 @dataclass
@@ -27,6 +22,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
     :param debug: Whether to display debug information for the component. If ``True``, the component's anchors will be
         displayed visually.
     """
+
     def __init__(self, debug: bool = False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -41,8 +37,12 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
 
         self._construct()
 
-        self._label_anchor = Anchor(debug, LABEL_COLOUR).shift(self._body.get_top() + 0.5 * mn.UP)
-        self._annotation_anchor = Anchor(debug, ANNOTATION_COLOUR).shift(self._body.get_bottom() + 0.5 * mn.DOWN)
+        self._label_anchor = Anchor(debug, LABEL_COLOUR).shift(
+            self._body.get_top() + 0.5 * mn.UP
+        )
+        self._annotation_anchor = Anchor(debug, ANNOTATION_COLOUR).shift(
+            self._body.get_bottom() + 0.5 * mn.DOWN
+        )
         self._anchors.add(self._label_anchor, self._annotation_anchor)
 
         for terminal in self._terminals:
@@ -89,7 +89,9 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         :param annotation: The annotation to set. Takes a TeX math mode string.
         :return: The (modified) component on which the method was called.
         """
-        self._annotation = self._replace_mark(self._annotation, annotation, self._annotation_anchor)
+        self._annotation = self._replace_mark(
+            self._annotation, annotation, self._annotation_anchor
+        )
         return self
 
     def clear_annotation(self) -> Self:
@@ -101,7 +103,9 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         self._annotation = None
         return self
 
-    def _replace_mark(self, old_mark: mn.MathTex, mark_text: str, anchor: Anchor) -> mn.MathTex:
+    def _replace_mark(
+        self, old_mark: mn.MathTex, mark_text: str, anchor: Anchor
+    ) -> mn.MathTex:
         """
         Replaces a mark with a new mark, and returns that mark.
         :param old_mark: The mark to replace.
@@ -109,8 +113,10 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         :param anchor: The anchor to affix the mark to.
         :return: The new mark, a ``manim.MathTex`` object.
         """
+
         def mark_updater(mark: mn.Mobject):
             mark.move_to(anchor)
+
         new_mark = mn.MathTex(mark_text).move_to(anchor)
         new_mark.add_updater(mark_updater)
         if old_mark is not None:
@@ -119,7 +125,9 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         return new_mark
 
     @mn.override_animate(set_label)
-    def _animate_set_label(self, *set_label_args, anim_args=None, **set_label_kwargs) -> mn.Animation:
+    def _animate_set_label(
+        self, *set_label_args, anim_args=None, **set_label_kwargs
+    ) -> mn.Animation:
         old_label = self._label
         self.set_label(*set_label_args, **set_label_kwargs)
         return self._animate_set_mark(old_label, self._label, anim_args)
@@ -131,7 +139,9 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         return anim
 
     @mn.override_animate(set_annotation)
-    def _animate_set_annotation(self, *set_annotation_args, anim_args=None, **set_annotation_kwargs) -> mn.Animation:
+    def _animate_set_annotation(
+        self, *set_annotation_args, anim_args=None, **set_annotation_kwargs
+    ) -> mn.Animation:
         old_annotation = self._annotation
         self.set_annotation(*set_annotation_args, **set_annotation_kwargs)
         return self._animate_set_mark(old_annotation, self._annotation, anim_args)
@@ -143,7 +153,9 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         return anim
 
     @staticmethod
-    def _animate_set_mark(old_mark: mn.MathTex | None, new_mark: mn.MathTex, anim_args) -> mn.Animation:
+    def _animate_set_mark(
+        old_mark: mn.MathTex | None, new_mark: mn.MathTex, anim_args
+    ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
 
@@ -152,7 +164,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         else:
             return mn.AnimationGroup(
                 mn.FadeOut(old_mark, shift=mn.DOWN, **anim_args),
-                mn.FadeIn(new_mark, shift=mn.DOWN, **anim_args)
+                mn.FadeIn(new_mark, shift=mn.DOWN, **anim_args),
             )
 
     @staticmethod
@@ -166,10 +178,14 @@ class Bipole(Component, metaclass=abc.ABCMeta):
     """
     Base class for bipole components, such as resistors and sources.
     """
-    def __init__(self,
-                 left: _Terminal = _Terminal(position=mn.LEFT, direction=mn.RIGHT),
-                 right: _Terminal = _Terminal(position=mn.RIGHT, direction=mn.LEFT),
-                 *args, **kwargs):
+
+    def __init__(
+        self,
+        left: _Terminal = _Terminal(position=mn.LEFT, direction=mn.RIGHT),
+        right: _Terminal = _Terminal(position=mn.RIGHT, direction=mn.LEFT),
+        *args,
+        **kwargs,
+    ):
         self.left = left
         self.right = right
         super().__init__(*args, **kwargs)

@@ -27,8 +27,10 @@ class Connection(Wire):
         #       terminals at each end (use the dot product)
         first_half_vector = horizontal_half_vector
         ends_more_aligned_to_the_vertical_than_the_horizontal = (
-                (end_1.position + end_2.position).dot(np.array([1, 0, 0]))
-                < (end_1.position + end_2.position).dot(np.array([0, 1, 0])))
+            end_1.position + end_2.position
+        ).dot(np.array([1, 0, 0])) < (end_1.position + end_2.position).dot(
+            np.array([0, 1, 0])
+        )
         if ends_more_aligned_to_the_vertical_than_the_horizontal:
             first_half_vector = vertical_half_vector
 
@@ -39,5 +41,5 @@ class Connection(Wire):
             end_2.position,
         ]
         for i in range(len(points) - 1):
-            if (points[i] != points[i+1]).any():
-                self.add(Wire(points[i], points[i+1]))
+            if (points[i] != points[i + 1]).any():
+                self.add(Wire(points[i], points[i + 1]))
