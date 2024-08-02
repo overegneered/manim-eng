@@ -1,15 +1,22 @@
 repos:
   - repo: local
     hooks:
+      # Flag (and fix, if possible) lint errors
       - id: ruff
         name: ruff check
         language: system
         entry: ruff check
         types: [python]
-
+      # Format code uniformly
       - id: ruff-format
         name: ruff format
         language: system
         entry: ruff format
         types: [python]
-
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      # Trim trailing whitespace
+      - id: trailing-whitespace
+      # Ensure files end with an empty line
+      - id: end-of-file-fixer
