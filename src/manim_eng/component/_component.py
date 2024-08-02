@@ -27,8 +27,11 @@ class Terminal:
 class Component(mn.VMobject, metaclass=abc.ABCMeta):
     """Base class for a circuit symbol.
 
-    :param debug: Whether to display debug information for the component. If ``True``,
-        the component's anchors will be displayed visually.
+    Parameters
+    ----------
+    debug
+        Whether to display debug information for the component. If ``True``, the
+        component's anchors will be displayed visually.
     """
 
     def __init__(self, debug: bool = False, *args, **kwargs):
@@ -80,7 +83,10 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         the component. For bipoles, it will be at the midpoint of the line between the
         two terminals.
 
-        :return: The centre of the component.
+        Returns
+        -------
+        Point3D
+            The centre of the component.
         """
         return self._centre_anchor.get_center()
 
@@ -97,8 +103,15 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
     def set_label(self, label: str) -> Self:
         """Set the label of the component.
 
-        :param label: The label to set. Takes a TeX math mode string.
-        :return: The (modified) component on which the method was called.
+        Parameters
+        ----------
+        label : str
+            The label to set. Takes a TeX math mode string.
+
+        Returns
+        -------
+        Self
+            The (modified) component on which the method was called.
         """
         self._label = self._replace_mark(self._label, label, self._label_anchor)
         return self
@@ -106,7 +119,10 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
     def clear_label(self) -> Self:
         """Clear the label of the component.
 
-        :return: The (modified) component on which the method was called.
+        Returns
+        -------
+        Self
+            The (modified) component on which the method was called.
         """
         self._marks.remove(self._label)
         self._label = None
@@ -115,8 +131,15 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
     def set_annotation(self, annotation: str) -> Self:
         """Set the annotation of the component.
 
-        :param annotation: The annotation to set. Takes a TeX math mode string.
-        :return: The (modified) component on which the method was called.
+        Parameters
+        ----------
+        annotation : str
+            The annotation to set. Takes a TeX math mode string.
+
+        Returns
+        -------
+        Self
+            The (modified) component on which the method was called.
         """
         self._annotation = self._replace_mark(
             self._annotation, annotation, self._annotation_anchor
@@ -126,7 +149,10 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
     def clear_annotation(self) -> Self:
         """Clear the annotation of the component.
 
-        :return: The (modified) component on which the method was called
+        Returns
+        -------
+        Self
+            The (modified) component on which the method was called
         """
         self._marks.remove(self._annotation)
         self._annotation = None
@@ -137,11 +163,20 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
     ) -> mn.MathTex:
         """Replace a mark with a new mark, and return that new mark.
 
-        :param old_mark: The mark to replace.
-        :param mark_text: The text to use for the new mark. Takes a TeX math mode
+        Parameters
+        ----------
+        old_mark : MathTex
+            The mark to replace.
+        mark_text : str
+            The text to use for the new mark. Takes a TeX math mode
             string.
-        :param anchor: The anchor to affix the mark to.
-        :return: The new mark, a ``manim.MathTex`` object.
+        anchor : Anchor
+            The anchor to affix the mark to.
+
+        Returns
+        -------
+        MathTex
+            The new mark.
         """
 
         def mark_updater(mark: mn.Mobject):
