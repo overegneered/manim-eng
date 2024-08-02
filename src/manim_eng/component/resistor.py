@@ -1,13 +1,17 @@
+"""Resistor-based components."""
+
 import manim as mn
 import numpy as np
 
 from .._base.wire import COMPONENT_STROKE_WIDTH, Wire
-from .component import Bipole
+from ._component import Bipole
 
 __all__ = ["Resistor", "Thermistor", "VariableResistor"]
 
 
 class Resistor(Bipole):
+    """The circuit symbol for a resistor."""
+
     def _construct(self) -> None:
         super()._construct()
         terminal_l = Wire(self.left.position, self.left.position / 2)
@@ -17,6 +21,8 @@ class Resistor(Bipole):
 
 
 class Thermistor(Resistor):
+    """The circuit symbol for a thermistor."""
+
     def _construct(self) -> None:
         super()._construct()
 
@@ -26,6 +32,8 @@ class Thermistor(Resistor):
 
 
 class VariableResistor(Resistor):
+    """The circuit symbol for a variable resistor."""
+
     def _construct(self) -> None:
         super()._construct()
 

@@ -25,10 +25,10 @@ class Terminal:
 
 
 class Component(mn.VMobject, metaclass=abc.ABCMeta):
-    """
-    Base class for a circuit symbol.
-    :param debug: Whether to display debug information for the component. If ``True``, the component's anchors will be
-        displayed visually.
+    """Base class for a circuit symbol.
+
+    :param debug: Whether to display debug information for the component. If ``True``,
+        the component's anchors will be displayed visually.
     """
 
     def __init__(self, debug: bool = False, *args, **kwargs):
@@ -64,18 +64,22 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def _construct(self) -> None:
+        """Construct the shape of the component.
+
+        Code to build the component's symbol goes in here (contrary to Manim's
+        standard) and *not* ``__init__()``. This is because the base ``Component`` class
+        has to perform initialisation both before (to set up the groups etc.) and after
+        (to set the anchor positions for annotations) the component's shape setup.
         """
-        Code to build the component's symbol goes in here (contrary to Manim's standard) and *not* ``__init__()``. This
-        is because the base ``Component`` class has to perform initialisation both before (to set up the groups etc.)
-        and after (to set the anchor positions for annotations) the component's shape setup.
-        """
-        pass
 
     def get_center(self) -> mnt.Point3D:
-        """
-        Get the centre of the component. **This is not necessarily the exact centre of the box the component symbol
-        occupies**. It is rather the point about which it is most logical to rotate the component. For bipoles, it will
-        be at the midpoint of the line between the two terminals.
+        """Get the centre of the component.
+
+        **This is not necessarily the exact centre of the box the component symbol
+        occupies**. It is rather the point about which it is most logical to rotate
+        the component. For bipoles, it will be at the midpoint of the line between the
+        two terminals.
+
         :return: The centre of the component.
         """
         return self._centre_anchor.get_center()
@@ -87,12 +91,12 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         *args,
         **kwargs,
     ) -> Self:
-        self._rotate.rotate(angle=angle, about_point=about_point, *args, **kwargs)
+        self._rotate.rotate(*args, angle=angle, about_point=about_point, **kwargs)
         return self
 
     def set_label(self, label: str) -> Self:
-        """
-        Set the label of the component.
+        """Set the label of the component.
+
         :param label: The label to set. Takes a TeX math mode string.
         :return: The (modified) component on which the method was called.
         """
@@ -100,8 +104,8 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         return self
 
     def clear_label(self) -> Self:
-        """
-        Clear the label of the component.
+        """Clear the label of the component.
+
         :return: The (modified) component on which the method was called.
         """
         self._marks.remove(self._label)
@@ -109,8 +113,8 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         return self
 
     def set_annotation(self, annotation: str) -> Self:
-        """
-        Set the annotation of the component.
+        """Set the annotation of the component.
+
         :param annotation: The annotation to set. Takes a TeX math mode string.
         :return: The (modified) component on which the method was called.
         """
@@ -120,8 +124,8 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         return self
 
     def clear_annotation(self) -> Self:
-        """
-        Clear the annotation of the component.
+        """Clear the annotation of the component.
+
         :return: The (modified) component on which the method was called
         """
         self._marks.remove(self._annotation)
@@ -131,10 +135,11 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
     def _replace_mark(
         self, old_mark: mn.MathTex, mark_text: str, anchor: Anchor
     ) -> mn.MathTex:
-        """
-        Replaces a mark with a new mark, and returns that mark.
+        """Replace a mark with a new mark, and return that new mark.
+
         :param old_mark: The mark to replace.
-        :param mark_text: The text to use for the new mark. Takes a TeX math mode string.
+        :param mark_text: The text to use for the new mark. Takes a TeX math mode
+            string.
         :param anchor: The anchor to affix the mark to.
         :return: The new mark, a ``manim.MathTex`` object.
         """
@@ -186,11 +191,11 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
 
         if old_mark is None:
             return mn.Create(new_mark, **anim_args)
-        else:
-            return mn.AnimationGroup(
-                mn.FadeOut(old_mark, shift=mn.DOWN, **anim_args),
-                mn.FadeIn(new_mark, shift=mn.DOWN, **anim_args),
-            )
+
+        return mn.AnimationGroup(
+            mn.FadeOut(old_mark, shift=mn.DOWN, **anim_args),
+            mn.FadeIn(new_mark, shift=mn.DOWN, **anim_args),
+        )
 
     @staticmethod
     def _animate_clear_mark(old_mark: mn.MathTex, anim_args) -> mn.Animation:
@@ -200,19 +205,17 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
 
 
 class Bipole(Component, metaclass=abc.ABCMeta):
-    """
-    Base class for bipole components, such as resistors and sources.
-    """
+    """Base class for bipole components, such as resistors and sources."""
 
     def __init__(
         self,
-        left: Terminal = Terminal(position=mn.LEFT, direction=mn.RIGHT),
-        right: Terminal = Terminal(position=mn.RIGHT, direction=mn.LEFT),
+        left: Terminal | None = None,
+        right: Terminal | None = None,
         *args,
         **kwargs,
     ):
-        self.left = left
-        self.right = right
+        self.left = left or Terminal(position=mn.LEFT, direction=mn.RIGHT)
+        self.right = right or Terminal(position=mn.RIGHT, direction=mn.LEFT)
         super().__init__(*args, **kwargs)
 
     def _construct(self):

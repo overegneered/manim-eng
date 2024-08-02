@@ -26,10 +26,39 @@ fix = true
 
 [tool.ruff.lint]
 select = [
-    # Import sorting
-    "I"
+    "E", # Pycodestyle errors
+    "W", # Pycodestyle warnings
+    "I", # Import sorting
+    "N", # Enforce PEP-8 naming
+    "D", # Docstring convention enforcing
+    "B", # Flake8 bugbears
+    "A", # Builtin shadowing
+    "COM", # Comma problems
+    "C4", # Unnecessary complexity
+    "ISC", # String concatenation
+    "PIE", # Misc. lints
+    "PT", # Pytest lints
+    "Q", # Quotes
+    "RET", # return-related lints
+    "SIM", # Possible simplifications
+    "ARG", # Unused arguments
+    "ERA", # Commented-out code
+    "PL", # Pylint
+    "NPY", # NumPy lints
+    "RUF", # Ruff lints
 ]
 ignore = [
     # Required to allow manim-eng to mirror Manim's `from manim import *` usage style.
-    "F403"
+    "F403",
+    # Deactivated for compatibility with the formatter,
+    # as outlined here: https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
+    "W191",
+    "E111", "E114", "E117",
+    "D206", "D300",
+    "Q000", "Q001", "Q002", "Q003",
+    "COM812", "COM819",
+    "ISC001", "ISC002",
 ]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
