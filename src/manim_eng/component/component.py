@@ -1,4 +1,5 @@
 import abc
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import Self
 
@@ -59,7 +60,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         """
         pass
 
-    def rotate(self, angle: float = mn.PI, axis: mnt.Vector3D = mn.OUT, *args, **kwargs) -> Self:
+    def rotate(self, angle: float = mn.PI, *args, **kwargs) -> Self:
         # TODO: adjust this so it rotates about the centre as found from the terminals
         self._rotate.rotate(angle, *args, **kwargs)
         return self
@@ -79,7 +80,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         :return: The (modified) component on which the method was called.
         """
         self._marks.remove(self._label)
-        self._annotation = None
+        self._label = None
         return self
 
     def set_annotation(self, annotation: str) -> Self:
@@ -97,7 +98,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         :return: The (modified) component on which the method was called
         """
         self._marks.remove(self._annotation)
-        self._label = None
+        self._annotation = None
         return self
 
     def _replace_mark(self, old_mark: mn.MathTex, mark_text: str, anchor: Anchor) -> mn.MathTex:
