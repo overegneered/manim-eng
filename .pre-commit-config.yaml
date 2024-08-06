@@ -12,8 +12,10 @@ repos:
     hooks:
       # Trim trailing whitespace
       - id: trailing-whitespace
+        exclude_types: [ python ] # No use checking Python as Ruff has already done it
       # Ensure files end with an empty line
       - id: end-of-file-fixer
+        exclude_types: [ python ] # No use checking Python as Ruff has already done it
   - repo: local
     hooks:
       # Flag (and fix, if possible) lint errors
