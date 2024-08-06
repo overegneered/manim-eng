@@ -29,41 +29,34 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
 
     Parameters
     ----------
-    debug
+    label : str | None
+        A label to set. Takes a TeX math mode string. No label is set if ``None`` is
+        passed.
+    annotation : str | None
+        An annotation to set. Takes a TeX math mode string. No annotation is set if
+        ``None`` is passed.
+    debug : bool
         Whether to display debug information for the component. If ``True``, the
         component's anchors will be displayed visually.
     """
 
-    def __init__(self, debug: bool = False, *args, **kwargs):
+    def __init__(
+        self,
+        label: str | None = None,
+        annotation: str | None = None,
+        debug: bool = False,
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
 
-        self._body = mn.VGroup()
-        self._anchors = mn.VGroup()
-        self._marks = mn.VGroup()
-
-        self._rotate = mn.VGroup(self._body, self._anchors)
-        self.add(self._rotate, self._marks)
-
+        self.__set_up_groups()
         self._terminals: list[Terminal] = []
 
         self._construct()
 
-        self._centre_anchor = Anchor(debug, CENTRE_COLOUR)
-        self._label_anchor = Anchor(debug, LABEL_COLOUR).shift(
-            self._body.get_top() + 0.4 * mn.UP
-        )
-        self._annotation_anchor = Anchor(debug, ANNOTATION_COLOUR).shift(
-            self._body.get_bottom() + 0.4 * mn.DOWN
-        )
-        self._anchors.add(
-            self._centre_anchor, self._label_anchor, self._annotation_anchor
-        )
-
-        for terminal in self._terminals:
-            self._anchors.add(Anchor(debug, TERMINAL_COLOUR).shift(terminal.position))
-
-        self._label: mn.MathTex | None = None
-        self._annotation: mn.MathTex | None = None
+        self.__set_up_anchors(debug)
+        self.__set_up_marks(annotation, label)
 
     @abc.abstractmethod
     def _construct(self) -> None:
@@ -159,6 +152,35 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
             self._marks.remove(self._annotation)
         self._annotation = None
         return self
+
+    def __set_up_anchors(self, debug):
+        self._centre_anchor = Anchor(debug, CENTRE_COLOUR)
+        self._label_anchor = Anchor(debug, LABEL_COLOUR).shift(
+            self._body.get_top() + 0.4 * mn.UP
+        )
+        self._annotation_anchor = Anchor(debug, ANNOTATION_COLOUR).shift(
+            self._body.get_bottom() + 0.4 * mn.DOWN
+        )
+        self._anchors.add(
+            self._centre_anchor, self._label_anchor, self._annotation_anchor
+        )
+        for terminal in self._terminals:
+            self._anchors.add(Anchor(debug, TERMINAL_COLOUR).shift(terminal.position))
+
+    def __set_up_groups(self):
+        self._body = mn.VGroup()
+        self._anchors = mn.VGroup()
+        self._marks = mn.VGroup()
+        self._rotate = mn.VGroup(self._body, self._anchors)
+        self.add(self._rotate, self._marks)
+
+    def __set_up_marks(self, annotation, label):
+        self._label: mn.MathTex | None = None
+        self._annotation: mn.MathTex | None = None
+        if label is not None:
+            self.set_label(label)
+        if annotation is not None:
+            self.set_annotation(annotation)
 
     def _replace_mark(
         self, old_mark: mn.MathTex, mark_text: str, anchor: Anchor
