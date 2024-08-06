@@ -1,0 +1,99 @@
+from unittest import mock
+
+import manim as mn
+import numpy as np
+import pytest
+from manim_eng.component._component import MARK_FONT_SIZE, Component
+
+
+@pytest.fixture()
+def dummy_component() -> Component:
+    class DummyComponent(Component):
+        def _construct(self) -> None:
+            pass
+
+    return DummyComponent()
+
+
+def test_set_label_no_existing_label(dummy_component: Component) -> None:
+    label = "R"
+
+    dummy_component.set_label(label)
+
+    assert dummy_component._marks.submobjects == [dummy_component._label]
+    assert dummy_component._label.tex_string == label
+    assert np.isclose(dummy_component._label.font_size, MARK_FONT_SIZE)
+
+
+def test_set_label_existing_label(dummy_component: Component) -> None:
+    dummy_component._label = mn.MathTex("old")
+    dummy_component._marks.submobjects = [dummy_component._label]
+    new_label_text = "new"
+
+    dummy_component.set_label(new_label_text)
+
+    assert dummy_component._marks.submobjects == [dummy_component._label]
+    assert dummy_component._label.tex_string == new_label_text
+    assert np.isclose(dummy_component._label.font_size, MARK_FONT_SIZE)
+
+
+def test_clear_label_label_exists(dummy_component: Component):
+    dummy_component._label = mn.MathTex("old")
+    dummy_component._marks.submobjects = [dummy_component._label]
+
+    dummy_component.clear_label()
+
+    assert dummy_component._marks.submobjects == []
+    assert dummy_component._label is None
+
+
+def test_clear_label_label_does_not_exist(dummy_component: Component):
+    dummy_component._marks.remove = mock.MagicMock(mn.VGroup)
+
+    dummy_component.clear_label()
+
+    dummy_component._marks.remove.assert_not_called()
+    assert dummy_component._marks.submobjects == []
+    assert dummy_component._label is None
+
+
+def test_set_annotation_no_existing_annotation(dummy_component: Component) -> None:
+    annotation = r"12 \Omega"
+
+    dummy_component.set_annotation(annotation)
+
+    assert dummy_component._marks.submobjects == [dummy_component._annotation]
+    assert dummy_component._annotation.tex_string == annotation
+    assert np.isclose(dummy_component._annotation.font_size, MARK_FONT_SIZE)
+
+
+def test_set_annotation_existing_annotation(dummy_component: Component) -> None:
+    dummy_component._annotation = mn.MathTex("old")
+    dummy_component._marks.submobjects = [dummy_component._annotation]
+    new_annotation_text = "new"
+
+    dummy_component.set_annotation(new_annotation_text)
+
+    assert dummy_component._marks.submobjects == [dummy_component._annotation]
+    assert dummy_component._annotation.tex_string == new_annotation_text
+    assert np.isclose(dummy_component._annotation.font_size, MARK_FONT_SIZE)
+
+
+def test_clear_annotation_annotation_exists(dummy_component: Component):
+    dummy_component._annotation = mn.MathTex("old")
+    dummy_component._marks.submobjects = [dummy_component._annotation]
+
+    dummy_component.clear_annotation()
+
+    assert dummy_component._marks.submobjects == []
+    assert dummy_component._annotation is None
+
+
+def test_clear_annotation_annotation_does_not_exist(dummy_component: Component):
+    dummy_component._marks.remove = mock.MagicMock(mn.VGroup)
+
+    dummy_component.clear_annotation()
+
+    dummy_component._marks.remove.assert_not_called()
+    assert dummy_component._marks.submobjects == []
+    assert dummy_component._annotation is None

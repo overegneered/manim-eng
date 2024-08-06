@@ -124,7 +124,8 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         Self
             The (modified) component on which the method was called.
         """
-        self._marks.remove(self._label)
+        if self._label is not None:
+            self._marks.remove(self._label)
         self._label = None
         return self
 
@@ -154,7 +155,8 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         Self
             The (modified) component on which the method was called
         """
-        self._marks.remove(self._annotation)
+        if self._annotation is not None:
+            self._marks.remove(self._annotation)
         self._annotation = None
         return self
 
