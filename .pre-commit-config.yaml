@@ -3,7 +3,7 @@ repos:
     hooks:
       # Format code uniformly
       - id: ruff-format
-        name: ruff format
+        name: Formatter (Ruff)
         language: system
         entry: ruff format
         types: [ python ]
@@ -12,15 +12,23 @@ repos:
     hooks:
       # Trim trailing whitespace
       - id: trailing-whitespace
+        name: Trim trailing whitespace
         exclude_types: [ python ] # No use checking Python as Ruff has already done it
       # Ensure files end with an empty line
       - id: end-of-file-fixer
+        name: Ensure files end in a single blank line
         exclude_types: [ python ] # No use checking Python as Ruff has already done it
   - repo: local
     hooks:
       # Flag (and fix, if possible) lint errors
       - id: ruff
-        name: ruff check
+        name: Linter (Ruff)
         language: system
         entry: ruff check
+        types: [ python ]
+      # Static type checking
+      - id: mypy
+        name: Static type checker (mypy)
+        language: system
+        entry: mypy
         types: [ python ]

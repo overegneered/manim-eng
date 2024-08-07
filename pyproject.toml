@@ -14,6 +14,7 @@ manim = ">=0.18.1"
 ruff = "^0.5.5"
 pre-commit = "^3.8.0"
 pytest = "^8.3.2"
+mypy = "^1.11.1"
 
 [tool.poetry.plugins."manim.plugins"]
 "manim_eng" = "manim_eng"
@@ -72,3 +73,23 @@ convention = "numpy"
     # Do not require docstrings for every 'public' function/class/method/module/package that is actually for testing
     "D1",
 ]
+
+[tool.mypy]
+pretty = true
+
+strict = true
+# Necessary to allow *args and **kwargs, annoyingly
+disallow_incomplete_defs = false
+disallow_untyped_defs = false
+# These have to be disabled until Manim has full type declarations
+disallow_subclassing_any = false
+disallow_untyped_decorators = false
+disallow_any_generics = false
+
+[[tool.mypy.overrides]]
+# Manim does not yet have full type declarations
+module = [
+    "manim",
+    "manim.typing"
+]
+ignore_missing_imports = true

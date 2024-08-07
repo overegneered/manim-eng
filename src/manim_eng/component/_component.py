@@ -1,6 +1,6 @@
 import abc
 from dataclasses import dataclass
-from typing import Self
+from typing import Any, Self
 
 import manim as mn
 import manim.typing as mnt
@@ -47,14 +47,24 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         debug: bool = False,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         super().__init__(*args, **kwargs)
 
-        self.__set_up_groups()
         self._terminals: list[Terminal] = []
+        self._label: mn.MathTex | None = None
+        self._annotation: mn.MathTex | None = None
+        self._centre_anchor: Anchor
+        self._label_anchor: Anchor
+        self._annotation_anchor: Anchor
 
+        self._body = mn.VGroup()
+        self._anchors = mn.VGroup()
+        self._marks = mn.VGroup()
+        self._rotate = mn.VGroup(self._body, self._anchors)
+        self.add(self._rotate, self._marks)
+
+        self.__set_up_groups()
         self._construct()
-
         self.__set_up_anchors(debug)
         self.__set_up_marks(annotation, label)
 
@@ -153,7 +163,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         self._annotation = None
         return self
 
-    def __set_up_anchors(self, debug):
+    def __set_up_anchors(self, debug: bool) -> None:
         self._centre_anchor = Anchor(debug, CENTRE_COLOUR)
         self._label_anchor = Anchor(debug, LABEL_COLOUR).shift(
             self._body.get_top() + 0.4 * mn.UP
@@ -167,16 +177,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         for terminal in self._terminals:
             self._anchors.add(Anchor(debug, TERMINAL_COLOUR).shift(terminal.position))
 
-    def __set_up_groups(self):
-        self._body = mn.VGroup()
-        self._anchors = mn.VGroup()
-        self._marks = mn.VGroup()
-        self._rotate = mn.VGroup(self._body, self._anchors)
-        self.add(self._rotate, self._marks)
-
-    def __set_up_marks(self, annotation, label):
-        self._label: mn.MathTex | None = None
-        self._annotation: mn.MathTex | None = None
+    def __set_up_marks(self, annotation: str | None, label: str | None) -> None:
         if label is not None:
             self.set_label(label)
         if annotation is not None:
@@ -203,7 +204,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
             The new mark.
         """
 
-        def mark_updater(mark: mn.Mobject):
+        def mark_updater(mark: mn.Mobject) -> None:
             mark.move_to(anchor)
 
         new_mark = mn.MathTex(mark_text, font_size=MARK_FONT_SIZE).move_to(anchor)
@@ -215,7 +216,10 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
 
     @mn.override_animate(set_label)
     def _animate_set_label(
-        self, *set_label_args, anim_args=None, **set_label_kwargs
+        self,
+        *set_label_args,
+        anim_args: dict[str, Any] | None = None,
+        **set_label_kwargs,
     ) -> mn.Animation:
         old_label = self._label
         self.set_label(*set_label_args, **set_label_kwargs)
@@ -272,10 +276,10 @@ class Bipole(Component, metaclass=abc.ABCMeta):
         right: Terminal | None = None,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         self.left = left or Terminal(position=mn.LEFT, direction=mn.RIGHT)
         self.right = right or Terminal(position=mn.RIGHT, direction=mn.LEFT)
         super().__init__(*args, **kwargs)
 
-    def _construct(self):
+    def _construct(self) -> None:
         self._terminals = [self.left, self.right]
