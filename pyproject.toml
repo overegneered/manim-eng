@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "manim-eng"
 version = "0.1.0"
-description = "A Manim CE plugin for engineering communication"
+description = "A Manim CE plugin for drawing engineering diagrams such as circuits."
 authors = ["overegneered <git@egneer.ing>"]
 readme = "README.md"
 packages = [{include = "manim_eng", from = "src"}]

@@ -63,7 +63,6 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         self._rotate = mn.VGroup(self._body, self._anchors)
         self.add(self._rotate, self._marks)
 
-        self.__set_up_groups()
         self._construct()
         self.__set_up_anchors(debug)
         self.__set_up_marks(annotation, label)
