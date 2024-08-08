@@ -32,3 +32,10 @@ repos:
         language: system
         entry: mypy
         types: [ python ]
+  - repo: https://github.com/python-poetry/poetry
+    rev: 1.8.3
+    hooks:
+      - id: poetry-check
+        name: Check Poetry configuration
+      - id: poetry-lock
+        name: Ensure Poetry lockfile is up-to-date
