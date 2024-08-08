@@ -1,3 +1,5 @@
+from typing import Any
+
 import manim as mn
 import numpy as np
 
@@ -8,12 +10,14 @@ COMPONENT_STROKE_WIDTH: float = 4.0
 
 
 class Wire(mn.Line):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, stroke_width=WIRE_STROKE_WIDTH, **kwargs)
 
 
 class Connection(Wire):
-    def __init__(self, end_1: Terminal, end_2: Terminal, *args, **kwargs) -> None:
+    def __init__(
+        self, end_1: Terminal, end_2: Terminal, *args: Any, **kwargs: Any
+    ) -> None:
         super().__init__(*args, **kwargs)
         # TODO: All of this logic. Will probably end up being pretty complicated
         #       It currently doesn't work because the Component types don't take their

@@ -78,9 +78,6 @@ convention = "numpy"
 pretty = true
 
 strict = true
-# Necessary to allow *args and **kwargs, annoyingly
-disallow_incomplete_defs = false
-disallow_untyped_defs = false
 # These have to be disabled until Manim has full type declarations
 disallow_subclassing_any = false
 disallow_untyped_decorators = false

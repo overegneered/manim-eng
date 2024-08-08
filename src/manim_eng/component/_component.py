@@ -45,8 +45,8 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         label: str | None = None,
         annotation: str | None = None,
         debug: bool = False,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
 
@@ -97,8 +97,8 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         self,
         angle: float = mn.PI,
         about_point: mnt.Point3D | None = None,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> Self:
         self._rotate.rotate(*args, angle=angle, about_point=about_point, **kwargs)
         return self
@@ -217,37 +217,46 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
     @mn.override_animate(set_label)
     def _animate_set_label(
         self,
-        *set_label_args,
+        *set_label_args: Any,
         anim_args: dict[str, Any] | None = None,
-        **set_label_kwargs,
+        **set_label_kwargs: Any,
     ) -> mn.Animation:
         old_label = self._label
         self.set_label(*set_label_args, **set_label_kwargs)
         return self._animate_set_mark(old_label, self._label, anim_args)
 
     @mn.override_animate(clear_label)
-    def _animate_clear_label(self, anim_args=None) -> mn.Animation:
+    def _animate_clear_label(
+        self, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation:
         anim = self._animate_clear_mark(self._label, anim_args)
         self.clear_label()
         return anim
 
     @mn.override_animate(set_annotation)
     def _animate_set_annotation(
-        self, *set_annotation_args, anim_args=None, **set_annotation_kwargs
+        self,
+        *set_annotation_args: Any,
+        anim_args: dict[str, Any] | None = None,
+        **set_annotation_kwargs: Any,
     ) -> mn.Animation:
         old_annotation = self._annotation
         self.set_annotation(*set_annotation_args, **set_annotation_kwargs)
         return self._animate_set_mark(old_annotation, self._annotation, anim_args)
 
     @mn.override_animate(clear_annotation)
-    def _animate_clear_annotation(self, anim_args=None) -> mn.Animation:
+    def _animate_clear_annotation(
+        self, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation:
         anim = self._animate_clear_mark(self._annotation, anim_args)
         self.clear_annotation()
         return anim
 
     @staticmethod
     def _animate_set_mark(
-        old_mark: mn.MathTex | None, new_mark: mn.MathTex, anim_args
+        old_mark: mn.MathTex | None,
+        new_mark: mn.MathTex,
+        anim_args: dict[str, Any] | None,
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
@@ -261,7 +270,9 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         )
 
     @staticmethod
-    def _animate_clear_mark(old_mark: mn.MathTex, anim_args) -> mn.Animation:
+    def _animate_clear_mark(
+        old_mark: mn.MathTex, anim_args: dict[str, Any] | None
+    ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
         return mn.Uncreate(old_mark, **anim_args)
@@ -274,8 +285,8 @@ class Bipole(Component, metaclass=abc.ABCMeta):
         self,
         left: Terminal | None = None,
         right: Terminal | None = None,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         self.left = left or Terminal(position=mn.LEFT, direction=mn.RIGHT)
         self.right = right or Terminal(position=mn.RIGHT, direction=mn.LEFT)
