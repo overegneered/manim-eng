@@ -1,4 +1,5 @@
 import abc
+import copy
 from dataclasses import dataclass
 from typing import Any, Self
 
@@ -6,6 +7,8 @@ import manim as mn
 import manim.typing as mnt
 import numpy as np
 import numpy.typing as npt
+
+import manim_eng._utils as utils
 
 from .._debug.anchor import (
     ANNOTATION_COLOUR,
@@ -16,6 +19,9 @@ from .._debug.anchor import (
 )
 
 MARK_FONT_SIZE = 36
+# How many radians off a cardinal direction of alignment a component can be whilst the
+# mark alignments still treat it as in a cardinal alignment
+CARDINAL_ALIGNMENT_MARGIN = 10 * (np.pi / 180)
 
 
 @dataclass
@@ -100,6 +106,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         **kwargs: Any,
     ) -> Self:
         self._rotate.rotate(*args, angle=angle, about_point=about_point, **kwargs)
+        self._marks.update()
         return self
 
     def set_label(self, label: str) -> Self:
@@ -204,10 +211,20 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         """
 
         def mark_updater(mark: mn.Mobject) -> None:
-            mark.move_to(anchor)
+            line_of_connection = anchor.pos - self._centre_anchor.pos
+            line_of_connection = utils.normalised(line_of_connection)
+            line_of_connection = utils.cardinalised(
+                line_of_connection, CARDINAL_ALIGNMENT_MARGIN
+            )
+            mark.next_to(
+                mobject_or_point=anchor,
+                direction=line_of_connection,
+                buff=np.array([0, 0, 0]),
+            )
 
         new_mark = mn.MathTex(mark_text, font_size=MARK_FONT_SIZE).move_to(anchor)
         new_mark.add_updater(mark_updater)
+        new_mark.update()
         if old_mark is not None:
             self._marks.remove(old_mark)
         self._marks.add(new_mark)
