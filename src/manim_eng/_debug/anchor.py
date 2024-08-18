@@ -1,4 +1,6 @@
 import manim as mn
+import numpy as np
+import numpy.typing as npt
 
 LABEL_COLOUR = mn.RED
 ANNOTATION_COLOUR = mn.BLUE
@@ -15,3 +17,7 @@ class Anchor(mn.Arc):
             color=color,
             stroke_width=2,
         )
+
+    @property
+    def pos(self) -> npt.NDArray:
+        return np.array(self.get_center())
