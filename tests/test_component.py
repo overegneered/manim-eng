@@ -3,7 +3,8 @@ from unittest import mock
 import manim as mn
 import numpy as np
 import pytest
-from manim_eng.component._component import MARK_FONT_SIZE, Component
+from manim_eng.components._component import MARK_FONT_SIZE
+from manim_eng.components._component.component import Component
 
 
 class DummyComponent(Component):

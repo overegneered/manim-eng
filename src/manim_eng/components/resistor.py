@@ -3,8 +3,8 @@
 import manim as mn
 import numpy as np
 
-from .._base.wire import COMPONENT_STROKE_WIDTH, Wire
-from ._component import Bipole
+from ._component import COMPONENT_STROKE_WIDTH
+from ._component.component import Bipole
 
 __all__ = ["Resistor", "Thermistor", "VariableResistor"]
 
@@ -14,10 +14,8 @@ class Resistor(Bipole):
 
     def _construct(self) -> None:
         super()._construct()
-        terminal_l = Wire(self.left.position, self.left.position / 2)
-        box = mn.Rectangle(width=1, height=0.4)
-        terminal_r = Wire(self.right.position / 2, self.right.position)
-        self._body.add(terminal_l, box, terminal_r)
+        box = mn.Rectangle(width=1, height=0.4, stroke_width=COMPONENT_STROKE_WIDTH)
+        self._body.add(box)
 
 
 class Thermistor(Resistor):

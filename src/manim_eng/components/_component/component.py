@@ -1,16 +1,12 @@
 import abc
-import copy
-from dataclasses import dataclass
 from typing import Any, Self
 
 import manim as mn
 import manim.typing as mnt
 import numpy as np
-import numpy.typing as npt
 
 import manim_eng._utils as utils
-
-from .._debug.anchor import (
+from manim_eng._debug.anchor import (
     ANNOTATION_COLOUR,
     CENTRE_COLOUR,
     LABEL_COLOUR,
@@ -18,16 +14,12 @@ from .._debug.anchor import (
     Anchor,
 )
 
-MARK_FONT_SIZE = 36
-# How many radians off a cardinal direction of alignment a component can be whilst the
+from .._component import MARK_FONT_SIZE
+from .._component.terminal import Terminal
+
+# How many radians off a cardinal direction of alignment a components can be whilst the
 # mark alignments still treat it as in a cardinal alignment
 CARDINAL_ALIGNMENT_MARGIN = 5 * (np.pi / 180)
-
-
-@dataclass
-class Terminal:
-    position: npt.NDArray[np.float64]
-    direction: npt.NDArray[np.float64]
 
 
 class Component(mn.VMobject, metaclass=abc.ABCMeta):
@@ -42,8 +34,8 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         An annotation to set. Takes a TeX math mode string. No annotation is set if
         ``None`` is passed.
     debug : bool
-        Whether to display debug information for the component. If ``True``, the
-        component's anchors will be displayed visually.
+        Whether to display debug information for the components. If ``True``, the
+        components's anchors will be displayed visually.
     """
 
     def __init__(
@@ -56,17 +48,17 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
     ) -> None:
         super().__init__(*args, **kwargs)
 
-        self._terminals: list[Terminal] = []
         self._label: mn.MathTex | None = None
         self._annotation: mn.MathTex | None = None
         self._centre_anchor: Anchor
         self._label_anchor: Anchor
         self._annotation_anchor: Anchor
 
-        self._body = mn.VGroup()
+        self._terminals = mn.VGroup()
+        self._body = mn.VGroup(self._terminals)
         self._anchors = mn.VGroup()
-        self._marks = mn.VGroup()
         self._rotate = mn.VGroup(self._body, self._anchors)
+        self._marks = mn.VGroup()
         self.add(self._rotate, self._marks)
 
         self._construct()
@@ -75,26 +67,26 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def _construct(self) -> None:
-        """Construct the shape of the component.
+        """Construct the shape of the components.
 
-        Code to build the component's symbol goes in here (contrary to Manim's
+        Code to build the components's symbol goes in here (contrary to Manim's
         standard) and *not* ``__init__()``. This is because the base ``Component`` class
         has to perform initialisation both before (to set up the groups etc.) and after
-        (to set the anchor positions for annotations) the component's shape setup.
+        (to set the anchor positions for annotations) the components's shape setup.
         """
 
     def get_center(self) -> mnt.Point3D:
-        """Get the centre of the component.
+        """Get the centre of the components.
 
-        **This is not necessarily the exact centre of the box the component symbol
+        **This is not necessarily the exact centre of the box the components symbol
         occupies**. It is rather the point about which it is most logical to rotate
-        the component. For bipoles, it will be at the midpoint of the line between the
+        the components. For bipoles, it will be at the midpoint of the line between the
         two terminals.
 
         Returns
         -------
         Point3D
-            The centre of the component.
+            The centre of the components.
         """
         return self._centre_anchor.get_center()
 
@@ -110,7 +102,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         return self
 
     def set_label(self, label: str) -> Self:
-        """Set the label of the component.
+        """Set the label of the components.
 
         Parameters
         ----------
@@ -120,18 +112,18 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         Returns
         -------
         Self
-            The (modified) component on which the method was called.
+            The (modified) components on which the method was called.
         """
         self._label = self._replace_mark(self._label, label, self._label_anchor)
         return self
 
     def clear_label(self) -> Self:
-        """Clear the label of the component.
+        """Clear the label of the components.
 
         Returns
         -------
         Self
-            The (modified) component on which the method was called.
+            The (modified) components on which the method was called.
         """
         if self._label is not None:
             self._marks.remove(self._label)
@@ -139,7 +131,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         return self
 
     def set_annotation(self, annotation: str) -> Self:
-        """Set the annotation of the component.
+        """Set the annotation of the components.
 
         Parameters
         ----------
@@ -149,7 +141,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         Returns
         -------
         Self
-            The (modified) component on which the method was called.
+            The (modified) components on which the method was called.
         """
         self._annotation = self._replace_mark(
             self._annotation, annotation, self._annotation_anchor
@@ -157,12 +149,12 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         return self
 
     def clear_annotation(self) -> Self:
-        """Clear the annotation of the component.
+        """Clear the annotation of the components.
 
         Returns
         -------
         Self
-            The (modified) component on which the method was called
+            The (modified) components on which the method was called
         """
         if self._annotation is not None:
             self._marks.remove(self._annotation)
@@ -295,7 +287,20 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
 
 
 class Bipole(Component, metaclass=abc.ABCMeta):
-    """Base class for bipole components, such as resistors and sources."""
+    """Base class for bipole components, such as resistors and sources.
+
+    By default, adds two terminals: one from (-0.5, 0) to (-1, 0), and one from (0.5, 0)
+    to (1, 0).
+
+    Parameters
+    ----------
+    left : Terminal | None
+        The terminal to use as the left connection point for the component. If left
+        unspecified, a terminal from (-0.5, 0) to (-1, 0) will be used.
+    right : Terminal | None
+        The terminal to use as the right connection point for the component. If left
+        unspecified, a terminal from (-0.5, 0) to (-1, 0) will be used.
+    """
 
     def __init__(
         self,
@@ -304,9 +309,15 @@ class Bipole(Component, metaclass=abc.ABCMeta):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        self.left = left or Terminal(position=mn.LEFT, direction=mn.RIGHT)
-        self.right = right or Terminal(position=mn.RIGHT, direction=mn.LEFT)
+        self.left = (
+            left if left is not None else Terminal(position=mn.LEFT, direction=mn.LEFT)
+        )
+        self.right = (
+            right
+            if right is not None
+            else Terminal(position=mn.RIGHT, direction=mn.RIGHT)
+        )
         super().__init__(*args, **kwargs)
 
     def _construct(self) -> None:
-        self._terminals = [self.left, self.right]
+        self._terminals.add(self.left, self.right)
