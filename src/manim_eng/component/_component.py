@@ -21,7 +21,7 @@ from .._debug.anchor import (
 MARK_FONT_SIZE = 36
 # How many radians off a cardinal direction of alignment a component can be whilst the
 # mark alignments still treat it as in a cardinal alignment
-CARDINAL_ALIGNMENT_MARGIN = 10 * (np.pi / 180)
+CARDINAL_ALIGNMENT_MARGIN = 5 * (np.pi / 180)
 
 
 @dataclass
@@ -172,10 +172,10 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
     def __set_up_anchors(self, debug: bool) -> None:
         self._centre_anchor = Anchor(debug, CENTRE_COLOUR)
         self._label_anchor = Anchor(debug, LABEL_COLOUR).shift(
-            self._body.get_top() + 0.4 * mn.UP
+            self._body.get_top()  # + 0.4 * mn.UP
         )
         self._annotation_anchor = Anchor(debug, ANNOTATION_COLOUR).shift(
-            self._body.get_bottom() + 0.4 * mn.DOWN
+            self._body.get_bottom()  # + 0.4 * mn.DOWN
         )
         self._anchors.add(
             self._centre_anchor, self._label_anchor, self._annotation_anchor
@@ -219,7 +219,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
             mark.next_to(
                 mobject_or_point=anchor,
                 direction=line_of_connection,
-                buff=np.array([0, 0, 0]),
+                buff=mn.SMALL_BUFF,
             )
 
         new_mark = mn.MathTex(mark_text, font_size=MARK_FONT_SIZE).move_to(anchor)
