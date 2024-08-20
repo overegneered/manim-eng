@@ -214,7 +214,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
                 buff=mn.SMALL_BUFF,
             )
 
-        new_mark = mn.MathTex(mark_text, font_size=MARK_FONT_SIZE).move_to(anchor)
+        new_mark = mn.MathTex(mark_text, font_size=MARK_FONT_SIZE)
         new_mark.add_updater(mark_updater)
         new_mark.update()
         if old_mark is not None:
