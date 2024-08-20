@@ -163,11 +163,13 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
 
     def __set_up_anchors(self, debug: bool) -> None:
         self._centre_anchor = Anchor(debug, CENTRE_COLOUR)
+        # A small amount is added to each of these anchors to make sure that they are
+        # never directly over the centre anchor, as this causes problems.
         self._label_anchor = Anchor(debug, LABEL_COLOUR).shift(
-            self._body.get_top()  # + 0.4 * mn.UP
+            self._body.get_top() + 0.01 * mn.UP
         )
         self._annotation_anchor = Anchor(debug, ANNOTATION_COLOUR).shift(
-            self._body.get_bottom()  # + 0.4 * mn.DOWN
+            self._body.get_bottom() + 0.01 * mn.DOWN
         )
         self._anchors.add(
             self._centre_anchor, self._label_anchor, self._annotation_anchor
@@ -209,7 +211,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
                 line_of_connection, CARDINAL_ALIGNMENT_MARGIN
             )
             mark.next_to(
-                mobject_or_point=anchor,
+                mobject_or_point=anchor.pos,
                 direction=line_of_connection,
                 buff=mn.SMALL_BUFF,
             )
