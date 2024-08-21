@@ -1,4 +1,5 @@
 import abc
+import typing
 from typing import Any, Self
 
 import manim as mn
@@ -16,10 +17,7 @@ from manim_eng._debug.anchor import (
 
 from .._component import MARK_FONT_SIZE
 from .._component.terminal import Terminal
-
-# How many radians off a cardinal direction of alignment a components can be whilst the
-# mark alignments still treat it as in a cardinal alignment
-CARDINAL_ALIGNMENT_MARGIN = 5 * (np.pi / 180)
+from .mark import Mark
 
 
 class Component(mn.VMobject, metaclass=abc.ABCMeta):
@@ -35,7 +33,7 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         ``None`` is passed.
     debug : bool
         Whether to display debug information for the components. If ``True``, the
-        components's anchors will be displayed visually.
+        component's anchors will be displayed visually.
     """
 
     def __init__(
@@ -48,8 +46,8 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
     ) -> None:
         super().__init__(*args, **kwargs)
 
-        self._label: mn.MathTex | None = None
-        self._annotation: mn.MathTex | None = None
+        self._label: Mark | None = None
+        self._annotation: Mark | None = None
         self._centre_anchor: Anchor
         self._label_anchor: Anchor
         self._annotation_anchor: Anchor
@@ -69,10 +67,10 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
     def _construct(self) -> None:
         """Construct the shape of the components.
 
-        Code to build the components's symbol goes in here (contrary to Manim's
+        Code to build the component's symbol goes in here (contrary to Manim's
         standard) and *not* ``__init__()``. This is because the base ``Component`` class
         has to perform initialisation both before (to set up the groups etc.) and after
-        (to set the anchor positions for annotations) the components's shape setup.
+        (to set the anchor positions for annotations) the component's shape setup.
         """
 
     def get_center(self) -> mnt.Point3D:
@@ -184,14 +182,14 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
             self.set_annotation(annotation)
 
     def _replace_mark(
-        self, old_mark: mn.MathTex, mark_text: str, anchor: Anchor
-    ) -> mn.MathTex:
+        self, old_mark: Mark | None, mark_text: str, anchor: Anchor
+    ) -> Mark:
         """Replace a mark with a new mark, and return that new mark.
 
         Parameters
         ----------
-        old_mark : MathTex
-            The mark to replace.
+        old_mark : Mark | None
+            The mark to replace. If ``None``, just introduces a new mark.
         mark_text : str
             The text to use for the new mark. Takes a TeX math mode
             string.
@@ -200,25 +198,10 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        MathTex
+        Mark
             The new mark.
         """
-
-        def mark_updater(mark: mn.Mobject) -> None:
-            line_of_connection = anchor.pos - self._centre_anchor.pos
-            line_of_connection = utils.normalised(line_of_connection)
-            line_of_connection = utils.cardinalised(
-                line_of_connection, CARDINAL_ALIGNMENT_MARGIN
-            )
-            mark.next_to(
-                mobject_or_point=anchor.pos,
-                direction=line_of_connection,
-                buff=mn.SMALL_BUFF,
-            )
-
-        new_mark = mn.MathTex(mark_text, font_size=MARK_FONT_SIZE)
-        new_mark.add_updater(mark_updater)
-        new_mark.update()
+        new_mark = Mark(mark_text).attach(anchor, self._centre_anchor)
         if old_mark is not None:
             self._marks.remove(old_mark)
         self._marks.add(new_mark)
@@ -233,7 +216,9 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
     ) -> mn.Animation:
         old_label = self._label
         self.set_label(*set_label_args, **set_label_kwargs)
-        return self._animate_set_mark(old_label, self._label, anim_args)
+        return self._animate_set_mark(
+            old_label, typing.cast(Mark, self._label), anim_args
+        )
 
     @mn.override_animate(clear_label)
     def _animate_clear_label(
@@ -252,7 +237,9 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
     ) -> mn.Animation:
         old_annotation = self._annotation
         self.set_annotation(*set_annotation_args, **set_annotation_kwargs)
-        return self._animate_set_mark(old_annotation, self._annotation, anim_args)
+        return self._animate_set_mark(
+            old_annotation, typing.cast(Mark, self._annotation), anim_args
+        )
 
     @mn.override_animate(clear_annotation)
     def _animate_clear_annotation(
@@ -264,8 +251,8 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
 
     @staticmethod
     def _animate_set_mark(
-        old_mark: mn.MathTex | None,
-        new_mark: mn.MathTex,
+        old_mark: Mark | None,
+        new_mark: Mark,
         anim_args: dict[str, Any] | None,
     ) -> mn.Animation:
         if anim_args is None:
@@ -281,10 +268,12 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
 
     @staticmethod
     def _animate_clear_mark(
-        old_mark: mn.MathTex, anim_args: dict[str, Any] | None
+        old_mark: Mark | None, anim_args: dict[str, Any] | None
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
+        if old_mark is None:
+            return mn.Animation(None)
         return mn.Uncreate(old_mark, **anim_args)
 
 
