@@ -46,16 +46,16 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self._label_anchor: Anchor
         self._annotation_anchor: Anchor
 
-        self._terminals = mn.VGroup()
-        self._body = mn.VGroup(self._terminals)
-        self._anchors = mn.VGroup()
-        self._rotate.add(self._body, self._anchors)
+        self._terminals: list[Terminal] = []  # mn.VGroup()
+        self._body = mn.VGroup()  # self._terminals)
+        self.add(self._body)
 
         self._construct()
+
         self.__set_up_anchors(self._debug)
         self._label = Mark(self._label_anchor, self._centre_anchor)
         self._annotation = Mark(self._annotation_anchor, self._centre_anchor)
-        self.__set_up_marks(annotation, label)
+        self.__initialise_marks(annotation, label)
 
     @abc.abstractmethod
     def _construct(self) -> None:
@@ -146,13 +146,11 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self._annotation_anchor = Anchor(debug, ANNOTATION_COLOUR).shift(
             self._body.get_bottom() + 0.01 * mn.DOWN
         )
-        self._anchors.add(
-            self._centre_anchor, self._label_anchor, self._annotation_anchor
-        )
+        self.add(self._centre_anchor, self._label_anchor, self._annotation_anchor)
         for terminal in self._terminals:
-            self._anchors.add(Anchor(debug, TERMINAL_COLOUR).shift(terminal.position))
+            self.add(Anchor(debug, TERMINAL_COLOUR).shift(terminal.position))
 
-    def __set_up_marks(self, annotation: str | None, label: str | None) -> None:
+    def __initialise_marks(self, annotation: str | None, label: str | None) -> None:
         if label is not None:
             self.set_label(label)
         if annotation is not None:
@@ -205,12 +203,16 @@ class Bipole(Component, metaclass=abc.ABCMeta):
     right : Terminal | None
         The terminal to use as the right connection point for the component. If left
         unspecified, a terminal from (-0.5, 0) to (-1, 0) will be used.
+    debug : bool
+        Whether to display debug information. If ``True``, the object's anchors will be
+        displayed visually.
     """
 
     def __init__(
         self,
         left: Terminal | None = None,
         right: Terminal | None = None,
+        debug: bool = False,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -222,7 +224,8 @@ class Bipole(Component, metaclass=abc.ABCMeta):
             if right is not None
             else Terminal(position=mn.RIGHT, direction=mn.RIGHT)
         )
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, debug=debug, **kwargs)
 
     def _construct(self) -> None:
-        self._terminals.add(self.left, self.right)
+        self._terminals = [self.left, self.right]
+        self.add(*self._terminals)

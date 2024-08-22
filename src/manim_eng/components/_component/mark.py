@@ -1,5 +1,6 @@
 import abc
 import copy
+import typing
 from typing import Any, Self
 
 import manim as mn
@@ -108,28 +109,55 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
 
         self._debug = debug
 
-        self._rotate = mn.VGroup()
-        self._marks = mn.VGroup()
-        self.add(self._rotate, self._marks)
+        self.__rotate = mn.VGroup()
+        self.__marks = mn.VGroup()
+        super().add(self.__rotate, self.__marks)
 
     def rotate(
         self,
         *args: Any,
         **kwargs: Any,
     ) -> Self:
-        self._rotate.rotate(*args, **kwargs)
+        self.__rotate.rotate(*args, **kwargs)
+        return self
+
+    def add(self, *mobjects: mn.Mobject) -> Self:
+        for mobject in [*mobjects]:
+            if isinstance(mobject, Markable):
+                self.__rotate.add(mobject.__rotate)
+                self.__marks.add(mobject.__marks)
+            else:
+                self.__rotate.add(*mobjects)
+        return self
+
+    def add_to_back(self, *mobjects: mn.Mobject) -> Self:
+        for mobject in [*mobjects]:
+            if isinstance(mobject, Markable):
+                self.__rotate.add_to_back(mobject.__rotate)
+                self.__marks.add_to_back(mobject.__marks)
+            else:
+                self.__rotate.add_to_back(*mobjects)
+        return self
+
+    def remove(self, *mobjects: mn.Mobject) -> Self:
+        for mobject in [*mobjects]:
+            if isinstance(mobject, Markable):
+                self.__rotate.remove(mobject.__rotate)
+                self.__marks.remove(mobject.__marks)
+            else:
+                self.__rotate.remove(*mobjects)
         return self
 
     def _set_mark(self, mark_to_set: Mark, mark_text: str) -> None:
         """Set a mark's label, adding the mark if necessary."""
-        if mark_to_set not in self._marks.submobjects:
-            self._marks.add(mark_to_set)
+        if mark_to_set not in self.__marks.submobjects:
+            self.__marks.add(mark_to_set)
         mark_to_set.set_text(mark_text)
 
     def _clear_mark(self, mark: Mark) -> None:
         """Clear a mark from the object."""
-        if mark in self._marks.submobjects:
-            self._marks.remove(mark)
+        if mark in self.__marks.submobjects:
+            self.__marks.remove(mark)
 
     @mn.override_animate(_set_mark)
     def __animate_set_mark(
@@ -138,8 +166,8 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
         if anim_args is None:
             anim_args = {}
 
-        if mark_to_set not in self._marks.submobjects:
-            self._marks.add(mark_to_set)
+        if mark_to_set not in self.__marks.submobjects:
+            self.__marks.add(mark_to_set)
             return mn.Create(mark_to_set.set_text(mark_text))
 
         mark_to_set.generate_target()
@@ -153,5 +181,5 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
         if anim_args is None:
             anim_args = {}
         anim = mn.Uncreate(mark_to_clear, **anim_args)
-        self._marks.remove(mark_to_clear)
+        self.__marks.remove(mark_to_clear)
         return anim
