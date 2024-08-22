@@ -17,10 +17,10 @@ from manim_eng._debug.anchor import (
 
 from .._component import MARK_FONT_SIZE
 from .._component.terminal import Terminal
-from .mark import Mark
+from .mark import Mark, Markable
 
 
-class Component(mn.VMobject, metaclass=abc.ABCMeta):
+class Component(Markable, metaclass=abc.ABCMeta):
     """Base class for a circuit symbol.
 
     Parameters
@@ -31,23 +31,17 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
     annotation : str | None
         An annotation to set. Takes a TeX math mode string. No annotation is set if
         ``None`` is passed.
-    debug : bool
-        Whether to display debug information for the components. If ``True``, the
-        component's anchors will be displayed visually.
     """
 
     def __init__(
         self,
         label: str | None = None,
         annotation: str | None = None,
-        debug: bool = False,
         *args: Any,
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
 
-        self._label: Mark | None = None
-        self._annotation: Mark | None = None
         self._centre_anchor: Anchor
         self._label_anchor: Anchor
         self._annotation_anchor: Anchor
@@ -55,17 +49,17 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         self._terminals = mn.VGroup()
         self._body = mn.VGroup(self._terminals)
         self._anchors = mn.VGroup()
-        self._rotate = mn.VGroup(self._body, self._anchors)
-        self._marks = mn.VGroup()
-        self.add(self._rotate, self._marks)
+        self._rotate.add(self._body, self._anchors)
 
         self._construct()
-        self.__set_up_anchors(debug)
+        self.__set_up_anchors(self._debug)
+        self._label = Mark(self._label_anchor, self._centre_anchor)
+        self._annotation = Mark(self._annotation_anchor, self._centre_anchor)
         self.__set_up_marks(annotation, label)
 
     @abc.abstractmethod
     def _construct(self) -> None:
-        """Construct the shape of the components.
+        """Construct the shape of the component.
 
         Code to build the component's symbol goes in here (contrary to Manim's
         standard) and *not* ``__init__()``. This is because the base ``Component`` class
@@ -76,9 +70,9 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
     def get_center(self) -> mnt.Point3D:
         """Get the centre of the components.
 
-        **This is not necessarily the exact centre of the box the components symbol
+        **This is not necessarily the exact centre of the box the component symbol
         occupies**. It is rather the point about which it is most logical to rotate
-        the components. For bipoles, it will be at the midpoint of the line between the
+        the component. For bipoles, it will be at the midpoint of the line between the
         two terminals.
 
         Returns
@@ -88,19 +82,8 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         """
         return self._centre_anchor.get_center()
 
-    def rotate(
-        self,
-        angle: float = mn.PI,
-        about_point: mnt.Point3D | None = None,
-        *args: Any,
-        **kwargs: Any,
-    ) -> Self:
-        self._rotate.rotate(*args, angle=angle, about_point=about_point, **kwargs)
-        self._marks.update()
-        return self
-
     def set_label(self, label: str) -> Self:
-        """Set the label of the components.
+        """Set the label of the component.
 
         Parameters
         ----------
@@ -110,26 +93,24 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         Returns
         -------
         Self
-            The (modified) components on which the method was called.
+            The (modified) component on which the method was called.
         """
-        self._label = self._replace_mark(self._label, label, self._label_anchor)
+        self._set_mark(self._label, label)
         return self
 
     def clear_label(self) -> Self:
-        """Clear the label of the components.
+        """Clear the label of the component.
 
         Returns
         -------
         Self
-            The (modified) components on which the method was called.
+            The (modified) component on which the method was called.
         """
-        if self._label is not None:
-            self._marks.remove(self._label)
-        self._label = None
+        self._clear_mark(self._label)
         return self
 
     def set_annotation(self, annotation: str) -> Self:
-        """Set the annotation of the components.
+        """Set the annotation of the component.
 
         Parameters
         ----------
@@ -139,24 +120,20 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         Returns
         -------
         Self
-            The (modified) components on which the method was called.
+            The (modified) component on which the method was called.
         """
-        self._annotation = self._replace_mark(
-            self._annotation, annotation, self._annotation_anchor
-        )
+        self._set_mark(self._annotation, annotation)
         return self
 
     def clear_annotation(self) -> Self:
-        """Clear the annotation of the components.
+        """Clear the annotation of the component.
 
         Returns
         -------
         Self
-            The (modified) components on which the method was called
+            The (modified) component on which the method was called
         """
-        if self._annotation is not None:
-            self._marks.remove(self._annotation)
-        self._annotation = None
+        self._clear_mark(self._annotation)
         return self
 
     def __set_up_anchors(self, debug: bool) -> None:
@@ -181,100 +158,37 @@ class Component(mn.VMobject, metaclass=abc.ABCMeta):
         if annotation is not None:
             self.set_annotation(annotation)
 
-    def _replace_mark(
-        self, old_mark: Mark | None, mark_text: str, anchor: Anchor
-    ) -> Mark:
-        """Replace a mark with a new mark, and return that new mark.
-
-        Parameters
-        ----------
-        old_mark : Mark | None
-            The mark to replace. If ``None``, just introduces a new mark.
-        mark_text : str
-            The text to use for the new mark. Takes a TeX math mode
-            string.
-        anchor : Anchor
-            The anchor to affix the mark to.
-
-        Returns
-        -------
-        Mark
-            The new mark.
-        """
-        new_mark = Mark(mark_text).attach(anchor, self._centre_anchor)
-        if old_mark is not None:
-            self._marks.remove(old_mark)
-        self._marks.add(new_mark)
-        return new_mark
-
     @mn.override_animate(set_label)
     def _animate_set_label(
-        self,
-        *set_label_args: Any,
-        anim_args: dict[str, Any] | None = None,
-        **set_label_kwargs: Any,
+        self, label: str, anim_args: dict[str, Any] | None = None
     ) -> mn.Animation:
-        old_label = self._label
-        self.set_label(*set_label_args, **set_label_kwargs)
-        return self._animate_set_mark(
-            old_label, typing.cast(Mark, self._label), anim_args
-        )
+        if anim_args is None:
+            anim_args = {}
+        return self.animate(**anim_args)._set_mark(self._label, label).build()
 
     @mn.override_animate(clear_label)
     def _animate_clear_label(
         self, anim_args: dict[str, Any] | None = None
     ) -> mn.Animation:
-        anim = self._animate_clear_mark(self._label, anim_args)
-        self.clear_label()
-        return anim
+        if anim_args is None:
+            anim_args = {}
+        return self.animate(**anim_args)._clear_mark(self._label).build()
 
     @mn.override_animate(set_annotation)
     def _animate_set_annotation(
-        self,
-        *set_annotation_args: Any,
-        anim_args: dict[str, Any] | None = None,
-        **set_annotation_kwargs: Any,
+        self, label: str, anim_args: dict[str, Any] | None = None
     ) -> mn.Animation:
-        old_annotation = self._annotation
-        self.set_annotation(*set_annotation_args, **set_annotation_kwargs)
-        return self._animate_set_mark(
-            old_annotation, typing.cast(Mark, self._annotation), anim_args
-        )
+        if anim_args is None:
+            anim_args = {}
+        return self.animate(**anim_args)._set_mark(self._annotation, label).build()
 
     @mn.override_animate(clear_annotation)
     def _animate_clear_annotation(
         self, anim_args: dict[str, Any] | None = None
     ) -> mn.Animation:
-        anim = self._animate_clear_mark(self._annotation, anim_args)
-        self.clear_annotation()
-        return anim
-
-    @staticmethod
-    def _animate_set_mark(
-        old_mark: Mark | None,
-        new_mark: Mark,
-        anim_args: dict[str, Any] | None,
-    ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
-
-        if old_mark is None:
-            return mn.Create(new_mark, **anim_args)
-
-        return mn.AnimationGroup(
-            mn.FadeOut(old_mark, shift=mn.DOWN, **anim_args),
-            mn.FadeIn(new_mark, shift=mn.DOWN, **anim_args),
-        )
-
-    @staticmethod
-    def _animate_clear_mark(
-        old_mark: Mark | None, anim_args: dict[str, Any] | None
-    ) -> mn.Animation:
-        if anim_args is None:
-            anim_args = {}
-        if old_mark is None:
-            return mn.Animation(None)
-        return mn.Uncreate(old_mark, **anim_args)
+        return self.animate(**anim_args)._clear_mark(self._annotation).build()
 
 
 class Bipole(Component, metaclass=abc.ABCMeta):
