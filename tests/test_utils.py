@@ -1,6 +1,5 @@
 import copy
 
-import manim.typing as mnt
 import manim_eng._utils as utils
 import numpy as np
 import pytest

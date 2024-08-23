@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from manim_eng._debug.anchor import Anchor
 from manim_eng.components._component import MARK_FONT_SIZE
-from manim_eng.components._component.mark import AlreadyAttachedError, Mark
+from manim_eng.components._component.mark import Mark
 
 
 def mock_anchor(x: float, y: float, z: float) -> Anchor:

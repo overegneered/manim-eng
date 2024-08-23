@@ -1,12 +1,9 @@
 import abc
-import typing
 from typing import Any, Self
 
 import manim as mn
 import manim.typing as mnt
-import numpy as np
 
-import manim_eng._utils as utils
 from manim_eng._debug.anchor import (
     ANNOTATION_COLOUR,
     CENTRE_COLOUR,
@@ -15,7 +12,6 @@ from manim_eng._debug.anchor import (
     Anchor,
 )
 
-from .._component import MARK_FONT_SIZE
 from .._component.terminal import Terminal
 from .mark import Mark, Markable
 

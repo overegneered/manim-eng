@@ -1,9 +1,5 @@
-from unittest import mock
-
-import manim as mn
 import pytest
 from manim_eng.components._component.component import Component
-from manim_eng.components._component.mark import Mark
 
 
 class DummyComponent(Component):

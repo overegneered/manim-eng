@@ -1,10 +1,7 @@
 import abc
-import copy
-import typing
 from typing import Any, Self
 
 import manim as mn
-import manim.typing as mnt
 import numpy as np
 
 import manim_eng._utils as utils

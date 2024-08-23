@@ -31,6 +31,7 @@ extend-exclude = [
 
 [tool.ruff.lint]
 select = [
+    "F", # Pyflakes
     "E", # Pycodestyle errors
     "W", # Pycodestyle warnings
     "I", # Import sorting

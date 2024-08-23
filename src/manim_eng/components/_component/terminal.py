@@ -1,4 +1,4 @@
-from typing import Any, Self
+from typing import Self
 
 import manim as mn
 import manim.typing as mnt
