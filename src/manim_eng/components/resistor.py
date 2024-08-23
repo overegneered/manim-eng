@@ -3,10 +3,11 @@
 import manim as mn
 import numpy as np
 
-from ._component import COMPONENT_STROKE_WIDTH
 from ._component.component import Bipole
 
 __all__ = ["Resistor", "Thermistor", "VariableResistor"]
+
+from .._config import config_eng
 
 
 class Resistor(Bipole):
@@ -14,7 +15,9 @@ class Resistor(Bipole):
 
     def _construct(self) -> None:
         super()._construct()
-        box = mn.Rectangle(width=1, height=0.4, stroke_width=COMPONENT_STROKE_WIDTH)
+        box = mn.Rectangle(
+            width=1, height=0.4, stroke_width=config_eng.symbol.component_stroke_width
+        )
         self._body.add(box)
 
 
@@ -40,6 +43,6 @@ class VariableResistor(Resistor):
             np.array([0.35, 0.4, 0]),
             buff=0,
             max_tip_length_to_length_ratio=0.125,
-            stroke_width=COMPONENT_STROKE_WIDTH,
+            stroke_width=config_eng.symbol.component_stroke_width,
         )
         self._body.add(arrow)

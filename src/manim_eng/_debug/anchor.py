@@ -2,17 +2,13 @@ import manim as mn
 import numpy as np
 import numpy.typing as npt
 
-LABEL_COLOUR = mn.RED
-ANNOTATION_COLOUR = mn.BLUE
-CURRENT_COLOUR = mn.ORANGE
-TERMINAL_COLOUR = mn.GREEN
-CENTRE_COLOUR = mn.PURPLE
+from manim_eng._config import config_eng
 
 
 class Anchor(mn.Arc):
-    def __init__(self, debug: bool, colour: mn.ManimColor):
+    def __init__(self, colour: mn.ManimColor):
         super().__init__(
-            0.06 if debug else 0,
+            0.06 if config_eng.debug else 0,
             start_angle=0,
             angle=2 * mn.PI,
             color=colour,
