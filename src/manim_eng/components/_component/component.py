@@ -217,12 +217,14 @@ class Bipole(Component, metaclass=abc.ABCMeta):
         **kwargs: Any,
     ) -> None:
         self.left = (
-            left if left is not None else Terminal(position=mn.LEFT, direction=mn.LEFT)
+            left
+            if left is not None
+            else Terminal(position=mn.LEFT, direction=mn.LEFT, debug=debug)
         )
         self.right = (
             right
             if right is not None
-            else Terminal(position=mn.RIGHT, direction=mn.RIGHT)
+            else Terminal(position=mn.RIGHT, direction=mn.RIGHT, debug=debug)
         )
         super().__init__(*args, debug=debug, **kwargs)
 
