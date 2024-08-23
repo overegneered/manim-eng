@@ -3,7 +3,7 @@ from typing import Any
 import manim as mn
 import numpy as np
 
-from manim_eng.component._component import Terminal
+from manim_eng.components._component.terminal import Terminal
 
 WIRE_STROKE_WIDTH: float = 2.5
 COMPONENT_STROKE_WIDTH: float = 4.0
