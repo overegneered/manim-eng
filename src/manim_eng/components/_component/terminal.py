@@ -12,7 +12,7 @@ from .mark import Mark, Markable
 class CurrentArrow(mn.Triangle):
     def __init__(self, position: mnt.Vector3D, rotation: float = 0) -> None:
         super().__init__(
-            radius=0.1,
+            radius=config_eng.symbol.current_arrow_radius,
             start_angle=rotation,
             color=mn.WHITE,
             fill_color=mn.WHITE,
@@ -43,7 +43,7 @@ class Terminal(Markable):
         super().__init__(debug)
 
         direction /= np.linalg.norm(direction)
-        end = position - direction * 0.5
+        end = position - (direction * config_eng.symbol.terminal_length)
         self.line = mn.Line(
             start=position,
             end=end,
@@ -54,8 +54,8 @@ class Terminal(Markable):
         self.position = position
         self.direction = direction
 
-        self._current_anchor: Anchor = Anchor(config_eng.anchor_colour.current)
-        self._centre_anchor: Anchor = Anchor(config_eng.anchor_colour.centre).move_to(
+        self._current_anchor: Anchor = Anchor(config_eng.anchor.current_colour)
+        self._centre_anchor: Anchor = Anchor(config_eng.anchor.centre_colour).move_to(
             self.get_center()
         )
 

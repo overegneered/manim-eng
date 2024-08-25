@@ -3,6 +3,7 @@ from typing import Any, Self
 
 import manim as mn
 import manim.typing as mnt
+import numpy as np
 
 from ..._config import config_eng
 from ..._debug.anchor import Anchor
@@ -127,18 +128,18 @@ class Component(Markable, metaclass=abc.ABCMeta):
         return self
 
     def __set_up_anchors(self) -> None:
-        self._centre_anchor = Anchor(config_eng.anchor_colour.centre)
+        self._centre_anchor = Anchor(config_eng.anchor.centre_colour)
         # A small amount is added to each of these anchors to make sure that they are
         # never directly over the centre anchor, as this causes problems.
-        self._label_anchor = Anchor(config_eng.anchor_colour.label).shift(
+        self._label_anchor = Anchor(config_eng.anchor.label_colour).shift(
             self._body.get_top() + 0.01 * mn.UP
         )
-        self._annotation_anchor = Anchor(config_eng.anchor_colour.annotation).shift(
+        self._annotation_anchor = Anchor(config_eng.anchor.annotation_colour).shift(
             self._body.get_bottom() + 0.01 * mn.DOWN
         )
         self.add(self._centre_anchor, self._label_anchor, self._annotation_anchor)
         for terminal in self._terminals:
-            self.add(Anchor(config_eng.anchor_colour.terminal).shift(terminal.position))
+            self.add(Anchor(config_eng.anchor.terminal_colour).shift(terminal.position))
 
     def __initialise_marks(self, annotation: str | None, label: str | None) -> None:
         if label is not None:
@@ -205,13 +206,20 @@ class Bipole(Component, metaclass=abc.ABCMeta):
         *args: Any,
         **kwargs: Any,
     ) -> None:
+        terminal_end_x = (
+            config_eng.symbol.bipole_width / 2
+        ) + config_eng.symbol.terminal_length
+        terminal_end = np.array([terminal_end_x, 0, 0])
+
         self.left = (
-            left if left is not None else Terminal(position=mn.LEFT, direction=mn.LEFT)
+            left
+            if left is not None
+            else Terminal(position=-terminal_end, direction=mn.LEFT)
         )
         self.right = (
             right
             if right is not None
-            else Terminal(position=mn.RIGHT, direction=mn.RIGHT)
+            else Terminal(position=terminal_end, direction=mn.RIGHT)
         )
         super().__init__(*args, **kwargs)
 

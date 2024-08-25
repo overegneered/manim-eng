@@ -1,7 +1,6 @@
 """Resistor-based components."""
 
 import manim as mn
-import numpy as np
 
 from ._component.component import Bipole
 
@@ -16,7 +15,9 @@ class Resistor(Bipole):
     def _construct(self) -> None:
         super()._construct()
         box = mn.Rectangle(
-            width=1, height=0.4, stroke_width=config_eng.symbol.component_stroke_width
+            width=config_eng.symbol.bipole_width,
+            height=config_eng.symbol.bipole_height,
+            stroke_width=config_eng.symbol.component_stroke_width,
         )
         self._body.add(box)
 
@@ -27,9 +28,18 @@ class Thermistor(Resistor):
     def _construct(self) -> None:
         super()._construct()
 
-        tick_base = mn.Line(np.array([-0.5, -0.35, 0]), np.array([-0.2, -0.35, 0]))
-        tick_diagonal = mn.Line(np.array([-0.2, -0.35, 0]), np.array([0.5, 0.35, 0]))
-        self._body.add(tick_base, tick_diagonal)
+        half_width = 0.5 * config_eng.symbol.bipole_width
+        half_height = 0.8 * config_eng.symbol.bipole_height
+        base_length = 0.3 * config_eng.symbol.bipole_width
+
+        tick_points = [
+            (-half_width, -half_height, 0),
+            (-(half_width - base_length), -half_height, 0),
+            (half_width, half_height, 0),
+        ]
+        tick = mn.VMobject().set_points_as_corners(tick_points)
+
+        self._body.add(tick)
 
 
 class VariableResistor(Resistor):
@@ -38,9 +48,12 @@ class VariableResistor(Resistor):
     def _construct(self) -> None:
         super()._construct()
 
+        half_width = 0.35 * config_eng.symbol.bipole_width
+        half_height = config_eng.symbol.bipole_height
+
         arrow = mn.Arrow(
-            np.array([-0.35, -0.4, 0]),
-            np.array([0.35, 0.4, 0]),
+            start=(-half_width, -half_height, 0),
+            end=(half_width, half_height, 0),
             buff=0,
             max_tip_length_to_length_ratio=0.125,
             stroke_width=config_eng.symbol.component_stroke_width,
