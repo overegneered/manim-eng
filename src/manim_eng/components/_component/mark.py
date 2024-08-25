@@ -4,8 +4,8 @@ from typing import Any, Self
 import manim as mn
 
 import manim_eng._utils as utils
-from manim_eng._config import config_eng
 
+from ..._config import config_eng
 from ..._debug.anchor import Anchor
 
 
