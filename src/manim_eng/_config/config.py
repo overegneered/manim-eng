@@ -99,7 +99,6 @@ STRING_TO_MANIM_COLOUR = {
 class ConfigBase:
     """Base class for manim-eng configuration classes."""
 
-    # TODO: #4 make this be able to handle colours
     def load_from_dict(
         self, dictionary: dict[str, Any], table_prefix: str = ""
     ) -> Self:
