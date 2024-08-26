@@ -8,7 +8,7 @@ from manim_eng._config.config import ConfigBase
 
 
 @dc.dataclass
-class SubTable(ConfigBase):
+class TestConfigSubtable(ConfigBase):
     var_int: int = 4
     var_float: float = 3.14
     var_str: str = "a test string"
@@ -16,26 +16,28 @@ class SubTable(ConfigBase):
 
 
 @dc.dataclass
-class Table(ConfigBase):
+class TestConfigTable(ConfigBase):
     var_int: int = 4
     var_float: float = 3.14
     var_str: str = "a test string"
     var_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.RED)
-    subtable: SubTable = dc.field(default_factory=lambda: SubTable())
+    subtable: TestConfigSubtable = dc.field(
+        default_factory=lambda: TestConfigSubtable()
+    )
 
 
 @dc.dataclass
-class Root(ConfigBase):
+class TestConfigRoot(ConfigBase):
     var_int: int = 4
     var_float: float = 3.14
     var_str: str = "a test string"
     var_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.RED)
-    table: Table = dc.field(default_factory=lambda: Table())
+    table: TestConfigTable = dc.field(default_factory=lambda: TestConfigTable())
 
 
 @pytest.fixture()
-def test_config() -> Root:
-    return Root()
+def test_config() -> TestConfigRoot:
+    return TestConfigRoot()
 
 
 @pytest.mark.parametrize(
@@ -151,25 +153,25 @@ def test_config() -> Root:
     ],
 )
 def test_load_from_dict_with_invalid_config(
-    dict_to_load: dict[str, Any], match_pattern: str, test_config: Root
+    dict_to_load: dict[str, Any], match_pattern: str, test_config: TestConfigRoot
 ) -> None:
     with pytest.raises(ValueError, match=match_pattern):
         test_config.load_from_dict(dict_to_load)
 
 
-def test_load_from_dict_load_to_root_table(test_config: Root) -> None:
+def test_load_from_dict_load_to_root_table(test_config: TestConfigRoot) -> None:
     test_config.load_from_dict({"var_str": "new value"})
 
     assert test_config.var_str == "new value"
 
 
-def test_load_from_dict_load_to_first_level_table(test_config: Root) -> None:
+def test_load_from_dict_load_to_first_level_table(test_config: TestConfigRoot) -> None:
     test_config.load_from_dict({"table": {"var_str": "new value"}})
 
     assert test_config.table.var_str == "new value"
 
 
-def test_load_from_dict_load_to_second_level_table(test_config: Root) -> None:
+def test_load_from_dict_load_to_second_level_table(test_config: TestConfigRoot) -> None:
     new_value = "new value"
 
     test_config.load_from_dict({"table": {"subtable": {"var_str": "new value"}}})
@@ -177,7 +179,7 @@ def test_load_from_dict_load_to_second_level_table(test_config: Root) -> None:
     assert test_config.table.subtable.var_str == new_value
 
 
-def test_load_from_dict_load_multiple(test_config: Root) -> None:
+def test_load_from_dict_load_multiple(test_config: TestConfigRoot) -> None:
     config_dict = {
         "var_int": 987654321,
         "var_float": 2.718,
@@ -197,7 +199,9 @@ def test_load_from_dict_load_multiple(test_config: Root) -> None:
     assert test_config.table.subtable.var_int == 123456789  # noqa: PLR2004
 
 
-def test_load_from_dict_load_empty_dict_does_nothing(test_config: Root) -> None:
+def test_load_from_dict_load_empty_dict_does_nothing(
+    test_config: TestConfigRoot,
+) -> None:
     original_config = copy.deepcopy(test_config)
 
     test_config.load_from_dict({})
@@ -300,7 +304,7 @@ def test_load_from_dict_load_empty_dict_does_nothing(test_config: Root) -> None:
     ],
 )
 def test_load_from_dict_with_string_representation_of_colour(
-    test_config: Root, colour_string: str, colour_manim: mn.ManimColor
+    test_config: TestConfigRoot, colour_string: str, colour_manim: mn.ManimColor
 ) -> None:
     config_dict = {
         "var_colour": colour_string,
@@ -311,7 +315,9 @@ def test_load_from_dict_with_string_representation_of_colour(
     assert test_config.var_colour == colour_manim
 
 
-def test_load_from_dict_with_manim_representation_of_colour(test_config: Root) -> None:
+def test_load_from_dict_with_manim_representation_of_colour(
+    test_config: TestConfigRoot,
+) -> None:
     config_dict = {
         "var_colour": mn.PURPLE_C,
     }
@@ -321,7 +327,7 @@ def test_load_from_dict_with_manim_representation_of_colour(test_config: Root) -
     assert test_config.var_colour == mn.PURPLE_C
 
 
-def test_as_dict(test_config: Root) -> None:
+def test_as_dict(test_config: TestConfigRoot) -> None:
     expected = {
         "var_int": 4,
         "var_float": 3.14,
