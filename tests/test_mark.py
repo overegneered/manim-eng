@@ -2,8 +2,8 @@ from unittest import mock
 
 import numpy as np
 import pytest
+from manim_eng._config import config_eng
 from manim_eng._debug.anchor import Anchor
-from manim_eng.components._component import MARK_FONT_SIZE
 from manim_eng.components._component.mark import Mark
 
 
@@ -32,7 +32,9 @@ def test_mark_defaults_to_default_font_size(mark_mocked_anchors: Mark) -> None:
     mark_mocked_anchors.set_text("A")
 
     assert mark_mocked_anchors.mathtex is not None
-    assert np.isclose(mark_mocked_anchors.mathtex.font_size, MARK_FONT_SIZE)
+    assert np.isclose(
+        mark_mocked_anchors.mathtex.font_size, config_eng.symbol.mark_font_size
+    )
 
 
 def test_mark_can_have_other_font_size_set(mark_mocked_anchors: Mark) -> None:

@@ -2,16 +2,11 @@ import abc
 from typing import Any, Self
 
 import manim as mn
-import numpy as np
 
 import manim_eng._utils as utils
 
+from ..._config import config_eng
 from ..._debug.anchor import Anchor
-from .._component import MARK_FONT_SIZE
-
-# How many radians off a cardinal direction of alignment a components can be whilst the
-# mark alignments still treat it as in a cardinal alignment
-CARDINAL_ALIGNMENT_MARGIN = 5 * (np.pi / 180)
 
 
 class AlreadyAttachedError(RuntimeError):
@@ -45,7 +40,7 @@ class Mark(mn.VMobject):
             line_of_connection = anchor.pos - centre_reference.pos
             line_of_connection = utils.normalised(line_of_connection)
             line_of_connection = utils.cardinalised(
-                line_of_connection, CARDINAL_ALIGNMENT_MARGIN
+                line_of_connection, config_eng.symbol.mark_cardinal_alignment_margin
             )
             mark.next_to(
                 mobject_or_point=anchor.pos,
@@ -57,7 +52,10 @@ class Mark(mn.VMobject):
         self.update()
 
     def set_text(
-        self, *args: Any, font_size: float = MARK_FONT_SIZE, **kwargs: Any
+        self,
+        *args: Any,
+        font_size: float = config_eng.symbol.mark_font_size,
+        **kwargs: Any,
     ) -> Self:
         """Set the text of the mark.
 
@@ -92,19 +90,14 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
 
     Parameters
     ----------
-    debug : bool
-        Whether to display debug information. If ``True``, the object's anchors will be
-        displayed visually.
     *args : Any
         Positional arguments to pass on to ``manim.VMobject``.
     **kwargs : Any
         Keyword arguments to pass on to ``manim.VMobject``.
     """
 
-    def __init__(self, debug: bool = False, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-
-        self._debug = debug
 
         self.__rotate = mn.VGroup()
         self.__marks = mn.VGroup()

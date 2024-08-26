@@ -3,15 +3,10 @@ from typing import Any, Self
 
 import manim as mn
 import manim.typing as mnt
+import numpy as np
 
-from manim_eng._debug.anchor import (
-    ANNOTATION_COLOUR,
-    CENTRE_COLOUR,
-    LABEL_COLOUR,
-    TERMINAL_COLOUR,
-    Anchor,
-)
-
+from ..._config import config_eng
+from ..._debug.anchor import Anchor
 from .._component.terminal import Terminal
 from .mark import Mark, Markable
 
@@ -48,7 +43,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
         self._construct()
 
-        self.__set_up_anchors(self._debug)
+        self.__set_up_anchors()
         self._label = Mark(self._label_anchor, self._centre_anchor)
         self._annotation = Mark(self._annotation_anchor, self._centre_anchor)
         self.__initialise_marks(annotation, label)
@@ -132,19 +127,19 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self._clear_mark(self._annotation)
         return self
 
-    def __set_up_anchors(self, debug: bool) -> None:
-        self._centre_anchor = Anchor(debug, CENTRE_COLOUR)
+    def __set_up_anchors(self) -> None:
+        self._centre_anchor = Anchor(config_eng.anchor.centre_colour)
         # A small amount is added to each of these anchors to make sure that they are
         # never directly over the centre anchor, as this causes problems.
-        self._label_anchor = Anchor(debug, LABEL_COLOUR).shift(
+        self._label_anchor = Anchor(config_eng.anchor.label_colour).shift(
             self._body.get_top() + 0.01 * mn.UP
         )
-        self._annotation_anchor = Anchor(debug, ANNOTATION_COLOUR).shift(
+        self._annotation_anchor = Anchor(config_eng.anchor.annotation_colour).shift(
             self._body.get_bottom() + 0.01 * mn.DOWN
         )
         self.add(self._centre_anchor, self._label_anchor, self._annotation_anchor)
         for terminal in self._terminals:
-            self.add(Anchor(debug, TERMINAL_COLOUR).shift(terminal.position))
+            self.add(Anchor(config_eng.anchor.terminal_colour).shift(terminal.position))
 
     def __initialise_marks(self, annotation: str | None, label: str | None) -> None:
         if label is not None:
@@ -208,21 +203,25 @@ class Bipole(Component, metaclass=abc.ABCMeta):
         self,
         left: Terminal | None = None,
         right: Terminal | None = None,
-        debug: bool = False,
         *args: Any,
         **kwargs: Any,
     ) -> None:
+        terminal_end_x = (
+            config_eng.symbol.bipole_width / 2
+        ) + config_eng.symbol.terminal_length
+        terminal_end = np.array([terminal_end_x, 0, 0])
+
         self.left = (
             left
             if left is not None
-            else Terminal(position=mn.LEFT, direction=mn.LEFT, debug=debug)
+            else Terminal(position=-terminal_end, direction=mn.LEFT)
         )
         self.right = (
             right
             if right is not None
-            else Terminal(position=mn.RIGHT, direction=mn.RIGHT, debug=debug)
+            else Terminal(position=terminal_end, direction=mn.RIGHT)
         )
-        super().__init__(*args, debug=debug, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def _construct(self) -> None:
         self._terminals = [self.left, self.right]
