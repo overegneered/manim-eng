@@ -1,4 +1,4 @@
-from typing import Self
+from typing import Any, Self
 
 import manim as mn
 import manim.typing as mnt
@@ -64,12 +64,14 @@ class Terminal(Markable):
             self._centre_anchor.pos, self.angle_offset
         )
         self._current_arrow_showing: bool = False
-        self._current_arrow_pointing_out: bool = True
 
         self._current_anchor.move_to(self._current_arrow.get_top())
         self._current: Mark = Mark(self._current_anchor, self._centre_anchor)
 
         self.add(self._centre_anchor, self._current_anchor)
+
+        self._current_arrow_pointing_out: bool = False
+        self._current_mark_anchored_below: bool = False
 
     def set_current(self, label: str, out: bool = False, below: bool = False) -> Self:
         """Set the current annotation of the terminal.
@@ -96,10 +98,15 @@ class Terminal(Markable):
             self.add(self._current_arrow)
             self._current_arrow_showing = True
         if out != self._current_arrow_pointing_out:
-            self._current_arrow.rotate(np.pi)
+            self._current_arrow.rotate(mn.PI)
             self._current_arrow_pointing_out = out
-        if below:
-            self._current_anchor.move_to(self._current_arrow.get_bottom())
+        if below != self._current_mark_anchored_below:
+            self._current_anchor.move_to(
+                self._current_arrow.get_bottom()
+                if below
+                else self._current_arrow.get_top()
+            )
+            self._current_mark_anchored_below = below
         else:
             self._current_anchor.move_to(self._current_arrow.get_top())
         self._set_mark(self._current, label)
@@ -117,3 +124,49 @@ class Terminal(Markable):
         self._current_arrow_showing = False
         self._clear_mark(self._current)
         return self
+
+    @mn.override_animate(set_current)
+    def __animate_set_current(
+        self,
+        label: str,
+        out: bool = False,
+        below: bool = False,
+        anim_args: dict[str, Any] | None = None,
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        animations: list[mn.Animation] = []
+
+        if below != self._current_mark_anchored_below:
+            self._current_anchor.move_to(
+                self._current_arrow.get_bottom()
+                if below
+                else self._current_arrow.get_top()
+            )
+            self._current_mark_anchored_below = below
+
+        label_animation = (
+            self.animate(**anim_args)._set_mark(self._current, label).build()
+        )
+        animations.append(label_animation)
+
+        if out != self._current_arrow_pointing_out:
+            self._current_arrow_pointing_out = out
+            rotation_needed = True
+        else:
+            rotation_needed = False
+
+        if not self._current_arrow_showing:
+            self.add(self._current_arrow)
+            if rotation_needed:
+                self._current_arrow.rotate(mn.PI)
+            self._current_arrow_showing = True
+            arrow_animation = mn.Create(self._current_arrow, **anim_args)
+            animations.append(arrow_animation)
+
+        elif rotation_needed:
+            arrow_animation = mn.Rotate(self._current_arrow, mn.PI)
+            animations.append(arrow_animation)
+
+        return mn.AnimationGroup(*animations)
