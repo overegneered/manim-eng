@@ -33,14 +33,10 @@ class Terminal(Markable):
         The direction the terminal 'points', i.e. the direction you get by walking from
         the point on the component body where the terminal attaches to the end of the
         terminal.
-    debug : bool
-        Whether to enable the debug visuals.
     """
 
-    def __init__(
-        self, position: mnt.Vector3D, direction: mnt.Vector3D, debug: bool = False
-    ):
-        super().__init__(debug)
+    def __init__(self, position: mnt.Vector3D, direction: mnt.Vector3D) -> None:
+        super().__init__()
 
         direction /= np.linalg.norm(direction)
         end = position - (direction * config_eng.symbol.terminal_length)
