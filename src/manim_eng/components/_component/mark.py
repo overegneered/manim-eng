@@ -191,6 +191,6 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
-        anim = mn.Uncreate(mark_to_clear, **anim_args)
+        anim = mn.Uncreate(mark_to_clear, remover=False, **anim_args)
         self.__marks.remove(mark_to_clear)
         return anim

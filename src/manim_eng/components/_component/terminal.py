@@ -55,19 +55,20 @@ class Terminal(Markable):
             self.get_center()
         )
 
-        self.angle_offset = np.arccos(np.dot(direction, np.array([1, 0, 0])))
-        self._current_arrow: CurrentArrow = CurrentArrow(
-            self._centre_anchor.pos, self.angle_offset
-        )
+        self._current_arrow: CurrentArrow
         self._current_arrow_showing: bool = False
+        self._current_arrow_pointing_out: bool = False
+        # Set to true so that the `__rebuild_current_arrow_if_necessary()` will rebuild
+        # the arrow (in this case, initialise it)
+        self._current_arrow_uncreated: bool = True
+        self.__rebuild_current_arrow_if_necessary()
 
         self._current_anchor.move_to(self._current_arrow.get_top())
+        self._current_mark_anchored_below: bool = False
+
         self._current: Mark = Mark(self._current_anchor, self._centre_anchor)
 
         self.add(self._centre_anchor, self._current_anchor)
-
-        self._current_arrow_pointing_out: bool = False
-        self._current_mark_anchored_below: bool = False
 
     def set_current(self, label: str, out: bool = False, below: bool = False) -> Self:
         """Set the current annotation of the terminal.
@@ -91,11 +92,14 @@ class Terminal(Markable):
             The (modified) terminal on which the method was called.
         """
         if not self._current_arrow_showing:
+            self.__rebuild_current_arrow_if_necessary()
             self.add(self._current_arrow)
             self._current_arrow_showing = True
+
         if out != self._current_arrow_pointing_out:
             self._current_arrow.rotate(mn.PI)
             self._current_arrow_pointing_out = out
+
         if below != self._current_mark_anchored_below:
             self._current_anchor.move_to(
                 self._current_arrow.get_bottom()
@@ -103,8 +107,7 @@ class Terminal(Markable):
                 else self._current_arrow.get_top()
             )
             self._current_mark_anchored_below = below
-        else:
-            self._current_anchor.move_to(self._current_arrow.get_top())
+
         self._set_mark(self._current, label)
         return self
 
@@ -121,6 +124,14 @@ class Terminal(Markable):
         self._clear_mark(self._current)
         return self
 
+    def __rebuild_current_arrow_if_necessary(self) -> None:
+        if self._current_arrow_uncreated:
+            angle_to_rotate = np.arccos(np.dot(self.direction, np.array([1, 0, 0])))
+            if not self._current_arrow_pointing_out:
+                angle_to_rotate += np.pi
+            self._current_arrow = CurrentArrow(self._centre_anchor.pos, angle_to_rotate)
+            self._current_arrow_uncreated = False
+
     @mn.override_animate(set_current)
     def __animate_set_current(
         self,
@@ -133,6 +144,23 @@ class Terminal(Markable):
             anim_args = {}
 
         animations: list[mn.Animation] = []
+
+        rotation_needed = out != self._current_arrow_pointing_out
+
+        if not self._current_arrow_showing:
+            self.__rebuild_current_arrow_if_necessary()
+            self.add(self._current_arrow)
+            self._current_arrow_showing = True
+            if rotation_needed:
+                self._current_arrow.rotate(mn.PI)
+            self._current_arrow_pointing_out = out
+            arrow_animation = mn.Create(self._current_arrow, **anim_args)
+            animations.append(arrow_animation)
+
+        elif rotation_needed:
+            arrow_animation = mn.Rotate(self._current_arrow, mn.PI, **anim_args)
+            self._current_arrow_pointing_out = out
+            animations.append(arrow_animation)
 
         if below != self._current_mark_anchored_below:
             self._current_anchor.move_to(
@@ -147,22 +175,20 @@ class Terminal(Markable):
         )
         animations.append(label_animation)
 
-        if out != self._current_arrow_pointing_out:
-            self._current_arrow_pointing_out = out
-            rotation_needed = True
-        else:
-            rotation_needed = False
-
-        if not self._current_arrow_showing:
-            self.add(self._current_arrow)
-            if rotation_needed:
-                self._current_arrow.rotate(mn.PI)
-            self._current_arrow_showing = True
-            arrow_animation = mn.Create(self._current_arrow, **anim_args)
-            animations.append(arrow_animation)
-
-        elif rotation_needed:
-            arrow_animation = mn.Rotate(self._current_arrow, mn.PI)
-            animations.append(arrow_animation)
-
         return mn.AnimationGroup(*animations)
+
+    @mn.override_animate(clear_current)
+    def __animate_clear_current(
+        self, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        arrow_animation = mn.Uncreate(self._current_arrow, *anim_args)
+        self._current_arrow_showing = False
+        self._current_arrow_uncreated = True
+
+        return mn.AnimationGroup(
+            arrow_animation,
+            self.animate(**anim_args)._clear_mark(self._current).build(),
+        )
