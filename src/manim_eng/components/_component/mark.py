@@ -9,10 +9,6 @@ from ..._config import config_eng
 from ..._debug.anchor import Anchor
 
 
-class AlreadyAttachedError(RuntimeError):
-    pass
-
-
 class Mark(mn.VMobject):
     """A mark object, representing any textual annotation on a component.
 
