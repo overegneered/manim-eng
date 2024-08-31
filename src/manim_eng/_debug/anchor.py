@@ -1,6 +1,6 @@
 import manim as mn
+import manim.typing as mnt
 import numpy as np
-import numpy.typing as npt
 
 from .._config import config_eng
 
@@ -17,5 +17,5 @@ class Anchor(mn.Arc):
         )
 
     @property
-    def pos(self) -> npt.NDArray:
+    def pos(self) -> mnt.Point3D:
         return np.array(self.get_center())
