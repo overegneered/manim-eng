@@ -27,19 +27,10 @@ class Mark(mn.VMobject):
 
     def __init__(self, anchor: Anchor, centre_reference: Anchor) -> None:
         super().__init__()
-        self.anchor = anchor
-        self.centre_reference = centre_reference
         self.mathtex: mn.MathTex = mn.MathTex("")
 
-        if (anchor.pos == centre_reference.pos).all():
-            raise ValueError(
-                "`anchor` and `centre_reference` cannot be the same. "
-                f"Found: {anchor=}, {centre_reference=}.\n"
-                "Please report this error to a developer."
-            )
-
-        self.add_updater(self.__get_updater(anchor, centre_reference))
-        self.update()
+        self.updater: Callable[[mn.Mobject], None]
+        self.change_anchors(anchor, centre_reference)
 
     def set_text(
         self,
@@ -68,6 +59,24 @@ class Mark(mn.VMobject):
         self._reposition()
         return self
 
+    def change_anchors(self, anchor: Anchor, centre_reference: Anchor) -> None:
+        """Change the anchors to which the mark is attached.
+
+        Parameters
+        ----------
+        anchor : Anchor
+            The anchor to use as a base for the attachment of the mark.
+        centre_reference : Anchor
+            The anchor to use as a reference; the mark will be kept aligned to
+            ``anchor``, attached to the side directly opposite the side
+            ``centre_reference`` is on.
+        """
+        if len(self.updaters) != 0:
+            self.remove_updater(self.updater)
+        self.updater = self.__get_updater(anchor, centre_reference)
+        self.add_updater(self.updater)
+        self.update()
+
     @property
     def tex_strings(self) -> list[str] | None:
         if self.mathtex is None:
@@ -91,6 +100,13 @@ class Mark(mn.VMobject):
     def __get_updater(
         anchor: Anchor, centre_reference: Anchor
     ) -> Callable[[mn.Mobject], None]:
+        if (anchor.pos == centre_reference.pos).all():
+            raise ValueError(
+                "`anchor` and `centre_reference` cannot be the same. "
+                f"Found: {anchor.pos=}, {centre_reference.pos=}.\n"
+                "Please report this error to a developer."
+            )
+
         def updater(mark: mn.Mobject) -> None:
             line_of_connection = anchor.pos - centre_reference.pos
             line_of_connection = utils.normalised(line_of_connection)

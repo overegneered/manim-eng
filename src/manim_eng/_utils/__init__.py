@@ -1,3 +1,4 @@
+import manim as mn
 import manim.typing as mnt
 import numpy as np
 
@@ -60,7 +61,7 @@ def cardinalised(vector: mnt.Vector3D, margin: float) -> mnt.Vector3D:
         The resultant vector.
     """
     vector_magnitude = np.linalg.norm(vector)
-    angle = np.arccos(np.dot(vector, np.array([1, 0, 0])) / vector_magnitude)
+    angle = mn.angle_of_vector(vector)
 
     vector_within_margin_of_cardinal_direction = (angle + margin) % (
         np.pi / 2

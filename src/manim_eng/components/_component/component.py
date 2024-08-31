@@ -138,8 +138,6 @@ class Component(Markable, metaclass=abc.ABCMeta):
             self._body.get_bottom() + 0.01 * mn.DOWN
         )
         self.add(self._centre_anchor, self._label_anchor, self._annotation_anchor)
-        for terminal in self._terminals:
-            self.add(Anchor(config_eng.anchor.terminal_colour).shift(terminal.position))
 
     def __initialise_marks(self, annotation: str | None, label: str | None) -> None:
         if label is not None:
