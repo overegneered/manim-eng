@@ -6,7 +6,7 @@ import numpy as np
 
 from ..._config import config_eng
 from ..._debug.anchor import Anchor
-from ..._utils import normalised
+from ..._utils import utils
 from .mark import Mark, Markable
 
 
@@ -77,7 +77,7 @@ class Terminal(Markable):
 
     @property
     def direction(self) -> mnt.Vector3D:
-        return normalised(self._end_anchor.pos - self._centre_anchor.pos)
+        return utils.normalised(self._end_anchor.pos - self._centre_anchor.pos)
 
     @property
     def end(self) -> mnt.Point3D:

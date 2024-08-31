@@ -3,7 +3,7 @@ from typing import Any, Callable, Self
 
 import manim as mn
 
-import manim_eng._utils as utils
+from manim_eng._utils import utils
 
 from ..._config import config_eng
 from ..._debug.anchor import Anchor

@@ -1,8 +1,8 @@
 import copy
 
-import manim_eng._utils as utils
 import numpy as np
 import pytest
+from manim_eng._utils import utils
 
 
 @pytest.mark.parametrize(
@@ -20,30 +20,6 @@ def test_normalised(vector: list[float], expected: list[float]) -> None:
     result = utils.normalised(vector)
 
     assert np.allclose(result, expected, rtol=0.001)
-    assert np.all(vector == vector_original)
-
-
-@pytest.mark.parametrize(
-    ("vector", "tolerance", "expected"),
-    [
-        pytest.param([1, 5, 0.2], 0.1, [1, 5, 0.2], id="no action necessary"),
-        pytest.param([1, 2, 0.1], 0.1, [1, 2, 0], id="action just barely necessary"),
-        pytest.param([0.01, 5, 0.005], 0.1, [0, 5, 0], id="both values zeroed"),
-        pytest.param([4, 10, 5], 15, [0, 0, 0], id="all values zeroed"),
-    ],
-)
-def test_small_values_zeroed_out(
-    vector: list[float],
-    tolerance: float,
-    expected: list[float],
-) -> None:
-    vector = np.array(vector)  # type: ignore[assignment]
-    vector_original = copy.deepcopy(vector)
-    expected = np.array(expected)  # type: ignore[assignment]
-
-    result = utils.small_values_zeroed_out(vector, tolerance)
-
-    assert np.all(result == expected)
     assert np.all(vector == vector_original)
 
 
