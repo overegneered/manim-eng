@@ -1,5 +1,5 @@
 import pytest
-from manim_eng.components._component.component import Component
+from manim_eng._base.component import Component
 
 
 class DummyComponent(Component):

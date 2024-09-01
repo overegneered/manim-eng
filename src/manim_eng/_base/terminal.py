@@ -4,10 +4,10 @@ import manim as mn
 import manim.typing as mnt
 import numpy as np
 
-from ..._config import config_eng
-from ..._debug.anchor import Anchor
-from ..._utils import utils
-from .mark import Mark, Markable
+from manim_eng._base.mark import Mark, Markable
+from manim_eng._config import config_eng
+from manim_eng._debug.anchor import Anchor
+from manim_eng._utils import utils
 
 
 class CurrentArrow(mn.Triangle):

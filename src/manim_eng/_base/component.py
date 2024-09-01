@@ -5,10 +5,10 @@ import manim as mn
 import manim.typing as mnt
 import numpy as np
 
-from ..._config import config_eng
-from ..._debug.anchor import Anchor
-from .._component.terminal import Terminal
-from .mark import Mark, Markable
+from manim_eng._base.mark import Mark, Markable
+from manim_eng._base.terminal import Terminal
+from manim_eng._config import config_eng
+from manim_eng._debug.anchor import Anchor
 
 
 class Component(Markable, metaclass=abc.ABCMeta):

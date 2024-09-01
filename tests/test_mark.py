@@ -2,9 +2,9 @@ from unittest import mock
 
 import numpy as np
 import pytest
+from manim_eng._base.mark import Mark
 from manim_eng._config import config_eng
 from manim_eng._debug.anchor import Anchor
-from manim_eng.components._component.mark import Mark
 
 
 def mock_anchor(x: float, y: float, z: float) -> Anchor:

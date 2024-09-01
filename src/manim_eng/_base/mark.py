@@ -3,10 +3,9 @@ from typing import Any, Callable, Self
 
 import manim as mn
 
+from manim_eng._config import config_eng
+from manim_eng._debug.anchor import Anchor
 from manim_eng._utils import utils
-
-from ..._config import config_eng
-from ..._debug.anchor import Anchor
 
 
 class Mark(mn.VMobject):

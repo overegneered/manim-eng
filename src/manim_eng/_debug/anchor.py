@@ -2,7 +2,7 @@ import manim as mn
 import manim.typing as mnt
 import numpy as np
 
-from .._config import config_eng
+from manim_eng._config import config_eng
 
 
 class Anchor(mn.Arc):

@@ -2,11 +2,10 @@
 
 import manim as mn
 
-from ._component.component import Bipole
+from manim_eng._base.component import Bipole
+from manim_eng._config import config_eng
 
 __all__ = ["Resistor", "Thermistor", "VariableResistor"]
-
-from .._config import config_eng
 
 
 class Resistor(Bipole):
