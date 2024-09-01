@@ -1,6 +1,6 @@
 import copy
 
-from manim_eng import config_eng, tempconfig_eng
+from manim_eng._config import config_eng, tempconfig_eng
 
 
 def test_tempconfig_eng() -> None:
