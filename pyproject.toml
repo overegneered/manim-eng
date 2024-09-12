@@ -64,6 +64,8 @@ ignore = [
     "Q000", "Q001", "Q002", "Q003",
     "COM812", "COM819",
     "ISC001", "ISC002",
+    # Deactivated because manim-eng has functions that have a lot of configuration arguments that have default values
+    "PLR0913",
 ]
 
 [tool.ruff.lint.pydocstyle]
