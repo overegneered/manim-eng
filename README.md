@@ -3,6 +3,17 @@
 manim-eng is a plugin for the [Manim Community](https://www.manim.community/) animation engine that introduces symbols and utilities for drawing engineering diagrams.
 Currently this only includes circuits, but the goal is to extend this to structures in the future as well.
 
+### Why make another circuit library?
+
+Quite simply, because the other options available just don't cut it for me. The [manim-circuit](https://github.com/Mr-FuzzyPenguin/manim-circuit/blob/main/README.md) plugin, which was released during early development of this plugin, comes closer to what I want, but still isn't quite there. My goal can be summed up as 'manim-eng should be to ManimCE what CircuiTikZ is to LaTeX'. This means:
+
+- Easy to configure and automatically placed labels, annotations, and current and voltage indications.
+- Automatic, sensible animations for when these labels are introduced, removed, or changed.
+- Automatic component connections, including automatic placement of 'junction blobs'.
+- Ability to specify component types (i.e. European or American), with as much or as little granularity as you wish.
+
+On top of this, I wanted a clean, intuitive, Pythonic interface to the library. No available option that I could find had all of this. Also, this was an excellent way to get familiar with Manim and a fun project.
+
 ## Development
 
 ### Environment setup
