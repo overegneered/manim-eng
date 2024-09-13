@@ -52,50 +52,24 @@ class Voltage(Markable):
     ) -> None:
         super().__init__()
 
-        self._from_terminal = from_terminal
-        self._to_terminal = to_terminal
+        self.from_terminal = from_terminal
+        self.to_terminal = to_terminal
+        self.clockwise = clockwise
+        self.buff = buff
+        self.component_to_avoid = avoid_component
+        self.component_buff = component_buff
 
-        direction = self._to_terminal.end - self._from_terminal.end
-        angle_of_direction = mn.angle_of_vector(direction)
+        self._direction = to_terminal.end - from_terminal.end
+        self._angle_of_direction = mn.angle_of_vector(self._direction)
 
-        if avoid_component is not None:
-            middle_point = self._get_critical_point_at_different_rotation(
-                avoid_component,
-                mn.UP if clockwise else mn.DOWN,
-                -angle_of_direction,
-            )
-            middle_point = self._introduce_buffer_to_point(
-                middle_point, avoid_component.get_center(), component_buff
-            )
+        self._arrow: mn.Arrow
+        self._centre_reference: Anchor
+        self._anchor: Anchor
 
-            angle = self._get_arc_details_for_middle_point(middle_point, clockwise)
-        else:
-            angle = config_eng.symbol.voltage_default_angle
+        self._build_arrow()
+        self._set_up_anchors()
 
-        self._arrow = mn.Arrow(
-            start=from_terminal.end,
-            end=to_terminal.end,
-            path_arc=angle,
-            stroke_width=config_eng.symbol.arrow_stroke_width,
-            max_tip_length_to_length_ratio=0.125,
-            buff=buff,
-        )
-        self.add(self._arrow)
-
-        self._centre_anchor = Anchor(config_eng.anchor.centre_colour).move_to(
-            self.get_center()
-        )
-
-        top_of_arrow_bow = self._get_critical_point_at_different_rotation(
-            self._arrow, mn.UP if clockwise else mn.DOWN, -angle_of_direction
-        )
-        self._anchor = Anchor(config_eng.anchor.voltage_colour).move_to(
-            top_of_arrow_bow
-        )
-
-        self.add(self._centre_anchor, self._anchor)
-
-        self._label = Mark(self._anchor, self._centre_anchor)
+        self._label = Mark(self._anchor, self._centre_reference)
         self._set_mark(self._label, label)
 
     def set_voltage(self, label: str) -> Self:
@@ -113,6 +87,100 @@ class Voltage(Markable):
         """
         self._set_mark(self._label, label)
         return self
+
+    def set_sense(self, clockwise: bool) -> Self:
+        """Set the sense of the voltage arrow (clockwise or anticlockwise).
+
+        Parameters
+        ----------
+        clockwise : bool
+            Whether the arrow should be clockwise (``True``) or anticlockwise
+            (``False``).
+
+        Returns
+        -------
+        Self
+            The (modified) voltage arrow.
+        """
+        if clockwise == self.clockwise:
+            return self
+        self.clockwise = clockwise
+
+        self._redisplay()
+
+        return self
+
+    def flip_direction(self, flip_sense_as_well: bool = True) -> Self:
+        """Flip the direction of the voltage arrow.
+
+        Parameters
+        ----------
+        flip_sense_as_well : bool
+            Whether to flip the sense of the arrow as well (clockwise to anticlockwise
+            or anticlockwise to clockwise), so that the arrow remains on the same side
+            of the component. Defaults to ``True``.
+
+        Returns
+        -------
+        Self
+            The (modified) voltage arrow.
+        """
+        self.from_terminal, self.to_terminal = self.to_terminal, self.from_terminal
+
+        self._direction = self.to_terminal.end - self.from_terminal.end
+        self._angle_of_direction = mn.angle_of_vector(self._direction)
+
+        if flip_sense_as_well:
+            self.clockwise ^= True
+
+        self._redisplay()
+
+        return self
+
+    def _redisplay(self) -> None:
+        self.remove(self._arrow, self._anchor, self._centre_reference)
+        self._build_arrow()
+        self._set_up_anchors()
+        self._label.change_anchors(self._anchor, self._centre_reference)
+
+    def _build_arrow(self) -> None:
+        if self.component_to_avoid is not None:
+            middle_point = self._get_critical_point_at_different_rotation(
+                self.component_to_avoid,
+                mn.UP if self.clockwise else mn.DOWN,
+                -self._angle_of_direction,
+            )
+            middle_point = self._introduce_buffer_to_point(
+                middle_point, self.component_to_avoid.get_center(), self.component_buff
+            )
+
+            angle = self._get_arc_details_for_middle_point(middle_point)
+        else:
+            angle = config_eng.symbol.voltage_default_angle
+
+        self._arrow = mn.Arrow(
+            start=self.from_terminal.end,
+            end=self.to_terminal.end,
+            path_arc=angle,
+            stroke_width=config_eng.symbol.arrow_stroke_width,
+            max_tip_length_to_length_ratio=0.125,
+            buff=self.buff,
+        )
+        self.add(self._arrow)
+
+    def _set_up_anchors(self) -> None:
+        self._centre_reference = Anchor(config_eng.anchor.centre_colour).move_to(
+            self._arrow.get_center()
+        )
+
+        top_of_arrow_bow = self._get_critical_point_at_different_rotation(
+            self._arrow, mn.UP if self.clockwise else mn.DOWN, -self._angle_of_direction
+        )
+        self._anchor = Anchor(config_eng.anchor.voltage_colour).move_to(
+            top_of_arrow_bow
+        )
+
+        self.add(self._centre_reference, self._anchor)
 
     @staticmethod
     def _get_critical_point_at_different_rotation(
@@ -142,7 +210,7 @@ class Voltage(Markable):
         reference.points = mobject.get_all_points()
 
         rotated_reference_critical_point = reference.rotate(
-            rotation
+            rotation, about_point=mobject.get_center()
         ).get_critical_point(direction)
         relative_to_centre = rotated_reference_critical_point - mobject.get_center()
         return mobject.get_center() + mn.rotate_vector(relative_to_centre, -rotation)
@@ -174,9 +242,7 @@ class Voltage(Markable):
         length = np.linalg.norm(relative_to_reference)
         return relative_to + direction * (length + buff)
 
-    def _get_arc_details_for_middle_point(
-        self, middle_point: mnt.Point3D, clockwise: bool
-    ) -> float:
+    def _get_arc_details_for_middle_point(self, middle_point: mnt.Point3D) -> float:
         """Calculate the voltage arrow's arc to pass through ``middle_point``.
 
         Calculates the necessary angle to be swept by the voltage arrow's arc for it to
@@ -193,10 +259,6 @@ class Voltage(Markable):
         middle_point : Point3D
             The extra point the arrow should pass through, as well as the two end points
             defined by the ``from`` and ``to`` terminals.
-        clockwise : bool
-            If the arrow is going clockwise. This can be calculated from the
-            middle_point, but as this is specified by the user anyway, it is unnecessary
-            to do this calculation.
 
         Returns
         -------
@@ -218,10 +280,10 @@ class Voltage(Markable):
         equations from the vector equations of the bisectors and solving for the scaling
         factors.
         """
-        chord_ab = middle_point - self._from_terminal.end
-        chord_bc = self._to_terminal.end - middle_point
+        chord_ab = middle_point - self.from_terminal.end
+        chord_bc = self.to_terminal.end - middle_point
 
-        mid_ab = self._from_terminal.end + chord_ab / 2
+        mid_ab = self.from_terminal.end + chord_ab / 2
         mid_bc = middle_point + chord_bc / 2
 
         perp_ab = np.cross(chord_ab, mn.OUT)
@@ -237,10 +299,10 @@ class Voltage(Markable):
         centre = mid_ab + x[0] * perp_ab
 
         radius = np.linalg.norm(centre - middle_point)
-        length = np.linalg.norm(self._from_terminal.end - self._to_terminal.end)
+        length = np.linalg.norm(self._direction)
         angle = 2 * cast(float, np.arcsin(length / (2 * radius)))
 
-        if clockwise:
+        if self.clockwise:
             angle *= -1
 
         return angle
