@@ -46,7 +46,7 @@ class Voltage(Markable):
         to_terminal: Terminal,
         label: str,
         clockwise: bool = False,
-        buff: float = mn.MED_SMALL_BUFF,
+        buff: float = mn.SMALL_BUFF,
         avoid_component: Component | None = None,
         component_buff: float = mn.SMALL_BUFF,
     ) -> None:
@@ -108,8 +108,42 @@ class Voltage(Markable):
             return self
         self.clockwise = clockwise
 
-        self._redisplay()
+        self.update()
 
+        return self
+
+    def set_from_terminal(self, terminal: Terminal) -> Self:
+        """Set the terminal the arrow should point from.
+
+        Parameters
+        ----------
+        terminal : Terminal
+            The terminal that should be at the non-tip end of the voltage arrow.
+
+        Returns
+        -------
+        Self
+            The (modified) voltage arrow.
+        """
+        self.from_terminal = terminal
+        self.update()
+        return self
+
+    def set_to_terminal(self, terminal: Terminal) -> Self:
+        """Set the terminal the arrow should point to.
+
+        Parameters
+        ----------
+        terminal : Terminal
+            The terminal that should be at the tip end of the voltage arrow.
+
+        Returns
+        -------
+        Self
+            The (modified) voltage arrow.
+        """
+        self.to_terminal = terminal
+        self.update()
         return self
 
     def flip_direction(self, flip_sense_as_well: bool = True) -> Self:
@@ -132,7 +166,7 @@ class Voltage(Markable):
         if flip_sense_as_well:
             self.clockwise ^= True
 
-        self._redisplay()
+        self.update()
 
         return self
 
