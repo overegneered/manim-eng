@@ -258,6 +258,8 @@ class ComponentSymbolConfig(ConfigBase):
     still being considered horizontal or vertical for the purpose of mark alignment."""
     arrow_stroke_width: float = wire_stroke_width
     """The stroke width to use for arrows in voltage marks and similar."""
+    arrow_tip_length: float = 0.2
+    """The length of voltage arrow tips."""
     voltage_default_angle: float = 60 * mn.DEGREES
     """The angle a voltage arrow will sweep with no other reference provided."""
 

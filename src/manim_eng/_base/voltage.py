@@ -72,6 +72,8 @@ class Voltage(Markable):
         self._label = Mark(self._anchor, self._centre_reference)
         self._set_mark(self._label, label)
 
+        self.add_updater(lambda mob: mob._redisplay())
+
     def set_voltage(self, label: str) -> Self:
         """Set the voltage label.
 
@@ -127,9 +129,6 @@ class Voltage(Markable):
         """
         self.from_terminal, self.to_terminal = self.to_terminal, self.from_terminal
 
-        self._direction = self.to_terminal.end - self.from_terminal.end
-        self._angle_of_direction = mn.angle_of_vector(self._direction)
-
         if flip_sense_as_well:
             self.clockwise ^= True
 
@@ -138,6 +137,9 @@ class Voltage(Markable):
         return self
 
     def _redisplay(self) -> None:
+        self._direction = self.to_terminal.end - self.from_terminal.end
+        self._angle_of_direction = mn.angle_of_vector(self._direction)
+
         self.remove(self._arrow, self._anchor, self._centre_reference)
         self._build_arrow()
         self._set_up_anchors()
@@ -158,12 +160,15 @@ class Voltage(Markable):
         else:
             angle = config_eng.symbol.voltage_default_angle
 
+        if self.clockwise:
+            angle *= -1
+
         self._arrow = mn.Arrow(
             start=self.from_terminal.end,
             end=self.to_terminal.end,
             path_arc=angle,
             stroke_width=config_eng.symbol.arrow_stroke_width,
-            max_tip_length_to_length_ratio=0.125,
+            tip_length=config_eng.symbol.arrow_tip_length,
             buff=self.buff,
         )
         self.add(self._arrow)
@@ -247,8 +252,7 @@ class Voltage(Markable):
 
         Calculates the necessary angle to be swept by the voltage arrow's arc for it to
         pass through ``middle_point`` as well as its endpoints defined by the
-        ``from_terminal`` and ``to_terminal`` as passed to the constructor. Assumes
-        that a clockwise arc is represented by a negative angle.
+        ``from_terminal`` and ``to_terminal`` as passed to the constructor.
 
         In all cases two possible angles are available, one reflex and one not. This
         method will always return the non-reflex one. As such, avoid passing in points
@@ -300,12 +304,7 @@ class Voltage(Markable):
 
         radius = np.linalg.norm(centre - middle_point)
         length = np.linalg.norm(self._direction)
-        angle = 2 * cast(float, np.arcsin(length / (2 * radius)))
-
-        if self.clockwise:
-            angle *= -1
-
-        return angle
+        return 2 * cast(float, np.arcsin(length / (2 * radius)))
 
     @mn.override_animate(set_voltage)
     def __animate_set_voltage(
