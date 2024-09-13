@@ -107,9 +107,7 @@ class Voltage(Markable):
         if clockwise == self.clockwise:
             return self
         self.clockwise = clockwise
-
         self.update()
-
         return self
 
     def set_from_terminal(self, terminal: Terminal) -> Self:
@@ -162,12 +160,9 @@ class Voltage(Markable):
             The (modified) voltage arrow.
         """
         self.from_terminal, self.to_terminal = self.to_terminal, self.from_terminal
-
         if flip_sense_as_well:
             self.clockwise ^= True
-
         self.update()
-
         return self
 
     def _redisplay(self) -> None:
