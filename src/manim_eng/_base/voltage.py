@@ -66,13 +66,13 @@ class Voltage(Markable):
         self._centre_reference: Anchor
         self._anchor: Anchor
 
-        self._build_arrow()
-        self._set_up_anchors()
+        self.__build_arrow()
+        self.__set_up_anchors()
 
         self._label = Mark(self._anchor, self._centre_reference)
         self._set_mark(self._label, label)
 
-        self.add_updater(lambda mob: mob._redisplay())
+        self.add_updater(lambda mob: mob.__redisplay())
 
     def set_voltage(self, label: str) -> Self:
         """Set the voltage label.
@@ -165,16 +165,16 @@ class Voltage(Markable):
         self.update()
         return self
 
-    def _redisplay(self) -> None:
+    def __redisplay(self) -> None:
         self._direction = self.to_terminal.end - self.from_terminal.end
         self._angle_of_direction = mn.angle_of_vector(self._direction)
 
         self.remove(self._arrow, self._anchor, self._centre_reference)
-        self._build_arrow()
-        self._set_up_anchors()
+        self.__build_arrow()
+        self.__set_up_anchors()
         self._label.change_anchors(self._anchor, self._centre_reference)
 
-    def _build_arrow(self) -> None:
+    def __build_arrow(self) -> None:
         if self.component_to_avoid is not None:
             middle_point = self._get_critical_point_at_different_rotation(
                 self.component_to_avoid,
@@ -202,7 +202,7 @@ class Voltage(Markable):
         )
         self.add(self._arrow)
 
-    def _set_up_anchors(self) -> None:
+    def __set_up_anchors(self) -> None:
         self._centre_reference = Anchor(config_eng.anchor.centre_colour).move_to(
             self._arrow.get_center()
         )
