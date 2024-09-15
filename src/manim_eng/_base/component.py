@@ -134,6 +134,118 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self._clear_mark(self._annotation)
         return self
 
+    def set_voltage(
+        self,
+        from_terminal: Terminal | str,
+        to_terminal: Terminal | str,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Self:
+        """Add a voltage arrow to the component.
+
+        Add a voltage arrow across two terminals of the component. There can only be one
+        arrow between any two terminals at a given time. If this method is used to place
+        an arrow between two terminals that already have a (component-managed) arrow, it
+        will replace the old one. Any voltage arrows added in this manner will have the
+        component they are called upon added as a component to avoid for the arrow, and
+        as such overrides the ``avoid_component`` argument to ``Voltage()``.
+
+        Using this method adds convenience (in that you don't have to manage the
+        ``Voltage`` object yourself), but sacrifices control. If you are likely to want
+        to update this arrow frequently, or attach one end of the arrow to another
+        component at any point, it will be easier (or necessary) to use ``Voltage``
+        directly.
+
+        Parameters
+        ----------
+        from_terminal : Terminal | str
+            Either a ``Terminal`` belonging to this component, or a string representing
+            an attribute of this component that returns a terminal (e.g. ``"right"``).
+        to_terminal : Terminal | str
+            Either a ``Terminal`` belonging to this component, or a string representing
+            an attribute of this component that returns a terminal (e.g. ``"left"``).
+        *args
+            Positional arguments to be passed to the ``Voltage`` constructor.
+        **kwargs
+            Keyword arguments to be passed to the ``Voltage`` constructor.
+
+        Returns
+        -------
+        Self
+            The (modified) component on which the method was called.
+
+        Raises
+        ------
+        ValueError
+            If a passed ``Terminal`` does not belong to this component.
+        AttributeError
+            If a string passed for either terminal does not represent an existing
+            attribute.
+        ValueError
+            If a string passed for either terminal does not represent an attribute of
+            this component that produces a ``Terminal`` instance.
+        ValueError
+            If the terminals specified for both 'from' and 'to' are the same.
+        """
+        from manim_eng._base.voltage import Voltage
+
+        from_terminal = self._get_or_check_terminal(from_terminal)
+        to_terminal = self._get_or_check_terminal(to_terminal)
+
+        if from_terminal == to_terminal:
+            raise ValueError(
+                "The terminals specified through `from_terminal` and `to_terminal` are "
+                "identical. They must be different."
+            )
+
+        kwargs["avoid_component"] = self
+
+        voltage_arrow = Voltage(from_terminal, to_terminal, *args, **kwargs)
+        self._add_or_replace_voltage_arrow(voltage_arrow)
+        self._voltage_arrows.add(voltage_arrow)
+
+        raise NotImplementedError
+
+    def clear_voltage(self, between_terminals: tuple[Terminal]) -> Self:
+        raise NotImplementedError
+
+    def _get_or_check_terminal(self, terminal: Terminal | str) -> Terminal:
+        """Get a terminal or check a passed terminal belongs to this component.
+
+        Parameters
+        ----------
+        terminal : Terminal | str
+            The string to use as a terminal identifier, or a ``Terminal`` instance to
+            verify belongs to this component.
+
+        Returns
+        -------
+        Terminal
+            The terminal identified.
+
+        Raises
+        ------
+        AttributeError
+            If the string passed for the terminal doesn't exist as an attribute on this
+            component.
+        ValueError
+            If the attribute identified by the string isn't an instance of ``Terminal``.
+        ValueError
+            If the terminal passed doesn't belong to this component.
+        """
+        if isinstance(terminal, Terminal):
+            if terminal not in self._terminals:
+                raise ValueError("Passed terminal does not belong to this component.")
+            to_return = terminal
+        else:
+            to_return = getattr(self, terminal)
+            if not isinstance(to_return, Terminal):
+                raise ValueError(
+                    f"Attribute `{terminal}` of `{self.__class__.__name__}` "
+                    f"is not a terminal."
+                )
+        return to_return
+
     def __set_up_anchors(self) -> None:
         self._centre_anchor = Anchor(config_eng.anchor.centre_colour)
         # A small amount is added to each of these anchors to make sure that they are

@@ -1,10 +1,20 @@
+from typing import Any
+
+import manim as mn
 import pytest
 from manim_eng._base.component import Component
+from manim_eng._base.terminal import Terminal
 
 
 class DummyComponent(Component):
-    def _construct(self) -> None:
-        pass
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        terminal = Terminal(mn.RIGHT, mn.RIGHT)
+        self.not_a_terminal = 3
+        super().__init__([terminal], *args, **kwargs)
+
+    @property
+    def terminal(self) -> Terminal:
+        return self._terminals[0]
 
 
 @pytest.fixture()
@@ -63,3 +73,62 @@ def test_label_and_annotation_via_constructor_argument_works() -> None:
 
     assert dummy_component._label.tex_strings == ["Z"]
     assert dummy_component._annotation.tex_strings == [r"(2 + j4) \,\Omega"]
+
+
+def test_get_or_check_terminal_errors_if_terminals_are_the_same(
+    dummy_component: DummyComponent,
+) -> None:
+    expected_message = (
+        "The terminals specified through `from_terminal` and "
+        "`to_terminal` are identical."
+    )
+
+    with pytest.raises(ValueError, match=expected_message):
+        dummy_component.set_voltage(dummy_component.terminal, dummy_component.terminal)
+    with pytest.raises(ValueError, match=expected_message):
+        dummy_component.set_voltage("terminal", dummy_component.terminal)
+    with pytest.raises(ValueError, match=expected_message):
+        dummy_component.set_voltage(dummy_component.terminal, "terminal")
+    with pytest.raises(ValueError, match=expected_message):
+        dummy_component.set_voltage("terminal", "terminal")
+
+
+def test_get_or_check_terminal_non_belonging_terminal() -> None:
+    component = DummyComponent()
+    other_component = DummyComponent()
+
+    with pytest.raises(
+        ValueError, match="Passed terminal does not belong to this component."
+    ):
+        component._get_or_check_terminal(other_component.terminal)
+
+
+def test_get_or_check_terminal_invalid_attribute(
+    dummy_component: DummyComponent,
+) -> None:
+    with pytest.raises(AttributeError):
+        dummy_component._get_or_check_terminal("invalid_attribute")
+
+
+def test_get_or_check_terminal_valid_attribute_not_a_terminal(
+    dummy_component: DummyComponent,
+) -> None:
+    not_a_terminal = "not_a_terminal"
+
+    with pytest.raises(
+        ValueError,
+        match=f"Attribute `{not_a_terminal}` of `DummyComponent` is not a terminal.",
+    ):
+        dummy_component._get_or_check_terminal(not_a_terminal)
+
+
+def test_get_or_check_terminal_valid_terminal(dummy_component: DummyComponent) -> None:
+    result = dummy_component._get_or_check_terminal(dummy_component.terminal)
+
+    assert result == dummy_component.terminal
+
+
+def test_get_or_check_terminal_valid_string(dummy_component: DummyComponent) -> None:
+    result = dummy_component._get_or_check_terminal("terminal")
+
+    assert result == dummy_component.terminal
