@@ -129,7 +129,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
         Returns
         -------
         Self
-            The (modified) component on which the method was called
+            The (modified) component on which the method was called.
         """
         self._clear_mark(self._annotation)
         return self
@@ -339,6 +339,9 @@ class Bipole(Component, metaclass=abc.ABCMeta):
             else Terminal(position=terminal_end, direction=mn.RIGHT)
         )
         super().__init__([left, right], *args, **kwargs)
+
+    def _construct(self) -> None:
+        pass
 
     @property
     def left(self) -> Terminal:
