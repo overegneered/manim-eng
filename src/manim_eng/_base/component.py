@@ -16,6 +16,10 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
     Parameters
     ----------
+    terminals : list[Terminal]
+        The terminals of the component. Management of terminal visibility is handled by
+        the constructor; terminals should not be added before or after they are passed
+        to this constructor.
     label : str | None
         A label to set. Takes a TeX math mode string. No label is set if ``None`` is
         passed.
@@ -26,6 +30,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
+        terminals: list[Terminal],
         label: str | None = None,
         annotation: str | None = None,
         *args: Any,
@@ -33,12 +38,14 @@ class Component(Markable, metaclass=abc.ABCMeta):
     ) -> None:
         super().__init__(*args, **kwargs)
 
+        self._terminals = terminals
+        self.add(*self._terminals)
+
         self._centre_anchor: Anchor
         self._label_anchor: Anchor
         self._annotation_anchor: Anchor
 
-        self._terminals: list[Terminal] = []  # mn.VGroup()
-        self._body = mn.VGroup()  # self._terminals)
+        self._body = mn.VGroup()
         self.add(self._body)
 
         self._construct()
@@ -209,18 +216,22 @@ class Bipole(Component, metaclass=abc.ABCMeta):
         ) + config_eng.symbol.terminal_length
         terminal_end = np.array([terminal_end_x, 0, 0])
 
-        self.left = (
+        left = (
             left
             if left is not None
             else Terminal(position=-terminal_end, direction=mn.LEFT)
         )
-        self.right = (
+        right = (
             right
             if right is not None
             else Terminal(position=terminal_end, direction=mn.RIGHT)
         )
-        super().__init__(*args, **kwargs)
+        super().__init__([left, right], *args, **kwargs)
 
-    def _construct(self) -> None:
-        self._terminals = [self.left, self.right]
-        self.add(*self._terminals)
+    @property
+    def left(self) -> Terminal:
+        return self._terminals[0]
+
+    @property
+    def right(self) -> Terminal:
+        return self._terminals[1]
