@@ -53,7 +53,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self.__set_up_anchors()
         self._label = Mark(self._label_anchor, self._centre_anchor)
         self._annotation = Mark(self._annotation_anchor, self._centre_anchor)
-        self.__initialise_marks(annotation, label)
+        self.__initialise_marks(label, annotation)
 
     @abc.abstractmethod
     def _construct(self) -> None:
@@ -146,7 +146,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
         )
         self.add(self._centre_anchor, self._label_anchor, self._annotation_anchor)
 
-    def __initialise_marks(self, annotation: str | None, label: str | None) -> None:
+    def __initialise_marks(self, label: str | None, annotation: str | None) -> None:
         if label is not None:
             self.set_label(label)
         if annotation is not None:
