@@ -68,15 +68,13 @@ class Voltage(Markable):
         self._centre_reference: Anchor = Anchor(config_eng.anchor.centre_colour)
         self._anchor: Anchor = Anchor(config_eng.anchor.voltage_colour)
 
-        self.__update_arrow()
-        self.__update_anchors()
+        self.add_updater(lambda mob: mob.__arrow_updater())
+        self.update()
 
         self.add(self._arrow, self._centre_reference, self._anchor)
 
         self._label = Mark(self._anchor, self._centre_reference)
         self._set_mark(self._label, label)
-
-        self.add_updater(lambda mob: mob.__redisplay())
 
     def set_voltage(self, label: str) -> Self:
         """Set the voltage label.
@@ -169,7 +167,7 @@ class Voltage(Markable):
         self.update()
         return self
 
-    def __redisplay(self) -> None:
+    def __arrow_updater(self) -> None:
         self._direction = self.to_terminal.end - self.from_terminal.end
         self._angle_of_direction = mn.angle_of_vector(self._direction)
 
