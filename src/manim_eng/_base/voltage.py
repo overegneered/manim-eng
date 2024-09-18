@@ -12,6 +12,8 @@ from manim_eng._base.terminal import Terminal
 from manim_eng._debug.anchor import Anchor
 
 
+# TODO: #7 move to a public-facing module as this is now designed to be used in the
+#          public API
 class Voltage(Markable):
     """Voltage arrow between two terminal endpoints.
 
@@ -62,12 +64,14 @@ class Voltage(Markable):
         self._direction = to_terminal.end - from_terminal.end
         self._angle_of_direction = mn.angle_of_vector(self._direction)
 
-        self._arrow: mn.Arrow
-        self._centre_reference: Anchor
-        self._anchor: Anchor
+        self._arrow: mn.Arrow = mn.Arrow(mn.ORIGIN, mn.ORIGIN)
+        self._centre_reference: Anchor = Anchor(config_eng.anchor.centre_colour)
+        self._anchor: Anchor = Anchor(config_eng.anchor.voltage_colour)
 
-        self.__build_arrow()
-        self.__set_up_anchors()
+        self.__update_arrow()
+        self.__update_anchors()
+
+        self.add(self._arrow, self._centre_reference, self._anchor)
 
         self._label = Mark(self._anchor, self._centre_reference)
         self._set_mark(self._label, label)
@@ -169,12 +173,10 @@ class Voltage(Markable):
         self._direction = self.to_terminal.end - self.from_terminal.end
         self._angle_of_direction = mn.angle_of_vector(self._direction)
 
-        self.remove(self._arrow, self._anchor, self._centre_reference)
-        self.__build_arrow()
-        self.__set_up_anchors()
-        self._label.change_anchors(self._anchor, self._centre_reference)
+        self.__update_arrow()
+        self.__update_anchors()
 
-    def __build_arrow(self) -> None:
+    def __update_arrow(self) -> None:
         if self.component_to_avoid is not None:
             middle_point = self._get_critical_point_at_different_rotation(
                 self.component_to_avoid,
@@ -192,7 +194,7 @@ class Voltage(Markable):
         if self.clockwise:
             angle *= -1
 
-        self._arrow = mn.Arrow(
+        new_arrow = mn.Arrow(
             start=self.from_terminal.end,
             end=self.to_terminal.end,
             path_arc=angle,
@@ -200,21 +202,15 @@ class Voltage(Markable):
             tip_length=config_eng.symbol.arrow_tip_length,
             buff=self.buff,
         )
-        self.add(self._arrow)
+        self._arrow.become(new_arrow)
 
-    def __set_up_anchors(self) -> None:
-        self._centre_reference = Anchor(config_eng.anchor.centre_colour).move_to(
-            self._arrow.get_center()
-        )
-
+    def __update_anchors(self) -> None:
         top_of_arrow_bow = self._get_critical_point_at_different_rotation(
             self._arrow, mn.UP if self.clockwise else mn.DOWN, -self._angle_of_direction
         )
-        self._anchor = Anchor(config_eng.anchor.voltage_colour).move_to(
-            top_of_arrow_bow
-        )
 
-        self.add(self._centre_reference, self._anchor)
+        self._centre_reference.move_to(self._arrow.get_center())
+        self._anchor.move_to(top_of_arrow_bow)
 
     @staticmethod
     def _get_critical_point_at_different_rotation(
