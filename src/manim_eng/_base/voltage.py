@@ -184,7 +184,6 @@ class Voltage(Markable):
             middle_point = self._introduce_buffer_to_point(
                 middle_point, self.component_to_avoid.get_center(), self.component_buff
             )
-
             angle = self._get_arc_details_for_middle_point(middle_point)
         else:
             angle = config_eng.symbol.voltage_default_angle
