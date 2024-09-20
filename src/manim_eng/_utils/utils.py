@@ -28,7 +28,7 @@ def cardinalised(vector: mnt.Vector3D, margin: float | None = None) -> mnt.Vecto
     original magnitude.
 
     In the event that a vector lies perfectly on the boundary between possible snaps,
-    the vertical snap will be preferred.
+    the horizontal snap will be preferred.
 
     Parameters
     ----------
