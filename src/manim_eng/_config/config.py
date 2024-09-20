@@ -247,15 +247,21 @@ class ComponentSymbolConfig(ConfigBase):
     current_arrow_radius: float = (2 / np.sqrt(3)) * 0.2 * bipole_height
     """The length from the centre of the current arrow triangle from its centre to one
     of its vertices."""
+    terminal_length: float = 0.5 * bipole_width
+    """The length of the terminal of a component."""
+    wire_stroke_width: float = 0.625 * component_stroke_width
+    """The stroke width to use for wires."""
     mark_font_size: float = 36.0
     """The default font size to use for marks (e.g. labels and annotations)."""
     mark_cardinal_alignment_margin: float = 5 * (mn.PI / 180)
     """The maximum angle a component can be from one of horizontal or vertical whilst
     still being considered horizontal or vertical for the purpose of mark alignment."""
-    terminal_length: float = 0.5 * bipole_width
-    """The length of the terminal of a component."""
-    wire_stroke_width: float = 0.625 * component_stroke_width
-    """The stroke width to use for wires."""
+    arrow_stroke_width: float = wire_stroke_width
+    """The stroke width to use for arrows in voltage marks and similar."""
+    arrow_tip_length: float = 0.2
+    """The length of voltage arrow tips."""
+    voltage_default_angle: float = 60 * mn.DEGREES
+    """The angle a voltage arrow will sweep with no other reference provided."""
 
 
 @dc.dataclass
@@ -276,6 +282,7 @@ class AnchorDisplayConfig(ConfigBase):
     """The stroke width of anchor visualisation rings."""
     terminal_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.GREEN)
     """The colour to use for terminal anchors' debug visuals."""
+    voltage_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.YELLOW)
 
 
 @dc.dataclass

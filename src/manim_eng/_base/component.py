@@ -5,10 +5,11 @@ import manim as mn
 import manim.typing as mnt
 import numpy as np
 
-from ..._config import config_eng
-from ..._debug.anchor import Anchor
-from .._component.terminal import Terminal
-from .mark import Mark, Markable
+from manim_eng._base.mark import Mark, Markable
+from manim_eng._base.terminal import Terminal
+from manim_eng._config import config_eng
+from manim_eng._debug.anchor import Anchor
+from manim_eng.circuit.voltage import Voltage
 
 
 class Component(Markable, metaclass=abc.ABCMeta):
@@ -16,6 +17,10 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
     Parameters
     ----------
+    terminals : list[Terminal]
+        The terminals of the component. Management of terminal visibility is handled by
+        the constructor; terminals should not be added before or after they are passed
+        to this constructor.
     label : str | None
         A label to set. Takes a TeX math mode string. No label is set if ``None`` is
         passed.
@@ -26,6 +31,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
+        terminals: list[Terminal],
         label: str | None = None,
         annotation: str | None = None,
         *args: Any,
@@ -33,12 +39,13 @@ class Component(Markable, metaclass=abc.ABCMeta):
     ) -> None:
         super().__init__(*args, **kwargs)
 
+        self._terminals = terminals
+
         self._centre_anchor: Anchor
         self._label_anchor: Anchor
         self._annotation_anchor: Anchor
 
-        self._terminals: list[Terminal] = []  # mn.VGroup()
-        self._body = mn.VGroup()  # self._terminals)
+        self._body = mn.VGroup(*self._terminals)
         self.add(self._body)
 
         self._construct()
@@ -46,7 +53,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self.__set_up_anchors()
         self._label = Mark(self._label_anchor, self._centre_anchor)
         self._annotation = Mark(self._annotation_anchor, self._centre_anchor)
-        self.__initialise_marks(annotation, label)
+        self.__initialise_marks(label, annotation)
 
     @abc.abstractmethod
     def _construct(self) -> None:
@@ -122,10 +129,106 @@ class Component(Markable, metaclass=abc.ABCMeta):
         Returns
         -------
         Self
-            The (modified) component on which the method was called
+            The (modified) component on which the method was called.
         """
         self._clear_mark(self._annotation)
         return self
+
+    def voltage(
+        self,
+        from_terminal: Terminal | str,
+        to_terminal: Terminal | str,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Voltage:
+        """Return a voltage arrow across the component.
+
+        Convenience method for creating a voltage arrow across two terminals of this
+        component. Returns the created ``Voltage`` object. This method automatically
+        sets the component is it called upon in the ``avoid`` argument of ``Voltage``
+        (and as such overrides this argument).
+
+        Parameters
+        ----------
+        from_terminal : Terminal | str
+            Either a ``Terminal`` belonging to this component, or a string representing
+            an attribute of this component that returns a terminal (e.g. ``"right"``).
+        to_terminal : Terminal | str
+            Either a ``Terminal`` belonging to this component, or a string representing
+            an attribute of this component that returns a terminal (e.g. ``"left"``).
+        *args
+            Positional arguments to be passed to the ``Voltage`` constructor.
+        **kwargs
+            Keyword arguments to be passed to the ``Voltage`` constructor. Any keyword
+            argument with the key ``avoid`` will be ignored.
+
+        Returns
+        -------
+        Voltage
+            The voltage arrow resulting from the specification given.
+
+        Raises
+        ------
+        ValueError
+            If a passed ``Terminal`` does not belong to this component.
+        AttributeError
+            If a string passed for either terminal does not represent an existing
+            attribute.
+        ValueError
+            If a string passed for either terminal does not represent an attribute of
+            this component that produces a ``Terminal`` instance.
+        ValueError
+            If the terminals specified for both 'from' and 'to' are the same.
+        """
+        from_terminal = self._get_or_check_terminal(from_terminal)
+        to_terminal = self._get_or_check_terminal(to_terminal)
+
+        if from_terminal == to_terminal:
+            raise ValueError(
+                "The terminals specified through `from_terminal` and `to_terminal` are "
+                "identical. They must be different."
+            )
+
+        kwargs["avoid"] = self
+
+        return Voltage(from_terminal, to_terminal, *args, **kwargs)
+
+    def _get_or_check_terminal(self, terminal: Terminal | str) -> Terminal:
+        """Get a terminal or check a passed terminal belongs to this component.
+
+        Parameters
+        ----------
+        terminal : Terminal | str
+            The string to use as a terminal identifier, or a ``Terminal`` instance to
+            verify belongs to this component.
+
+        Returns
+        -------
+        Terminal
+            The terminal identified.
+
+        Raises
+        ------
+        AttributeError
+            If the string passed for the terminal doesn't exist as an attribute on this
+            component.
+        ValueError
+            If the attribute identified by the string isn't an instance of ``Terminal``.
+        ValueError
+            If the terminal passed doesn't belong to this component.
+        """
+        if isinstance(terminal, Terminal):
+            if terminal not in self._terminals:
+                raise ValueError("Passed terminal does not belong to this component.")
+            to_return = terminal
+        else:
+            to_return = getattr(self, terminal)
+            if not isinstance(to_return, Terminal):
+                raise ValueError(
+                    f"Attribute `{terminal}` of `{self.__class__.__name__}` "
+                    f"is not a terminal."
+                )
+        return to_return
 
     def __set_up_anchors(self) -> None:
         self._centre_anchor = Anchor(config_eng.anchor.centre_colour)
@@ -139,7 +242,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
         )
         self.add(self._centre_anchor, self._label_anchor, self._annotation_anchor)
 
-    def __initialise_marks(self, annotation: str | None, label: str | None) -> None:
+    def __initialise_marks(self, label: str | None, annotation: str | None) -> None:
         if label is not None:
             self.set_label(label)
         if annotation is not None:
@@ -209,18 +312,25 @@ class Bipole(Component, metaclass=abc.ABCMeta):
         ) + config_eng.symbol.terminal_length
         terminal_end = np.array([terminal_end_x, 0, 0])
 
-        self.left = (
+        left = (
             left
             if left is not None
             else Terminal(position=-terminal_end, direction=mn.LEFT)
         )
-        self.right = (
+        right = (
             right
             if right is not None
             else Terminal(position=terminal_end, direction=mn.RIGHT)
         )
-        super().__init__(*args, **kwargs)
+        super().__init__([left, right], *args, **kwargs)
 
     def _construct(self) -> None:
-        self._terminals = [self.left, self.right]
-        self.add(*self._terminals)
+        pass
+
+    @property
+    def left(self) -> Terminal:
+        return self._terminals[0]
+
+    @property
+    def right(self) -> Terminal:
+        return self._terminals[1]
