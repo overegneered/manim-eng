@@ -4,7 +4,6 @@ import manim as mn
 import pytest
 from manim_eng._base.component import Component
 from manim_eng._base.terminal import Terminal
-from manim_eng.circuit.voltage import Voltage
 
 
 class DummyComponent(Component):
@@ -13,6 +12,9 @@ class DummyComponent(Component):
         other_terminal = Terminal(mn.LEFT, mn.LEFT)
         self.not_a_terminal = 3
         super().__init__([terminal, other_terminal], *args, **kwargs)
+
+    def _construct(self) -> None:
+        pass
 
     @property
     def terminal(self) -> Terminal:
@@ -90,16 +92,23 @@ def test_voltage_processes_terminals_correctly(dummy_component: DummyComponent) 
     voltage_2 = dummy_component.voltage("terminal", dummy_component.other_terminal, "V")
     voltage_3 = dummy_component.voltage(dummy_component.terminal, "other_terminal", "V")
     voltage_4 = dummy_component.voltage("terminal", "other_terminal", "V")
-    expected = Voltage(
-        from_terminal=dummy_component.terminal,
-        to_terminal=dummy_component.other_terminal,
-        label="V",
-    )
 
-    assert voltage_1 == expected
-    assert voltage_2 == expected
-    assert voltage_3 == expected
-    assert voltage_4 == expected
+    assert voltage_1.from_terminal == dummy_component.terminal
+    assert voltage_1.to_terminal == dummy_component.other_terminal
+    assert voltage_2.from_terminal == dummy_component.terminal
+    assert voltage_2.to_terminal == dummy_component.other_terminal
+    assert voltage_3.from_terminal == dummy_component.terminal
+    assert voltage_3.to_terminal == dummy_component.other_terminal
+    assert voltage_4.from_terminal == dummy_component.terminal
+    assert voltage_4.to_terminal == dummy_component.other_terminal
+
+
+def test_voltage_sets_component_it_is_called_on_as_avoid(
+    dummy_component: DummyComponent,
+) -> None:
+    voltage = dummy_component.voltage("terminal", "other_terminal", "V")
+
+    assert voltage.component_to_avoid == dummy_component
 
 
 def test_voltage_errors_if_terminals_are_the_same(
