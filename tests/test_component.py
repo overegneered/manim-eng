@@ -4,17 +4,23 @@ import manim as mn
 import pytest
 from manim_eng._base.component import Component
 from manim_eng._base.terminal import Terminal
+from manim_eng.circuit.voltage import Voltage
 
 
 class DummyComponent(Component):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         terminal = Terminal(mn.RIGHT, mn.RIGHT)
+        other_terminal = Terminal(mn.LEFT, mn.LEFT)
         self.not_a_terminal = 3
-        super().__init__([terminal], *args, **kwargs)
+        super().__init__([terminal, other_terminal], *args, **kwargs)
 
     @property
     def terminal(self) -> Terminal:
         return self._terminals[0]
+
+    @property
+    def other_terminal(self) -> Terminal:
+        return self._terminals[1]
 
 
 @pytest.fixture()
@@ -75,7 +81,28 @@ def test_label_and_annotation_via_constructor_argument_works() -> None:
     assert dummy_component._annotation.tex_strings == [r"(2 + j4) \,\Omega"]
 
 
-def test_get_or_check_terminal_errors_if_terminals_are_the_same(
+def test_voltage_processes_terminals_correctly(dummy_component: DummyComponent) -> None:
+    voltage_1 = dummy_component.voltage(
+        dummy_component.terminal,
+        dummy_component.other_terminal,
+        "V",
+    )
+    voltage_2 = dummy_component.voltage("terminal", dummy_component.other_terminal, "V")
+    voltage_3 = dummy_component.voltage(dummy_component.terminal, "other_terminal", "V")
+    voltage_4 = dummy_component.voltage("terminal", "other_terminal", "V")
+    expected = Voltage(
+        from_terminal=dummy_component.terminal,
+        to_terminal=dummy_component.other_terminal,
+        label="V",
+    )
+
+    assert voltage_1 == expected
+    assert voltage_2 == expected
+    assert voltage_3 == expected
+    assert voltage_4 == expected
+
+
+def test_voltage_errors_if_terminals_are_the_same(
     dummy_component: DummyComponent,
 ) -> None:
     expected_message = (
@@ -84,13 +111,13 @@ def test_get_or_check_terminal_errors_if_terminals_are_the_same(
     )
 
     with pytest.raises(ValueError, match=expected_message):
-        dummy_component.set_voltage(dummy_component.terminal, dummy_component.terminal)
+        dummy_component.voltage(dummy_component.terminal, dummy_component.terminal)
     with pytest.raises(ValueError, match=expected_message):
-        dummy_component.set_voltage("terminal", dummy_component.terminal)
+        dummy_component.voltage("terminal", dummy_component.terminal)
     with pytest.raises(ValueError, match=expected_message):
-        dummy_component.set_voltage(dummy_component.terminal, "terminal")
+        dummy_component.voltage(dummy_component.terminal, "terminal")
     with pytest.raises(ValueError, match=expected_message):
-        dummy_component.set_voltage("terminal", "terminal")
+        dummy_component.voltage("terminal", "terminal")
 
 
 def test_get_or_check_terminal_non_belonging_terminal() -> None:

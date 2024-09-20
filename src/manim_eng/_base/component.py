@@ -9,6 +9,7 @@ from manim_eng._base.mark import Mark, Markable
 from manim_eng._base.terminal import Terminal
 from manim_eng._config import config_eng
 from manim_eng._debug.anchor import Anchor
+from manim_eng.circuit.voltage import Voltage
 
 
 class Component(Markable, metaclass=abc.ABCMeta):
@@ -39,13 +40,12 @@ class Component(Markable, metaclass=abc.ABCMeta):
         super().__init__(*args, **kwargs)
 
         self._terminals = terminals
-        self.add(*self._terminals)
 
         self._centre_anchor: Anchor
         self._label_anchor: Anchor
         self._annotation_anchor: Anchor
 
-        self._body = mn.VGroup()
+        self._body = mn.VGroup(*self._terminals)
         self.add(self._body)
 
         self._construct()
@@ -134,27 +134,19 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self._clear_mark(self._annotation)
         return self
 
-    def set_voltage(
+    def voltage(
         self,
         from_terminal: Terminal | str,
         to_terminal: Terminal | str,
         *args: Any,
         **kwargs: Any,
-    ) -> Self:
-        """Add a voltage arrow to the component.
+    ) -> Voltage:
+        """Return a voltage arrow across the component.
 
-        Add a voltage arrow across two terminals of the component. There can only be one
-        arrow between any two terminals at a given time. If this method is used to place
-        an arrow between two terminals that already have a (component-managed) arrow, it
-        will replace the old one. Any voltage arrows added in this manner will have the
-        component they are called upon added as a component to avoid for the arrow, and
-        as such overrides the ``avoid_component`` argument to ``Voltage()``.
-
-        Using this method adds convenience (in that you don't have to manage the
-        ``Voltage`` object yourself), but sacrifices control. If you are likely to want
-        to update this arrow frequently, or attach one end of the arrow to another
-        component at any point, it will be easier (or necessary) to use ``Voltage``
-        directly.
+        Convenience method for creating a voltage arrow across two terminals of this
+        component. Returns the created ``Voltage`` object. This method automatically
+        sets the component is it called upon in the ``avoid`` argument of ``Voltage``
+        (and as such overrides this argument).
 
         Parameters
         ----------
@@ -167,12 +159,13 @@ class Component(Markable, metaclass=abc.ABCMeta):
         *args
             Positional arguments to be passed to the ``Voltage`` constructor.
         **kwargs
-            Keyword arguments to be passed to the ``Voltage`` constructor.
+            Keyword arguments to be passed to the ``Voltage`` constructor. Any keyword
+            argument with the key ``avoid`` will be ignored.
 
         Returns
         -------
-        Self
-            The (modified) component on which the method was called.
+        Voltage
+            The voltage arrow resulting from the specification given.
 
         Raises
         ------
@@ -187,8 +180,6 @@ class Component(Markable, metaclass=abc.ABCMeta):
         ValueError
             If the terminals specified for both 'from' and 'to' are the same.
         """
-        from manim_eng._base.voltage import Voltage
-
         from_terminal = self._get_or_check_terminal(from_terminal)
         to_terminal = self._get_or_check_terminal(to_terminal)
 
@@ -198,16 +189,9 @@ class Component(Markable, metaclass=abc.ABCMeta):
                 "identical. They must be different."
             )
 
-        kwargs["avoid_component"] = self
+        kwargs["avoid"] = self
 
-        voltage_arrow = Voltage(from_terminal, to_terminal, *args, **kwargs)
-        self._add_or_replace_voltage_arrow(voltage_arrow)
-        self._voltage_arrows.add(voltage_arrow)
-
-        raise NotImplementedError
-
-    def clear_voltage(self, between_terminals: tuple[Terminal]) -> Self:
-        raise NotImplementedError
+        return Voltage(from_terminal, to_terminal, *args, **kwargs)
 
     def _get_or_check_terminal(self, terminal: Terminal | str) -> Terminal:
         """Get a terminal or check a passed terminal belongs to this component.

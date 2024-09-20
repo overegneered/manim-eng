@@ -1,3 +1,5 @@
+"""Voltage arrow annotation for applying between component terminals."""
+
 from typing import Any, Self, cast
 
 import manim as mn
@@ -6,14 +8,13 @@ import numpy as np
 
 import manim_eng._utils as utils
 from manim_eng import config_eng
-from manim_eng._base.component import Component
 from manim_eng._base.mark import Mark, Markable
 from manim_eng._base.terminal import Terminal
 from manim_eng._debug.anchor import Anchor
 
+__all__ = ["Voltage"]
 
-# TODO: #7 move to a public-facing module as this is now designed to be used in the
-#          public API
+
 class Voltage(Markable):
     """Voltage arrow between two terminal endpoints.
 
@@ -32,11 +33,10 @@ class Voltage(Markable):
         anticlockwise.
     buff : float
         The buffer to use when attaching the arrow to the terminal ends.
-    avoid_component : Component | None
-        If a component is specified, the arrow will go around it (including labels or
-        annotations attached to the component). This is currently not perfect, but works
-        decently.
-        If no component is specified, the arrow will take on its default 'curviness'.
+    avoid : VMobject | None
+        If a vmoject is specified, the arrow will go around it (including, if the
+        vmobject is a component, labels or annotations attached to the component).
+        If no component is specified, the arrow will take a default curvature.
     component_buff : float
         The buffer to use between the component body and the arrow, if a component to
         avoid is specified.
@@ -49,7 +49,7 @@ class Voltage(Markable):
         label: str,
         clockwise: bool = False,
         buff: float = mn.SMALL_BUFF,
-        avoid_component: Component | None = None,
+        avoid: mn.VMobject | None = None,
         component_buff: float = mn.SMALL_BUFF,
     ) -> None:
         super().__init__()
@@ -58,7 +58,7 @@ class Voltage(Markable):
         self.to_terminal = to_terminal
         self.clockwise = clockwise
         self.buff = buff
-        self.component_to_avoid = avoid_component
+        self.component_to_avoid = avoid
         self.component_buff = component_buff
 
         self._direction = to_terminal.end - from_terminal.end
