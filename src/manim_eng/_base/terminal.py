@@ -6,7 +6,7 @@ import numpy as np
 
 from manim_eng._base.mark import Mark, Markable
 from manim_eng._config import config_eng
-from manim_eng._debug.anchor import Anchor
+from manim_eng._debug.anchor import CentreAnchor, CurrentAnchor, TerminalAnchor
 from manim_eng._utils import utils
 
 
@@ -48,12 +48,8 @@ class Terminal(Markable):
         )
         self.add(self.line)
 
-        self._centre_anchor: Anchor = Anchor(config_eng.anchor.centre_colour).move_to(
-            self.line.get_center()
-        )
-        self._end_anchor: Anchor = Anchor(config_eng.anchor.terminal_colour).move_to(
-            position
-        )
+        self._centre_anchor = CentreAnchor().move_to(self.line.get_center())
+        self._end_anchor = TerminalAnchor().move_to(position)
 
         self._current_arrow: CurrentArrow
         self._current_arrow_showing: bool = False
@@ -61,10 +57,10 @@ class Terminal(Markable):
         self.__rebuild_current_arrow()
 
         arrow_half_height = self._current_arrow.height / 2
-        self._top_anchor = Anchor(config_eng.anchor.current_colour).move_to(
+        self._top_anchor = CurrentAnchor().move_to(
             self._centre_anchor.pos + np.array([0, arrow_half_height, 0])
         )
-        self._bottom_anchor = Anchor(config_eng.anchor.current_colour).move_to(
+        self._bottom_anchor = CurrentAnchor().move_to(
             self._centre_anchor.pos + np.array([0, -arrow_half_height, 0])
         )
 

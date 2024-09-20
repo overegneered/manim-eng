@@ -10,7 +10,7 @@ import manim_eng._utils as utils
 from manim_eng import config_eng
 from manim_eng._base.mark import Mark, Markable
 from manim_eng._base.terminal import Terminal
-from manim_eng._debug.anchor import Anchor
+from manim_eng._debug.anchor import CentreAnchor, VoltageAnchor
 
 __all__ = ["Voltage"]
 
@@ -65,8 +65,8 @@ class Voltage(Markable):
         self._angle_of_direction = mn.angle_of_vector(self._direction)
 
         self._arrow: mn.Arrow = mn.Arrow(mn.ORIGIN, mn.ORIGIN)
-        self._centre_reference: Anchor = Anchor(config_eng.anchor.centre_colour)
-        self._anchor: Anchor = Anchor(config_eng.anchor.voltage_colour)
+        self._centre_reference = CentreAnchor()
+        self._anchor = VoltageAnchor()
 
         self.add_updater(lambda mob: mob.__arrow_updater())
         self.update()
