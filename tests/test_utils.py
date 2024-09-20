@@ -91,11 +91,28 @@ def test_cardinalised(
     margin: float,
     expected: list[float],
 ) -> None:
-    vector = np.array(vector)  # type: ignore[assignment]
     vector_original = copy.deepcopy(vector)
-    expected = np.array(expected)  # type: ignore[assignment]
 
     result = utils.cardinalised(vector, margin)
 
-    assert np.allclose(result, expected, rtol=0.00001)
+    assert np.allclose(result, expected)
     assert np.all(vector == vector_original)
+
+
+@pytest.mark.parametrize(
+    ("vector", "expected"),
+    [
+        pytest.param([1, 0, 0], [1, 0, 0], id="no action necessary"),
+        pytest.param(
+            [0.7071067811865475, 0.7071067811865475, 0],
+            [1, 0, 0],
+            id="45 degrees snaps to the vertical preferentially",
+        ),
+    ],
+)
+def test_cardinalised_no_margin_given(
+    vector: list[float], expected: list[float]
+) -> None:
+    result = utils.cardinalised(vector)
+
+    assert np.allclose(result, expected)

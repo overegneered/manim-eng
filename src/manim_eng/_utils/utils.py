@@ -19,7 +19,7 @@ def normalised(vector: mnt.Vector3D) -> mnt.Vector3D:
     return vector / np.linalg.norm(vector)
 
 
-def cardinalised(vector: mnt.Vector3D, margin: float) -> mnt.Vector3D:
+def cardinalised(vector: mnt.Vector3D, margin: float | None = None) -> mnt.Vector3D:
     """If ``vector`` is within ``margin`` of a cardinal direction, snap it to it.
 
     The angle the passed ``vector`` makes with the positive horizontal is checked, and
@@ -27,13 +27,17 @@ def cardinalised(vector: mnt.Vector3D, margin: float) -> mnt.Vector3D:
     right, then the vector is snapped to that cardinal direction, maintaining its
     original magnitude.
 
+    In the event that a vector lies perfectly on the boundary between possible snaps,
+    the vertical snap will be preferred.
+
     Parameters
     ----------
     vector : mnt.Vector3D
         The vector to potentially snap to a cardinal direction.
     margin : float
         The maximum angle ``vector`` can make with a cardinal direction and still be
-        snapped to it, in *radians*.
+        snapped to it, in *radians*. If not supplied, all vectors will be snapped to the
+        nearest cardinal direction.
 
     Returns
     -------
@@ -43,9 +47,9 @@ def cardinalised(vector: mnt.Vector3D, margin: float) -> mnt.Vector3D:
     vector_magnitude = np.linalg.norm(vector)
     angle = mn.angle_of_vector(vector)
 
-    vector_within_margin_of_cardinal_direction = (angle + margin) % (
-        np.pi / 2
-    ) <= 2 * margin
+    vector_within_margin_of_cardinal_direction = (
+        (angle + margin) % (np.pi / 2) <= 2 * margin if margin is not None else True
+    )
     if vector_within_margin_of_cardinal_direction:
         abs_max_index = np.argmax(np.abs(vector))
         cardinalised_vector = np.zeros_like(vector)
