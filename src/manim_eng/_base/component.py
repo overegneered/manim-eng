@@ -8,7 +8,7 @@ import numpy as np
 from manim_eng._base.mark import Mark, Markable
 from manim_eng._base.terminal import Terminal
 from manim_eng._config import config_eng
-from manim_eng._debug.anchor import Anchor
+from manim_eng._debug.anchor import AnnotationAnchor, CentreAnchor, LabelAnchor
 from manim_eng.circuit.voltage import Voltage
 
 
@@ -41,9 +41,9 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
         self._terminals = terminals
 
-        self._centre_anchor: Anchor
-        self._label_anchor: Anchor
-        self._annotation_anchor: Anchor
+        self._centre_anchor = CentreAnchor()
+        self._label_anchor = LabelAnchor()
+        self._annotation_anchor = AnnotationAnchor()
 
         self._body = mn.VGroup(*self._terminals)
         self.add(self._body)
@@ -231,15 +231,10 @@ class Component(Markable, metaclass=abc.ABCMeta):
         return to_return
 
     def __set_up_anchors(self) -> None:
-        self._centre_anchor = Anchor(config_eng.anchor.centre_colour)
         # A small amount is added to each of these anchors to make sure that they are
         # never directly over the centre anchor, as this causes problems.
-        self._label_anchor = Anchor(config_eng.anchor.label_colour).shift(
-            self._body.get_top() + 0.01 * mn.UP
-        )
-        self._annotation_anchor = Anchor(config_eng.anchor.annotation_colour).shift(
-            self._body.get_bottom() + 0.01 * mn.DOWN
-        )
+        self._label_anchor.shift(self._body.get_top() + 0.01 * mn.UP)
+        self._annotation_anchor.shift(self._body.get_bottom() + 0.01 * mn.DOWN)
         self.add(self._centre_anchor, self._label_anchor, self._annotation_anchor)
 
     def __initialise_marks(self, label: str | None, annotation: str | None) -> None:
