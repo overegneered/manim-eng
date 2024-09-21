@@ -1,6 +1,7 @@
-"""Module containing the Wire class."""
+"""Module containing wire-related classes."""
 
-from typing import cast
+import abc
+from typing import Sequence, cast
 
 import manim as mn
 import manim.typing as mnt
@@ -10,9 +11,87 @@ from manim_eng import config_eng
 from manim_eng._base.terminal import Terminal
 from manim_eng._utils import utils
 
+__all__ = ["ManualWire", "Wire"]
 
-class Wire(mn.VMobject):
-    """Wire to connect components together.
+
+class _WireBase(mn.VMobject, metaclass=abc.ABCMeta):
+    def __init__(self, from_terminal: Terminal, to_terminal: Terminal, updating: bool):
+        super().__init__(stroke_width=config_eng.symbol.wire_stroke_width)
+
+        self.from_terminal = from_terminal
+        self.to_terminal = to_terminal
+
+        self.__construct_wire()
+
+        if updating:
+            self.add_updater(lambda mob: mob.__construct_wire())
+
+    def __construct_wire(self) -> None:
+        # The extra points involving the 0.001 factors extend the wire ever so slightly
+        # into the terminals, producing a nice clean join between the terminals and the
+        # wire
+        self.set_points_as_corners(
+            [
+                self.from_terminal.end - 0.001 * self.from_terminal.direction,
+                self.from_terminal.end,
+                *self.get_corner_points(),
+                self.to_terminal.end,
+                self.to_terminal.end - 0.001 * self.to_terminal.direction,
+            ]
+        )
+
+    @abc.abstractmethod
+    def get_corner_points(self) -> list[mnt.Point3D]:
+        """Get the corner points of the wire.
+
+        Returns the vertices of the wire, not including the end points (i.e. at the
+        start and end terminals).
+        """
+
+
+class ManualWire(_WireBase):
+    """Wire that requires its path to be manually specified.
+
+    Parameters
+    ----------
+    from_terminal : Terminal
+        The terminal the wire starts at.
+    to_terminal : Terminal
+        The terminal the wire ends at.
+    corner_points : Sequence[Point3D]
+        The vertices the line should have between the two terminals. Should not include
+        the positions of the two terminals, as these are inserted automatically when the
+        wire is drawn. These should be in order from ``from_terminal`` to
+        ``to_terminal``.
+    updating : bool
+        Whether the ends of the wire should update automatically to keep connected to
+        the terminals. This is disabled by default. If this is enabled, it is
+        recommended to attach another updater that will update ``corner_points`` to
+        prevent strange artefacts.
+    """
+
+    def __init__(
+        self,
+        from_terminal: Terminal,
+        to_terminal: Terminal,
+        corner_points: Sequence[mnt.Point3D],
+        updating: bool = False,
+    ):
+        super().__init__(from_terminal, to_terminal, updating)
+
+        self.corner_points = list(corner_points)
+
+    def get_corner_points(self) -> list[mnt.Point3D]:
+        """Get the corner points of the wire.
+
+        Returns the vertices of the wire, not including the end points (i.e. at the
+        start and end terminals).
+        """
+        return self.corner_points
+
+
+class Wire(_WireBase):
+    """Wire to automatically connect components together.
 
     The connection algorithm will do its best to avoid going 'backwards' through
     components' terminals whilst ensuring that automatic connections have no more than
@@ -21,44 +100,29 @@ class Wire(mn.VMobject):
     Parameters
     ----------
     from_terminal : Terminal
-        The terminal the wire comes from.
+        The terminal the wire starts at.
     to_terminal : Terminal
-        The terminal the wire goes to.
+        The terminal the wire ends at.
     """
 
     def __init__(self, from_terminal: Terminal, to_terminal: Terminal) -> None:
-        super().__init__(stroke_width=config_eng.symbol.wire_stroke_width)
+        super().__init__(from_terminal, to_terminal, updating=True)
 
-        self.from_terminal = from_terminal
-        self.to_terminal = to_terminal
+    def get_corner_points(self) -> list[mnt.Point3D]:
+        """Get the corner points of the wire.
 
-        self.add_updater(self.__shape_updater)
-        self.update()
-
-    def __shape_updater(self, _mobject: mn.Mobject) -> None:
+        Returns the vertices of the wire, not including the end points (i.e. at the
+        start and end terminals).
+        """
         from_direction = utils.cardinalised(self.from_terminal.direction)
         to_direction = utils.cardinalised(self.to_terminal.direction)
 
         if np.isclose(np.dot(from_direction, to_direction), 0):
-            corner_points = self.__get_corner_points_for_perpendicular_terminals(
+            return self.__get_corner_points_for_perpendicular_terminals(
                 from_direction, to_direction
             )
-        else:
-            corner_points = self.__get_corner_points_for_parallel_terminals(
-                from_direction, to_direction
-            )
-
-        # The extra points involving the 0.001 factors extend the wire ever so slightly
-        # into the terminals, producing a nice clean join between the terminals and the
-        # wire
-        self.set_points_as_corners(
-            [
-                self.from_terminal.end - self.from_terminal.direction * 0.001,
-                self.from_terminal.end,
-                *corner_points,
-                self.to_terminal.end,
-                self.to_terminal.end - self.to_terminal.direction * 0.001,
-            ]
+        return self.__get_corner_points_for_parallel_terminals(
+            from_direction, to_direction
         )
 
     def __get_corner_points_for_perpendicular_terminals(
@@ -119,7 +183,7 @@ class Wire(mn.VMobject):
             [self.from_terminal.end, self.to_terminal.end],
             [from_direction, to_direction],
         )
-        return [*corner_points]
+        return list(corner_points)
 
     @staticmethod
     def __point_is_behind_plane(
