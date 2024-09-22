@@ -18,11 +18,11 @@ class DummyComponent(Component):
 
     @property
     def terminal(self) -> Terminal:
-        return self._terminals[0]
+        return self.terminals[0]
 
     @property
     def other_terminal(self) -> Terminal:
-        return self._terminals[1]
+        return self.terminals[1]
 
 
 @pytest.fixture()
