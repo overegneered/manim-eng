@@ -24,8 +24,8 @@ class Circuit(mn.VMobject):
         super().__init__()
 
         self.components = mn.VGroup()
-        self.connections = mn.VGroup()
-        super().add(self.components, self.connections)
+        self.wires = mn.VGroup()
+        super().add(self.components, self.wires)
 
         self.add(*components)
 
@@ -79,7 +79,7 @@ class Circuit(mn.VMobject):
         Self
             The circuit on which this method was called.
         """
-        self.connections.add(Wire(from_terminal, to_terminal))
+        self.wires.add(Wire(from_terminal, to_terminal))
         return self
 
     def disconnect(self, *components_or_terminals: Component | Terminal) -> Self:
@@ -109,7 +109,7 @@ class Circuit(mn.VMobject):
         to_remove = self.__get_wires_from_terminal_condition(
             terminals, lambda start, end: start and end
         )
-        self.connections.remove(*to_remove)
+        self.wires.remove(*to_remove)
         return self
 
     def isolate(self, *components_or_terminals: Component | Terminal) -> Self:
@@ -138,7 +138,7 @@ class Circuit(mn.VMobject):
         to_remove = self.__get_wires_from_terminal_condition(
             terminals, lambda start, end: start or end
         )
-        self.connections.remove(*to_remove)
+        self.wires.remove(*to_remove)
         return self
 
     @staticmethod
@@ -179,12 +179,12 @@ class Circuit(mn.VMobject):
             The list of wires selected by the condition.
         """
         to_remove = []
-        for connection in cast(list[Wire], self.connections.submobjects):
+        for wire in cast(list[Wire], self.wires.submobjects):
             if condition(
-                connection.from_terminal in terminals,
-                connection.to_terminal in terminals,
+                wire.from_terminal in terminals,
+                wire.to_terminal in terminals,
             ):
-                to_remove.append(connection)
+                to_remove.append(wire)
         return to_remove
 
     @mn.override_animate(connect)
@@ -198,7 +198,7 @@ class Circuit(mn.VMobject):
             anim_args = {}
 
         new_wire = Wire(from_terminal, to_terminal)
-        self.connections.add(new_wire)
+        self.wires.add(new_wire)
         return mn.Create(new_wire, **anim_args)
 
     @mn.override_animate(disconnect)
@@ -217,7 +217,7 @@ class Circuit(mn.VMobject):
             terminals, lambda start, end: start and end
         )
         animations = [mn.Uncreate(wire, **anim_args) for wire in to_remove]
-        self.connections.remove(*to_remove)
+        self.wires.remove(*to_remove)
 
         return mn.AnimationGroup(*animations)
 
@@ -237,6 +237,6 @@ class Circuit(mn.VMobject):
             terminals, lambda start, end: start or end
         )
         animations = [mn.Uncreate(wire, **anim_args) for wire in to_remove]
-        self.connections.remove(*to_remove)
+        self.wires.remove(*to_remove)
 
         return mn.AnimationGroup(*animations)
