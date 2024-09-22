@@ -103,7 +103,7 @@ class Circuit(mn.VMobject):
         --------
         isolate : Remove a wire if either of its ends is specified.
         """
-        terminals = self.__collapse_components_and_terminals_to_terminals(
+        terminals = self._collapse_components_and_terminals_to_terminals(
             components_or_terminals
         )
         to_remove = self.__get_wires_from_terminal_condition(
@@ -132,7 +132,7 @@ class Circuit(mn.VMobject):
         --------
         disconnect : Remove a wire if both its ends are specified.
         """
-        terminals = self.__collapse_components_and_terminals_to_terminals(
+        terminals = self._collapse_components_and_terminals_to_terminals(
             components_or_terminals
         )
         to_remove = self.__get_wires_from_terminal_condition(
@@ -142,7 +142,7 @@ class Circuit(mn.VMobject):
         return self
 
     @staticmethod
-    def __collapse_components_and_terminals_to_terminals(
+    def _collapse_components_and_terminals_to_terminals(
         components_or_terminals: Sequence[Component | Terminal],
     ) -> list[Terminal]:
         terminals = []
@@ -210,7 +210,7 @@ class Circuit(mn.VMobject):
         if anim_args is None:
             anim_args = {}
 
-        terminals = self.__collapse_components_and_terminals_to_terminals(
+        terminals = self._collapse_components_and_terminals_to_terminals(
             components_or_terminals
         )
         to_remove = self.__get_wires_from_terminal_condition(
@@ -230,7 +230,7 @@ class Circuit(mn.VMobject):
         if anim_args is None:
             anim_args = {}
 
-        terminals = self.__collapse_components_and_terminals_to_terminals(
+        terminals = self._collapse_components_and_terminals_to_terminals(
             components_or_terminals
         )
         to_remove = self.__get_wires_from_terminal_condition(

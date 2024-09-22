@@ -1,7 +1,6 @@
 from typing import Any
 
 import manim as mn
-import pytest
 from manim_eng._base.component import Component
 from manim_eng._base.terminal import Terminal
 
@@ -23,8 +22,3 @@ class DummyComponent(Component):
     @property
     def terminal_2(self) -> Terminal:
         return self.terminals[1]
-
-
-@pytest.fixture()
-def dummy_component() -> Component:
-    return DummyComponent()
