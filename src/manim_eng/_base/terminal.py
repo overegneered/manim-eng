@@ -28,8 +28,8 @@ class Terminal(Markable):
     Parameters
     ----------
     position : Vector3D
-        The position of the *end* of the terminal, i.e. the bit that other components or
-        wires would attach to.
+        The position of the *start* of the terminal, i.e. the bit that 'connects' to the
+        body of the component.
     direction : Vector3D
         The direction the terminal 'points', i.e. the direction you get by walking from
         the point on the component body where the terminal attaches to the end of the
@@ -40,16 +40,16 @@ class Terminal(Markable):
         super().__init__()
 
         direction /= np.linalg.norm(direction)
-        start = position - (direction * config_eng.symbol.terminal_length)
+        end = position + (direction * config_eng.symbol.terminal_length)
         self.line = mn.Line(
             start=position,
-            end=start,
+            end=end,
             stroke_width=config_eng.symbol.wire_stroke_width,
         )
         self.add(self.line)
 
         self._centre_anchor = CentreAnchor().move_to(self.line.get_center())
-        self._end_anchor = TerminalAnchor().move_to(position)
+        self._end_anchor = TerminalAnchor().move_to(end)
 
         self._current_arrow: CurrentArrow
         self._current_arrow_showing: bool = False

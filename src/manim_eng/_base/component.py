@@ -3,7 +3,6 @@ from typing import Any, Self
 
 import manim as mn
 import manim.typing as mnt
-import numpy as np
 
 from manim_eng._base.mark import Mark, Markable
 from manim_eng._base.terminal import Terminal
@@ -302,20 +301,17 @@ class Bipole(Component, metaclass=abc.ABCMeta):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        terminal_end_x = (
-            config_eng.symbol.bipole_width / 2
-        ) + config_eng.symbol.terminal_length
-        terminal_end = np.array([terminal_end_x, 0, 0])
+        half_width = config_eng.symbol.bipole_width / 2
 
         left = (
             left
             if left is not None
-            else Terminal(position=-terminal_end, direction=mn.LEFT)
+            else Terminal(position=half_width * mn.LEFT, direction=mn.LEFT)
         )
         right = (
             right
             if right is not None
-            else Terminal(position=terminal_end, direction=mn.RIGHT)
+            else Terminal(position=half_width * mn.RIGHT, direction=mn.RIGHT)
         )
         super().__init__([left, right], *args, **kwargs)
 

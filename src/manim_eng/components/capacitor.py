@@ -18,13 +18,11 @@ class Capacitor(Bipole):
 
         super().__init__(
             Terminal(
-                position=mn.LEFT
-                * (self.plate_half_gap + config_eng.symbol.terminal_length),
+                position=mn.LEFT * self.plate_half_gap,
                 direction=mn.LEFT,
             ),
             Terminal(
-                position=mn.RIGHT
-                * (self.plate_half_gap + config_eng.symbol.terminal_length),
+                position=mn.RIGHT * self.plate_half_gap,
                 direction=mn.RIGHT,
             ),
             *args,
