@@ -39,13 +39,13 @@ class Component(Markable, metaclass=abc.ABCMeta):
     ) -> None:
         super().__init__(*args, **kwargs)
 
-        self._terminals = terminals
+        self.terminals = terminals
 
         self._centre_anchor = CentreAnchor()
         self._label_anchor = LabelAnchor()
         self._annotation_anchor = AnnotationAnchor()
 
-        self._body = mn.VGroup(*self._terminals)
+        self._body = mn.VGroup(*self.terminals)
         self.add(self._body)
 
         self._construct()
@@ -218,7 +218,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
             If the terminal passed doesn't belong to this component.
         """
         if isinstance(terminal, Terminal):
-            if terminal not in self._terminals:
+            if terminal not in self.terminals:
                 raise ValueError("Passed terminal does not belong to this component.")
             to_return = terminal
         else:
@@ -324,8 +324,8 @@ class Bipole(Component, metaclass=abc.ABCMeta):
 
     @property
     def left(self) -> Terminal:
-        return self._terminals[0]
+        return self.terminals[0]
 
     @property
     def right(self) -> Terminal:
-        return self._terminals[1]
+        return self.terminals[1]
