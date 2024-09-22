@@ -8,8 +8,8 @@ import manim.typing as mnt
 import numpy as np
 
 from manim_eng import config_eng
-from manim_eng._base.terminal import Terminal
 from manim_eng._utils import utils
+from manim_eng.components.base.terminal import Terminal
 
 __all__ = ["ManualWire", "Wire"]
 

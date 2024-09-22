@@ -1,18 +1,22 @@
+"""Module containing the Component base class."""
+
 import abc
 from typing import Any, Self
 
 import manim as mn
 import manim.typing as mnt
 
-from manim_eng._base.mark import Mark, Markable
-from manim_eng._base.terminal import Terminal
-from manim_eng._config import config_eng
+from manim_eng._base.mark import Mark
+from manim_eng._base.markable import Markable
 from manim_eng._debug.anchor import AnnotationAnchor, CentreAnchor, LabelAnchor
 from manim_eng.circuit.voltage import Voltage
+from manim_eng.components.base.terminal import Terminal
+
+__all__ = ["Component"]
 
 
 class Component(Markable, metaclass=abc.ABCMeta):
-    """Base class for a circuit symbol.
+    """Base class for all components.
 
     Parameters
     ----------
@@ -273,55 +277,3 @@ class Component(Markable, metaclass=abc.ABCMeta):
         if anim_args is None:
             anim_args = {}
         return self.animate(**anim_args)._clear_mark(self._annotation).build()
-
-
-class Bipole(Component, metaclass=abc.ABCMeta):
-    """Base class for bipole components, such as resistors and sources.
-
-    By default, adds two terminals: one from (-0.5, 0) to (-1, 0), and one from (0.5, 0)
-    to (1, 0).
-
-    Parameters
-    ----------
-    left : Terminal | None
-        The terminal to use as the left connection point for the component. If left
-        unspecified, a terminal from (-0.5, 0) to (-1, 0) will be used.
-    right : Terminal | None
-        The terminal to use as the right connection point for the component. If left
-        unspecified, a terminal from (-0.5, 0) to (-1, 0) will be used.
-    debug : bool
-        Whether to display debug information. If ``True``, the object's anchors will be
-        displayed visually.
-    """
-
-    def __init__(
-        self,
-        left: Terminal | None = None,
-        right: Terminal | None = None,
-        *args: Any,
-        **kwargs: Any,
-    ) -> None:
-        half_width = config_eng.symbol.bipole_width / 2
-
-        left = (
-            left
-            if left is not None
-            else Terminal(position=half_width * mn.LEFT, direction=mn.LEFT)
-        )
-        right = (
-            right
-            if right is not None
-            else Terminal(position=half_width * mn.RIGHT, direction=mn.RIGHT)
-        )
-        super().__init__([left, right], *args, **kwargs)
-
-    def _construct(self) -> None:
-        pass
-
-    @property
-    def left(self) -> Terminal:
-        return self.terminals[0]
-
-    @property
-    def right(self) -> Terminal:
-        return self.terminals[1]

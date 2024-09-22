@@ -3,7 +3,7 @@
 import manim as mn
 
 from manim_eng import config_eng
-from manim_eng._base.component import Bipole
+from manim_eng.components.base.bipole import Bipole
 
 __all__ = ["Inductor"]
 

@@ -1,8 +1,8 @@
 from typing import Any
 
 import manim as mn
-from manim_eng._base.component import Component
-from manim_eng._base.terminal import Terminal
+from manim_eng.components.base.component import Component
+from manim_eng.components.base.terminal import Terminal
 
 
 class DummyComponent(Component):

@@ -2,7 +2,8 @@ from unittest import mock
 
 import manim as mn
 import pytest
-from manim_eng._base.mark import Mark, Markable
+from manim_eng._base.mark import Mark
+from manim_eng._base.markable import Markable
 
 
 class SubclassesMarkable(Markable):

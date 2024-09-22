@@ -1,13 +1,18 @@
+"""Module containing the Terminal base class and helper classes."""
+
 from typing import Any, Self
 
 import manim as mn
 import manim.typing as mnt
 import numpy as np
 
-from manim_eng._base.mark import Mark, Markable
+from manim_eng._base.mark import Mark
+from manim_eng._base.markable import Markable
 from manim_eng._config import config_eng
 from manim_eng._debug.anchor import CentreAnchor, CurrentAnchor, TerminalAnchor
 from manim_eng._utils import utils
+
+__all__ = ["Terminal"]
 
 
 class CurrentArrow(mn.Triangle):
@@ -73,10 +78,12 @@ class Terminal(Markable):
 
     @property
     def direction(self) -> mnt.Vector3D:
+        """Return the direction of the terminal as a normalised vector."""
         return utils.normalised(self._end_anchor.pos - self._centre_anchor.pos)
 
     @property
     def end(self) -> mnt.Point3D:
+        """Return the global position of the end of the terminal."""
         return self._end_anchor.pos
 
     def set_current(self, label: str, out: bool = False, below: bool = False) -> Self:
