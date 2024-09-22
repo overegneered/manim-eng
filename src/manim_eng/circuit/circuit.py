@@ -1,6 +1,6 @@
 """Module containing the Circuit class."""
 
-from typing import Self
+from typing import Any, Self, Sequence
 
 import manim as mn
 
@@ -102,7 +102,8 @@ class Circuit(mn.VMobject):
         --------
         isolate : Remove a wire if either of its terminals is given.
         """
-        for connection in self.connections.submobjects:
+        # Iterate backwards to prevent removals from messing up the iteration
+        for connection in self.connections.submobjects[::-1]:
             if (
                 connection.from_terminal in terminals
                 and connection.to_terminal in terminals
@@ -130,17 +131,12 @@ class Circuit(mn.VMobject):
         --------
         disconnect : Remove a wire if both its terminals are given.
         """
-        terminals_to_disconnect = []
-        for component_or_terminal in components_or_terminals:
-            if isinstance(component_or_terminal, Component):
-                terminals_to_disconnect.extend(component_or_terminal.terminals)
-            else:
-                terminals_to_disconnect.append(component_or_terminal)
+        terminals_to_disconnect = self.__collapse_components_and_terminals_to_terminals(
+            components_or_terminals
+        )
 
-        # Remove duplicate entries
-        terminals_to_disconnect = list(set(terminals_to_disconnect))
-
-        for connection in self.connections.submobjects:
+        # Iterate backwards to prevent removals from messing up the iteration
+        for connection in self.connections.submobjects[::-1]:
             if (
                 connection.from_terminal in terminals_to_disconnect
                 or connection.to_terminal in terminals_to_disconnect
@@ -148,3 +144,75 @@ class Circuit(mn.VMobject):
                 self.connections.remove(connection)
 
         return self
+
+    @staticmethod
+    def __collapse_components_and_terminals_to_terminals(
+        components_or_terminals: Sequence[Component | Terminal],
+    ) -> list[Terminal]:
+        terminals = []
+        for component_or_terminal in components_or_terminals:
+            if isinstance(component_or_terminal, Component):
+                terminals.extend(component_or_terminal.terminals)
+            else:
+                terminals.append(component_or_terminal)
+        # Remove duplicate entries
+        return list(set(terminals))
+
+    @mn.override_animate(connect)
+    def __animate_connect(
+        self,
+        from_terminal: Terminal,
+        to_terminal: Terminal,
+        anim_args: dict[str, Any] | None = None,
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        new_wire = Wire(from_terminal, to_terminal)
+        self.connections.add(new_wire)
+        return mn.Create(new_wire, **anim_args)
+
+    @mn.override_animate(disconnect)
+    def __animate_disconnect(
+        self, *terminals: Terminal, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        animations = []
+
+        # Iterate backwards to prevent removals from messing up the iteration
+        for connection in self.connections.submobjects[::-1]:
+            if (
+                connection.from_terminal in terminals
+                and connection.to_terminal in terminals
+            ):
+                animations.append(mn.Uncreate(connection, **anim_args))
+                self.connections.remove(connection)
+
+        return mn.AnimationGroup(*animations)
+
+    @mn.override_animate(isolate)
+    def __animate_isolate(
+        self,
+        *components_or_terminals: Component | Terminal,
+        anim_args: dict[str, Any] | None = None,
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        animations = []
+        terminals_to_disconnect = self.__collapse_components_and_terminals_to_terminals(
+            components_or_terminals
+        )
+
+        # Iterate backwards to prevent removals from messing up the iteration
+        for connection in self.connections.submobjects[::-1]:
+            if (
+                connection.from_terminal in terminals_to_disconnect
+                or connection.to_terminal in terminals_to_disconnect
+            ):
+                animations.append(mn.Uncreate(connection, **anim_args))
+                self.connections.remove(connection)
+
+        return mn.AnimationGroup(*animations)
