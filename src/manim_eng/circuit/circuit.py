@@ -1,6 +1,6 @@
 """Module containing the Circuit class."""
 
-from typing import Any, Self, Sequence
+from typing import Any, Callable, Self, Sequence, cast
 
 import manim as mn
 
@@ -82,16 +82,17 @@ class Circuit(mn.VMobject):
         self.connections.add(Wire(from_terminal, to_terminal))
         return self
 
-    def disconnect(self, *terminals: Terminal) -> Self:
-        """Disconnect the given terminals from one another.
+    def disconnect(self, *components_or_terminals: Component | Terminal) -> Self:
+        """Disconnect the given components and/or terminals from one another.
 
-        Each wire is checked to see if *both* the start *and* end terminals are in the
-        group of terminals passed. If this is the case, the wire will be removed.
+        Each wire is checked to see if *both* the start *and* end terminals have been
+        passed or belong to a component that was passed. If this is the case, the wire
+        will be removed.
 
         Parameters
         ----------
-        *terminals : Terminal
-            The group of terminals to disconnect from one another.
+        *components_or_terminals : Component | Terminal
+            The group of components and terminals to disconnect from one another.
 
         Returns
         -------
@@ -100,15 +101,15 @@ class Circuit(mn.VMobject):
 
         See Also
         --------
-        isolate : Remove a wire if either of its terminals is given.
+        isolate : Remove a wire if either of its ends is specified.
         """
-        # Iterate backwards to prevent removals from messing up the iteration
-        for connection in self.connections.submobjects[::-1]:
-            if (
-                connection.from_terminal in terminals
-                and connection.to_terminal in terminals
-            ):
-                self.connections.remove(connection)
+        terminals = self.__collapse_components_and_terminals_to_terminals(
+            components_or_terminals
+        )
+        to_remove = self.__get_wires_from_terminal_condition(
+            terminals, lambda start, end: start and end
+        )
+        self.connections.remove(*to_remove)
         return self
 
     def isolate(self, *components_or_terminals: Component | Terminal) -> Self:
@@ -129,20 +130,15 @@ class Circuit(mn.VMobject):
 
         See Also
         --------
-        disconnect : Remove a wire if both its terminals are given.
+        disconnect : Remove a wire if both its ends are specified.
         """
-        terminals_to_disconnect = self.__collapse_components_and_terminals_to_terminals(
+        terminals = self.__collapse_components_and_terminals_to_terminals(
             components_or_terminals
         )
-
-        # Iterate backwards to prevent removals from messing up the iteration
-        for connection in self.connections.submobjects[::-1]:
-            if (
-                connection.from_terminal in terminals_to_disconnect
-                or connection.to_terminal in terminals_to_disconnect
-            ):
-                self.connections.remove(connection)
-
+        to_remove = self.__get_wires_from_terminal_condition(
+            terminals, lambda start, end: start or end
+        )
+        self.connections.remove(*to_remove)
         return self
 
     @staticmethod
@@ -157,6 +153,39 @@ class Circuit(mn.VMobject):
                 terminals.append(component_or_terminal)
         # Remove duplicate entries
         return list(set(terminals))
+
+    def __get_wires_from_terminal_condition(
+        self, terminals: Sequence[Terminal], condition: Callable[[bool, bool], bool]
+    ) -> list[Wire]:
+        """Return a list of wires from the circuit based on a given condition.
+
+        Iterates through all connections and calculates if each end of the wire is in
+        ``terminals``. Whether each one is in ``terminals`` is passed to ``condition``,
+        which is expected
+
+        Parameters
+        ----------
+        terminals : Sequence[Terminal]
+            The terminals to check all wires for.
+        condition : Callable[[bool, bool], bool]
+            The condition to use to determine whether a wire should be returned. Will be
+            passed two booleans, whether the start or end of the wire is in
+            ``terminals``, respectively, and should return ``True`` if the wire should
+            be returned and ``False`` otherwise.
+
+        Returns
+        -------
+        list[Wire]
+            The list of wires selected by the condition.
+        """
+        to_remove = []
+        for connection in cast(list[Wire], self.connections.submobjects):
+            if condition(
+                connection.from_terminal in terminals,
+                connection.to_terminal in terminals,
+            ):
+                to_remove.append(connection)
+        return to_remove
 
     @mn.override_animate(connect)
     def __animate_connect(
@@ -174,21 +203,21 @@ class Circuit(mn.VMobject):
 
     @mn.override_animate(disconnect)
     def __animate_disconnect(
-        self, *terminals: Terminal, anim_args: dict[str, Any] | None = None
+        self,
+        *components_or_terminals: Component | Terminal,
+        anim_args: dict[str, Any] | None = None,
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
 
-        animations = []
-
-        # Iterate backwards to prevent removals from messing up the iteration
-        for connection in self.connections.submobjects[::-1]:
-            if (
-                connection.from_terminal in terminals
-                and connection.to_terminal in terminals
-            ):
-                animations.append(mn.Uncreate(connection, **anim_args))
-                self.connections.remove(connection)
+        terminals = self.__collapse_components_and_terminals_to_terminals(
+            components_or_terminals
+        )
+        to_remove = self.__get_wires_from_terminal_condition(
+            terminals, lambda start, end: start and end
+        )
+        animations = [mn.Uncreate(wire, **anim_args) for wire in to_remove]
+        self.connections.remove(*to_remove)
 
         return mn.AnimationGroup(*animations)
 
@@ -201,18 +230,13 @@ class Circuit(mn.VMobject):
         if anim_args is None:
             anim_args = {}
 
-        animations = []
-        terminals_to_disconnect = self.__collapse_components_and_terminals_to_terminals(
+        terminals = self.__collapse_components_and_terminals_to_terminals(
             components_or_terminals
         )
-
-        # Iterate backwards to prevent removals from messing up the iteration
-        for connection in self.connections.submobjects[::-1]:
-            if (
-                connection.from_terminal in terminals_to_disconnect
-                or connection.to_terminal in terminals_to_disconnect
-            ):
-                animations.append(mn.Uncreate(connection, **anim_args))
-                self.connections.remove(connection)
+        to_remove = self.__get_wires_from_terminal_condition(
+            terminals, lambda start, end: start or end
+        )
+        animations = [mn.Uncreate(wire, **anim_args) for wire in to_remove]
+        self.connections.remove(*to_remove)
 
         return mn.AnimationGroup(*animations)
