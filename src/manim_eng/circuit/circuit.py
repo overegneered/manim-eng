@@ -78,7 +78,15 @@ class Circuit(mn.VMobject):
         -------
         Self
             The circuit on which this method was called.
+
+        Raises
+        ------
+        ValueError
+            If the two terminals passed are identical.
+        ValueError
+            If either terminal doesn't belong to a component in this circuit.
         """
+        self.__check_terminals_all_belong_to_this_circuit([from_terminal, to_terminal])
         self.wires.add(Wire(from_terminal, to_terminal))
         return self
 
@@ -99,6 +107,11 @@ class Circuit(mn.VMobject):
         Self
             The circuit on which this method was called.
 
+        Raises
+        ------
+        ValueError
+            If any passed terminal does not belong to a component in this circuit.
+
         See Also
         --------
         isolate : Remove a wire if either of its ends is specified.
@@ -106,6 +119,7 @@ class Circuit(mn.VMobject):
         terminals = self._collapse_components_and_terminals_to_terminals(
             components_or_terminals
         )
+        self.__check_terminals_all_belong_to_this_circuit(terminals)
         to_remove = self.__get_wires_from_terminal_condition(
             terminals, lambda start, end: start and end
         )
@@ -128,6 +142,11 @@ class Circuit(mn.VMobject):
         Self
             The circuit on which this method was called.
 
+        Raises
+        ------
+        ValueError
+            If any passed terminal does not belong to a component in this circuit.
+
         See Also
         --------
         disconnect : Remove a wire if both its ends are specified.
@@ -135,6 +154,7 @@ class Circuit(mn.VMobject):
         terminals = self._collapse_components_and_terminals_to_terminals(
             components_or_terminals
         )
+        self.__check_terminals_all_belong_to_this_circuit(terminals)
         to_remove = self.__get_wires_from_terminal_condition(
             terminals, lambda start, end: start or end
         )
@@ -187,6 +207,23 @@ class Circuit(mn.VMobject):
                 to_remove.append(wire)
         return to_remove
 
+    def __check_terminals_all_belong_to_this_circuit(
+        self, terminals: list[Terminal]
+    ) -> None:
+        terminal_set = set(terminals)
+        owned_terminal_set = set()
+        for component in self.components.submobjects:
+            owned_terminal_set.update(component.terminals)
+
+        terminals_not_owned = terminal_set.difference(owned_terminal_set)
+        if len(terminals_not_owned) != 0:
+            raise ValueError(
+                f"At least one passed terminal does not "
+                f"belong to any component in this circuit. "
+                f"Problem terminals have the following end coordinates: "
+                f"{[tuple(terminal.end) for terminal in terminals_not_owned]}"
+            )
+
     @mn.override_animate(connect)
     def __animate_connect(
         self,
@@ -197,6 +234,12 @@ class Circuit(mn.VMobject):
         if anim_args is None:
             anim_args = {}
 
+        self.__check_terminals_all_belong_to_this_circuit([from_terminal, to_terminal])
+        if from_terminal == to_terminal:
+            raise ValueError(
+                "`from_terminal` and `to_terminal` are identical. "
+                "`connect()` requires two different terminals."
+            )
         new_wire = Wire(from_terminal, to_terminal)
         self.wires.add(new_wire)
         return mn.Create(new_wire, **anim_args)
@@ -213,6 +256,7 @@ class Circuit(mn.VMobject):
         terminals = self._collapse_components_and_terminals_to_terminals(
             components_or_terminals
         )
+        self.__check_terminals_all_belong_to_this_circuit(terminals)
         to_remove = self.__get_wires_from_terminal_condition(
             terminals, lambda start, end: start and end
         )
@@ -233,6 +277,7 @@ class Circuit(mn.VMobject):
         terminals = self._collapse_components_and_terminals_to_terminals(
             components_or_terminals
         )
+        self.__check_terminals_all_belong_to_this_circuit(terminals)
         to_remove = self.__get_wires_from_terminal_condition(
             terminals, lambda start, end: start or end
         )

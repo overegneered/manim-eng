@@ -18,6 +18,12 @@ class _WireBase(mn.VMobject, metaclass=abc.ABCMeta):
     def __init__(self, from_terminal: Terminal, to_terminal: Terminal, updating: bool):
         super().__init__(stroke_width=config_eng.symbol.wire_stroke_width)
 
+        if from_terminal == to_terminal:
+            raise ValueError(
+                "`from_terminal` and `to_terminal` are identical. "
+                "Wires must have different terminals at each end."
+            )
+
         self.from_terminal = from_terminal
         self.to_terminal = to_terminal
 
@@ -68,6 +74,11 @@ class ManualWire(_WireBase):
         the terminals. This is disabled by default. If this is enabled, it is
         recommended to attach another updater that will update ``corner_points`` to
         prevent strange artefacts.
+
+    Raises
+    ------
+    ValueError
+        If ``from_terminal`` and ``to_terminal`` are the same.
     """
 
     def __init__(
@@ -103,6 +114,11 @@ class Wire(_WireBase):
         The terminal the wire starts at.
     to_terminal : Terminal
         The terminal the wire ends at.
+
+    Raises
+    ------
+    ValueError
+        If ``from_terminal`` and ``to_terminal`` are the same.
     """
 
     def __init__(self, from_terminal: Terminal, to_terminal: Terminal) -> None:
