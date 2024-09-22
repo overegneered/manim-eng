@@ -9,10 +9,10 @@ Quite simply, because the other options available just don't cut it for me. The 
 
 - Easy to configure and automatically placed labels, annotations, and current and voltage indications.
 - Automatic, sensible animations for when these labels are introduced, removed, or changed.
-- Automatic component connections, including automatic placement of 'junction blobs'.
+- Automatic component connections.
 - Ability to specify component types (i.e. European or American), with as much or as little granularity as you wish.
 
-On top of this, I wanted a clean, intuitive, Pythonic interface to the library. No available option that I could find had all of this. Also, this was an excellent way to get familiar with Manim and a fun project.
+Those who know CircuiTikZ will know that it can't actually do all of the above, but why not make something better than your inspiration? On top of these features, I wanted a clean, intuitive, Pythonic interface to the library. No available option that I could find had all of this. Making my own was also an excellent way to get familiar with Manim, and a fun project.
 
 ## Development
 
