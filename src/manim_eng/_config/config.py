@@ -242,6 +242,9 @@ class ComponentSymbolConfig(ConfigBase):
     """The standard height to use for box-esque bipoles, such as resistors and fuses."""
     bipole_width: float = 1.0
     """The standard width to use for box-esque bipoles, such as resistors and fuses."""
+    square_bipole_side_length: float = 1.5 * bipole_height
+    """The standard height to use for bipoles with square bounding boxes, such as
+    voltage sources and sensors."""
     component_stroke_width: float = mn.DEFAULT_STROKE_WIDTH
     """The stroke width to use for the component symbols."""
     current_arrow_radius: float = (2 / np.sqrt(3)) * 0.2 * bipole_height

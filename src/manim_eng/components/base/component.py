@@ -58,7 +58,6 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self._annotation = Mark(self._annotation_anchor, self._centre_anchor)
         self.__initialise_marks(label, annotation)
 
-    @abc.abstractmethod
     def _construct(self) -> None:
         """Construct the shape of the component.
 
