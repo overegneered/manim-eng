@@ -1,0 +1,66 @@
+"""Base switch class and switch utility classes."""
+
+import abc
+from typing import Any, Self
+
+import manim as mn
+
+from manim_eng import config_eng
+from manim_eng.components.base.bipole import Bipole
+from manim_eng.components.base.terminal import Terminal
+
+__all__ = ["BipoleSwitchBase"]
+
+
+class OpenNode(mn.Arc):
+    def __init__(self) -> None:
+        super().__init__(
+            radius=config_eng.symbol.node_radius,
+            angle=2 * mn.PI,
+            fill_color=mn.config.background_color,
+            fill_opacity=1.0,
+            stroke_width=config_eng.symbol.wire_stroke_width,
+            z_index=10,
+        )
+
+
+class BipoleSwitchBase(Bipole, metaclass=abc.ABCMeta):
+    """Base class for switches with two terminals."""
+
+    def __init__(self, closed: bool = False, **kwargs: Any) -> None:
+        half_width = config_eng.symbol.square_bipole_side_length / 2
+        self.closed = closed
+        self.left_node = OpenNode().move_to(half_width * mn.LEFT)
+        self.right_node = OpenNode().move_to(half_width * mn.RIGHT)
+
+        super().__init__(
+            Terminal(
+                position=mn.LEFT * half_width,
+                direction=mn.LEFT,
+            ),
+            Terminal(
+                position=mn.RIGHT * half_width,
+                direction=mn.RIGHT,
+            ),
+            **kwargs,
+        )
+
+    def _construct(self) -> None:
+        super()._construct()
+        self._body.add(self.left_node, self.right_node)
+
+    @abc.abstractmethod
+    def open(self) -> Self:
+        """Open the switch, if not already open."""
+
+    @abc.abstractmethod
+    def close(self) -> Self:
+        """Close the switch, if not already closed."""
+
+    @abc.abstractmethod
+    def toggle(self) -> Self:
+        """Toggle the switch position (open becomes closed, closed becomes open)."""
+
+    @abc.abstractmethod
+    def set_closed(self, closed: bool) -> Self:
+        """Set the position of the switch."""

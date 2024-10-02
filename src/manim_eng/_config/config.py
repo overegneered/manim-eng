@@ -265,6 +265,8 @@ class ComponentSymbolConfig(ConfigBase):
     """The length of voltage arrow tips."""
     voltage_default_angle: float = 60 * mn.DEGREES
     """The angle a voltage arrow will sweep with no other reference provided."""
+    node_radius: float = 0.06
+    """The radius of wire nodes."""
 
 
 @dc.dataclass

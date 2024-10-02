@@ -6,3 +6,4 @@ from .cells import *
 from .inductors import *
 from .resistors import *
 from .sources import *
+from .switches import *
