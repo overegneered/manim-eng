@@ -169,7 +169,6 @@ class Terminal(Markable):
         if not self._current_arrow_pointing_out:
             angle_to_rotate += np.pi
         self._current_arrow = CurrentArrow(self._centre_anchor.pos, angle_to_rotate)
-        self._current_arrow_uncreated = False
 
     @mn.override_animate(set_current)
     def __animate_set_current(
@@ -227,9 +226,8 @@ class Terminal(Markable):
         if anim_args is None:
             anim_args = {}
 
-        arrow_animation = mn.Uncreate(self._current_arrow, *anim_args)
+        arrow_animation = mn.Uncreate(self._current_arrow, **anim_args)
         self._current_arrow_showing = False
-        self._current_arrow_uncreated = True
 
         return mn.AnimationGroup(
             arrow_animation,
