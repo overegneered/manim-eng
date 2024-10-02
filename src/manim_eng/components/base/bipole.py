@@ -48,7 +48,7 @@ class Bipole(Component, metaclass=abc.ABCMeta):
             if right is not None
             else Terminal(position=half_width * mn.RIGHT, direction=mn.RIGHT)
         )
-        super().__init__([left, right], **kwargs)
+        super().__init__(terminals=[left, right], **kwargs)
 
     def _construct(self) -> None:
         pass

@@ -269,6 +269,8 @@ class ComponentSymbolConfig(ConfigBase):
     """The radius of wire nodes."""
     variability_arrow_tip_length: float = 0.125
     """The length of arrow tips in arrows signifying variability in a component."""
+    monopole_width: float = 0.5 * bipole_width
+    """The width of monopole source/ground symbols."""
 
 
 @dc.dataclass
