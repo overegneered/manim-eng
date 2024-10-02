@@ -25,11 +25,14 @@ class OpenNode(mn.Arc):
 
 
 class BipoleSwitchBase(Bipole, metaclass=abc.ABCMeta):
-    """Base class for switches with two terminals."""
+    """Base class for switches with two terminals.
+
+    Note that subclasses should construct their switch models **open**.
+    """
 
     def __init__(self, closed: bool = False, **kwargs: Any) -> None:
         half_width = config_eng.symbol.square_bipole_side_length / 2
-        self.closed = closed
+        self.closed = False
         self.left_node = OpenNode().move_to(half_width * mn.LEFT)
         self.right_node = OpenNode().move_to(half_width * mn.RIGHT)
 
@@ -44,6 +47,9 @@ class BipoleSwitchBase(Bipole, metaclass=abc.ABCMeta):
             ),
             **kwargs,
         )
+
+        if closed:
+            self.close()
 
     def _construct(self) -> None:
         super()._construct()
