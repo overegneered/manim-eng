@@ -4,6 +4,7 @@ import abc
 from typing import Any, Self
 
 import manim as mn
+import numpy as np
 
 from manim_eng import config_eng
 from manim_eng.components.base.bipole import Bipole
@@ -154,10 +155,11 @@ class EuropeanVoltageSourceBase(VoltageSourceBase, metaclass=abc.ABCMeta):
             + direction_to_label_anchor * arrow_midpoint_distance
         )
         arrow_half_length = 0.9 * half_side_length
+        arrow_direction = np.cross(direction_to_label_anchor, mn.OUT)
 
         self.__arrow = mn.Arrow(
-            start=arrow_midpoint + mn.LEFT * arrow_half_length,
-            end=arrow_midpoint + mn.RIGHT * arrow_half_length,
+            start=arrow_midpoint - arrow_half_length * arrow_direction,
+            end=arrow_midpoint + arrow_half_length * arrow_direction,
             stroke_width=config_eng.symbol.arrow_stroke_width,
             tip_length=config_eng.symbol.arrow_tip_length,
             buff=0,
