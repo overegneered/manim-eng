@@ -65,18 +65,6 @@ class Switch(BipoleSwitchBase):
         self.closed = True
         return self
 
-    def toggle(self) -> Self:
-        """Toggle the switch position (open becomes closed, closed becomes open)."""
-        if self.closed:
-            return self.open()
-        return self.close()
-
-    def set_closed(self, closed: bool) -> Self:
-        """Set the position of the switch."""
-        if closed:
-            return self.close()
-        return self.open()
-
     @mn.override_animate(open)
     def __animate_open(
         self, anim_args: dict[str, Any] | None = None
@@ -108,23 +96,3 @@ class Switch(BipoleSwitchBase):
             about_point=self.left_node.get_center(),
             **anim_args,
         )
-
-    @mn.override_animate(toggle)
-    def __animate_toggle(
-        self, anim_args: dict[str, Any] | None = None
-    ) -> mn.Animation | None:
-        if anim_args is None:
-            anim_args = {}
-        if self.closed:
-            return self.animate(**anim_args).open().build()
-        return self.animate(**anim_args).close().build()
-
-    @mn.override_animate(set_closed)
-    def __animate_set_closed(
-        self, closed: bool, anim_args: dict[str, Any] | None = None
-    ) -> mn.Animation | None:
-        if anim_args is None:
-            anim_args = {}
-        if closed:
-            return self.animate(**anim_args).close().build()
-        return self.animate(**anim_args).open().build()
