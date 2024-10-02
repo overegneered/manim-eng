@@ -267,6 +267,8 @@ class ComponentSymbolConfig(ConfigBase):
     """The angle a voltage arrow will sweep with no other reference provided."""
     node_radius: float = 0.06
     """The radius of wire nodes."""
+    variability_arrow_tip_length: float = 0.125
+    """The length of arrow tips in arrows signifying variability in a component."""
 
 
 @dc.dataclass

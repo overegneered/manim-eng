@@ -5,7 +5,9 @@ import manim as mn
 from manim_eng import config_eng
 from manim_eng.components.base.bipole import Bipole
 
-__all__ = ["Inductor"]
+__all__ = ["Inductor", "InductiveSensor", "VariableInductor"]
+
+from manim_eng.components.base.modifiers import SensorModifier, VariableModifier
 
 
 class Inductor(Bipole):
@@ -41,3 +43,17 @@ class Inductor(Bipole):
                 .shift(correction_direction * 0.5 * config_eng.symbol.bipole_width)
             )
             self._body.add(visual_correction)
+
+
+class InductiveSensor(SensorModifier, Inductor):
+    """Circuit symbol for an inductive sensor."""
+
+    def _construct(self) -> None:
+        super()._construct()
+
+
+class VariableInductor(VariableModifier, Inductor):
+    """Circuit symbol for a variable inductor."""
+
+    def _construct(self) -> None:
+        super()._construct()

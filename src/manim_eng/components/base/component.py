@@ -47,10 +47,12 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self._label_anchor = LabelAnchor()
         self._annotation_anchor = AnnotationAnchor()
 
-        self._body = mn.VGroup(*self.terminals)
+        self._body = mn.VGroup()
         self.add(self._body)
 
         self._construct()
+
+        self._body.add(*self.terminals)
 
         self.__set_up_anchors()
         self._label = Mark(self._label_anchor, self._centre_anchor)
