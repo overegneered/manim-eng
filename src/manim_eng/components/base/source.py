@@ -24,13 +24,23 @@ class Source(Bipole, metaclass=abc.ABCMeta):
 
     @property
     def negative(self) -> Terminal:
-        """Return the negative (left-hand) terminal of the component."""
+        """Return the negative (left-hand) terminal of the source."""
         return self.left
 
     @property
     def positive(self) -> Terminal:
-        """Return the positive (right-hand) terminal of the component."""
+        """Return the positive (right-hand) terminal of the source."""
         return self.right
+
+    @property
+    def anode(self) -> Terminal:
+        """Return the anode (positive terminal) of the source."""
+        return self.positive
+
+    @property
+    def cathode(self) -> Terminal:
+        """Return the cathode (negative terminal) of the source."""
+        return self.negative
 
 
 class VoltageSourceBase(Source, metaclass=abc.ABCMeta):

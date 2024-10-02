@@ -59,6 +59,16 @@ class Diode(SquareBipole):
         """Return the negative terminal of the diode."""
         return self.right
 
+    @property
+    def anode(self) -> Terminal:
+        """Return the anode (positive terminal) of the diode."""
+        return self.positive
+
+    @property
+    def cathode(self) -> Terminal:
+        """Return the cathode (negative terminal) of the diode."""
+        return self.negative
+
 
 class LED(Diode):
     """Circuit symbol for an LED."""
