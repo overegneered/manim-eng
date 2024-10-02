@@ -14,17 +14,27 @@ from manim_eng.components.base.terminal import Terminal
 class Source(Bipole, metaclass=abc.ABCMeta):
     """Base class of all sources."""
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(
+        self,
+        *args: Any,
+        left: Terminal | None = None,
+        right: Terminal | None = None,
+        **kwargs: Any,
+    ) -> None:
         half_width = config_eng.symbol.square_bipole_side_length / 2
         super().__init__(
             Terminal(
                 position=mn.LEFT * half_width,
                 direction=mn.LEFT,
-            ),
+            )
+            if left is None
+            else left,
             Terminal(
                 position=mn.RIGHT * half_width,
                 direction=mn.RIGHT,
-            ),
+            )
+            if right is None
+            else right,
             *args,
             **kwargs,
         )
@@ -43,20 +53,25 @@ class Source(Bipole, metaclass=abc.ABCMeta):
 class VoltageSourceBase(Source, metaclass=abc.ABCMeta):
     """Base class of all voltage sources."""
 
-    def __init__(self, voltage: str | None = None, *args: Any, **kwargs: Any) -> None:
+    def __init__(
+        self, arrow: bool, voltage: str | None = None, *args: Any, **kwargs: Any
+    ) -> None:
         super().__init__(*args, **kwargs)
+
+        self.should_arrow = arrow
+        self.__arrow: mn.Arrow | None = None
+
         if voltage is not None:
             self.set_voltage(voltage)
 
-    @abc.abstractmethod
     def set_voltage(self, voltage: str) -> Self:
         """Set the voltage of the source.
 
         Sets the voltage label of the source, using the label of the component to do so.
-        For American-style sources there is no difference between using this and using
-        `.set_label()`, however for European sources an arrow is added only when calling
-        this method. For portability between source types it is therefore recommended to
-        use this method over `.set_label()`.
+        For non-arrowed (American-style) sources there is no difference between using
+        this and using `.set_label()`, however for arrowed sources an arrow is added
+        only when calling this method. For portability between source types it is
+        therefore recommended to use this method over `.set_label()`.
 
         Parameters
         ----------
@@ -68,78 +83,27 @@ class VoltageSourceBase(Source, metaclass=abc.ABCMeta):
         Self
             The (modified) voltage source on which the method was called.
         """
-
-    @abc.abstractmethod
-    def clear_voltage(self) -> Self:
-        """Clear the voltage label of the source.
-
-        Clears the voltage label of the source (i.e. the label of the component). For
-        American-style sources there is no difference between using this and using
-        `.clear_label()`, however for European sources the arrow is removed only when
-        calling this method. For portability between source types it is therefore
-        recommended to use this method over `.clear_label()`.
-
-        Returns
-        -------
-        Self
-            The (modified) voltage source on which the method was called.
-        """
-
-
-class EuropeanVoltageSourceBase(VoltageSourceBase, metaclass=abc.ABCMeta):
-    """Base class for all European voltage sources.
-
-    Implements the additional voltage arrow unique to European sources.
-    """
-
-    __arrow: mn.Arrow | None = None
-
-    def _construct(self) -> None:
-        super()._construct()
-        half_width = config_eng.symbol.square_bipole_side_length / 2
-        self._body.add(
-            mn.Line(
-                start=mn.LEFT * half_width,
-                end=mn.RIGHT * half_width,
-                stroke_width=config_eng.symbol.component_stroke_width,
-            )
-        )
-
-    def set_voltage(self, label: str) -> Self:
-        """Set the voltage of the source.
-
-        Sets the voltage label of the source using a straight voltage arrow from the
-        negative to the positive terminal. Uses the component's label to do this, so
-        using `.set_label()` or `.clear_label()` in conjunction with this method is
-        not recommended.
-
-        Parameters
-        ----------
-        label : str
-            The voltage label to set. Takes a TeX math mode string.
-
-        Returns
-        -------
-        Self
-            The (modified) voltage source on which the method was called.
-        """
-        if self.__arrow is None:
+        if self.should_arrow and self.__arrow is None:
             self.__construct_arrow()
-        self.set_label(label)
+        self.set_label(voltage)
         return self
 
     def clear_voltage(self) -> Self:
         """Clear the voltage label of the source.
 
-        Clears the component's label (used to display the voltage label), and removes
-        the voltage arrow created by `.set_voltage()`.
+        Clears the voltage label of the source (i.e. the label of the component). For
+        non-arrowed (American-style) sources there is no difference between using this
+        and using `.clear_label()`, however for European sources the arrow is removed
+        only when calling this method. For portability between source types it is
+        therefore recommended to use this method over `.clear_label()`.
 
         Returns
         -------
         Self
             The (modified) voltage source on which the method was called.
         """
-        self.__clear_arrow()
+        if self.should_arrow:
+            self.__clear_arrow()
         self.clear_label()
         return self
 
@@ -183,7 +147,7 @@ class EuropeanVoltageSourceBase(VoltageSourceBase, metaclass=abc.ABCMeta):
         label_animation = self.animate(**anim_args).set_label(label).build()
         animations = [label_animation]
 
-        if self.__arrow is None:
+        if self.should_arrow and self.__arrow is None:
             self.__construct_arrow()
             arrow_animation = mn.Create(self.__arrow, **anim_args)
             animations.append(arrow_animation)
@@ -200,12 +164,36 @@ class EuropeanVoltageSourceBase(VoltageSourceBase, metaclass=abc.ABCMeta):
         label_animation = self.animate(**anim_args).clear_label().build()
         animations = [label_animation]
 
-        if self.__arrow is not None:
+        if self.should_arrow and self.__arrow is not None:
             arrow_animation = mn.Uncreate(self.__arrow, **anim_args)
             animations.append(arrow_animation)
         self.__clear_arrow()
 
         return mn.AnimationGroup(*animations)
+
+
+class EuropeanVoltageSourceBase(VoltageSourceBase, metaclass=abc.ABCMeta):
+    """Base class for all European voltage sources.
+
+    Parameters
+    ----------
+    voltage : str | None
+        The voltage label to set initially. Takes a TeX math mode string.
+    """
+
+    def __init__(self, voltage: str | None = None, *args: Any, **kwargs: Any) -> None:
+        super().__init__(True, voltage, *args, **kwargs)
+
+    def _construct(self) -> None:
+        super()._construct()
+        half_width = config_eng.symbol.square_bipole_side_length / 2
+        self._body.add(
+            mn.Line(
+                start=mn.LEFT * half_width,
+                end=mn.RIGHT * half_width,
+                stroke_width=config_eng.symbol.component_stroke_width,
+            )
+        )
 
 
 class CurrentSourceBase(Source, metaclass=abc.ABCMeta):

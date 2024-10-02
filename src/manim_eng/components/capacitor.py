@@ -13,8 +13,8 @@ class Capacitor(Bipole):
     """Circuit symbol for a basic capacitor."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        self.plate_half_gap = config_eng.symbol.bipole_width / 10
-        self.plate_half_height = 4 * self.plate_half_gap
+        self.plate_half_gap = config_eng.symbol.bipole_width / 12
+        self.plate_half_height = 5 * self.plate_half_gap
 
         super().__init__(
             Terminal(
