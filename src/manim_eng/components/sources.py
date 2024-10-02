@@ -1,10 +1,9 @@
 """Sources."""
 
+from manim_eng.components.base.modifiers import DiamondOuter, RoundOuter
 from manim_eng.components.base.source import (
-    DiamondOuter,
     EuropeanCurrentSourceBase,
     EuropeanVoltageSourceBase,
-    RoundOuter,
 )
 
 

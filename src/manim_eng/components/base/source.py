@@ -4,11 +4,9 @@ import abc
 from typing import Any, Self
 
 import manim as mn
-import numpy as np
 
 from manim_eng import config_eng
 from manim_eng.components.base.bipole import Bipole
-from manim_eng.components.base.component import Component
 from manim_eng.components.base.terminal import Terminal
 
 
@@ -85,80 +83,6 @@ class VoltageSourceBase(Source, metaclass=abc.ABCMeta):
         Self
             The (modified) voltage source on which the method was called.
         """
-
-
-class CurrentSourceBase(Source, metaclass=abc.ABCMeta):
-    """Base class of all current sources."""
-
-    def __init__(self, *args: Any, current: str | None = None, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        if current is not None:
-            self.set_current(current)
-
-    @abc.abstractmethod
-    def set_current(self, label: str) -> Self:
-        """Set the current label.
-
-        Sets the current label of the source. The underlying label used to display this
-        differs by source type: European sources use the positive terminal's current
-        label, American sources use the component's label. It is recommended to use this
-        method over `.positive.set_current()` or `.set_label()` for portability between
-        European and American source types.
-
-        Parameters
-        ----------
-        label : str
-            The current label to set. Takes a TeX math mode string.
-
-        Returns
-        -------
-        Self
-            The (modified) current source on which the method was called.
-        """
-
-    @abc.abstractmethod
-    def clear_current(self) -> Self:
-        """Clear the current label.
-
-        Clears the current label of the source, being either the positive terminal's
-        current label (for European sources) or the component's label (for American).
-        It is recommended to use this method over `.positive.clear_current()` or
-        `.clear_label()` for portability between European and American source types.
-
-        Returns
-        -------
-        Self
-            The (modified) current source on which the method was called.
-        """
-
-
-class RoundOuter(Component, metaclass=abc.ABCMeta):
-    """Circular component outline."""
-
-    def _construct(self) -> None:
-        super()._construct()
-        self._body.add(
-            # Use an Arc instead of a Circle because it doesn't have a strange default
-            # colour
-            mn.Arc(
-                radius=config_eng.symbol.square_bipole_side_length / 2,
-                angle=mn.TAU,
-                stroke_width=config_eng.symbol.component_stroke_width,
-            )
-        )
-
-
-class DiamondOuter(Component, metaclass=abc.ABCMeta):
-    """Diamond component outline."""
-
-    def _construct(self) -> None:
-        super()._construct()
-        self._body.add(
-            mn.Square(
-                side_length=config_eng.symbol.square_bipole_side_length / np.sqrt(2),
-                stroke_width=config_eng.symbol.component_stroke_width,
-            ).rotate(45 * mn.DEGREES)
-        )
 
 
 class EuropeanVoltageSourceBase(VoltageSourceBase, metaclass=abc.ABCMeta):
@@ -246,6 +170,51 @@ class EuropeanVoltageSourceBase(VoltageSourceBase, metaclass=abc.ABCMeta):
         # next setting of the label will only put it back where it is now
         self._body.remove(self.__arrow)
         self.__arrow = None
+
+
+class CurrentSourceBase(Source, metaclass=abc.ABCMeta):
+    """Base class of all current sources."""
+
+    def __init__(self, *args: Any, current: str | None = None, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        if current is not None:
+            self.set_current(current)
+
+    @abc.abstractmethod
+    def set_current(self, label: str) -> Self:
+        """Set the current label.
+
+        Sets the current label of the source. The underlying label used to display this
+        differs by source type: European sources use the positive terminal's current
+        label, American sources use the component's label. It is recommended to use this
+        method over `.positive.set_current()` or `.set_label()` for portability between
+        European and American source types.
+
+        Parameters
+        ----------
+        label : str
+            The current label to set. Takes a TeX math mode string.
+
+        Returns
+        -------
+        Self
+            The (modified) current source on which the method was called.
+        """
+
+    @abc.abstractmethod
+    def clear_current(self) -> Self:
+        """Clear the current label.
+
+        Clears the current label of the source, being either the positive terminal's
+        current label (for European sources) or the component's label (for American).
+        It is recommended to use this method over `.positive.clear_current()` or
+        `.clear_label()` for portability between European and American source types.
+
+        Returns
+        -------
+        Self
+            The (modified) current source on which the method was called.
+        """
 
 
 class EuropeanCurrentSourceBase(CurrentSourceBase, metaclass=abc.ABCMeta):
