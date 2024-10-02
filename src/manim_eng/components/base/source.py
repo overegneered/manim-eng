@@ -7,11 +7,11 @@ import manim as mn
 import numpy as np
 
 from manim_eng import config_eng
-from manim_eng.components.base.bipole import Bipole
+from manim_eng.components.base.bipole import SquareBipole
 from manim_eng.components.base.terminal import Terminal
 
 
-class Source(Bipole, metaclass=abc.ABCMeta):
+class Source(SquareBipole, metaclass=abc.ABCMeta):
     """Base class of all sources."""
 
     def __init__(
@@ -115,10 +115,9 @@ class VoltageSourceBase(Source, metaclass=abc.ABCMeta):
         self.__arrow = mn.Arrow(
             start=arrow_midpoint - arrow_half_length * arrow_direction,
             end=arrow_midpoint + arrow_half_length * arrow_direction,
-            stroke_width=config_eng.symbol.arrow_stroke_width,
             tip_length=config_eng.symbol.arrow_tip_length,
             buff=0,
-        )
+        ).match_style(self)
         self._label_anchor.move_to(arrow_midpoint)
         self._body.add(self.__arrow)
 
@@ -182,8 +181,7 @@ class EuropeanVoltageSourceBase(VoltageSourceBase, metaclass=abc.ABCMeta):
             mn.Line(
                 start=mn.LEFT * half_width,
                 end=mn.RIGHT * half_width,
-                stroke_width=config_eng.symbol.component_stroke_width,
-            )
+            ).match_style(self)
         )
 
 
@@ -246,8 +244,7 @@ class EuropeanCurrentSourceBase(CurrentSourceBase, metaclass=abc.ABCMeta):
             mn.Line(
                 start=mn.UP * half_width,
                 end=mn.DOWN * half_width,
-                stroke_width=config_eng.symbol.component_stroke_width,
-            )
+            ).match_style(self)
         )
 
     def set_current(self, label: str) -> Self:

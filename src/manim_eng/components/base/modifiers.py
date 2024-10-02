@@ -20,8 +20,7 @@ class RoundOuter(Component, metaclass=abc.ABCMeta):
             mn.Arc(
                 radius=config_eng.symbol.square_bipole_side_length / 2,
                 angle=mn.TAU,
-                stroke_width=config_eng.symbol.component_stroke_width,
-            )
+            ).match_style(self)
         )
 
 
@@ -33,8 +32,9 @@ class DiamondOuter(Component, metaclass=abc.ABCMeta):
         self._body.add(
             mn.Square(
                 side_length=config_eng.symbol.square_bipole_side_length / np.sqrt(2),
-                stroke_width=config_eng.symbol.component_stroke_width,
-            ).rotate(45 * mn.DEGREES)
+            )
+            .match_style(self)
+            .rotate(45 * mn.DEGREES)
         )
 
 
@@ -66,7 +66,11 @@ class VariableModifier(Component, metaclass=abc.ABCMeta):
             + self._body.get_center(),
             buff=0,
             tip_length=config_eng.symbol.variability_arrow_tip_length,
-            stroke_width=config_eng.symbol.component_stroke_width,
+            stroke_width=self.stroke_width,
+            stroke_color=self.stroke_color,
+            stroke_opacity=self.stroke_opacity,
+            fill_color=self.stroke_color,
+            fill_opacity=self.stroke_opacity,
         )
         self._body.add(arrow)
 
@@ -115,7 +119,8 @@ class SensorModifier(Component, metaclass=abc.ABCMeta):
         main_midpoint_offset = (bottom_middle + top_right) / 2
 
         tick = (
-            mn.VMobject(stroke_width=config_eng.symbol.component_stroke_width)
+            mn.VMobject()
+            .match_style(self)
             .set_points_as_corners([bottom_left, bottom_middle, top_right])
             .move_to(self._body.get_center() - main_midpoint_offset)
         )

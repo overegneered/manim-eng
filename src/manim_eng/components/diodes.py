@@ -30,23 +30,21 @@ class Diode(SquareBipole):
         half_height = np.sqrt(3) * radius / 2
         line_start = 0.5 * width * mn.RIGHT
 
-        triangle = mn.Triangle(
-            start_angle=0,
-            radius=radius,
-            stroke_width=config_eng.symbol.component_stroke_width,
-            stroke_color=self.stroke_color,
-            fill_opacity=self.fill_opacity,
-            fill_color=self.fill_color,
-        ).shift((1 / 12) * mn.LEFT)
+        triangle = (
+            mn.Triangle(
+                start_angle=0,
+                radius=radius,
+            )
+            .match_style(self)
+            .shift((1 / 12) * mn.LEFT)
+        )
         self._body.add(triangle)
 
         if draw_line:
             line = mn.Line(
                 start=line_start + half_height * mn.DOWN,
                 end=line_start + half_height * mn.UP,
-                stroke_width=config_eng.symbol.component_stroke_width,
-                stroke_color=self.stroke_color,
-            )
+            ).match_style(self)
             self._body.add(line)
 
     @property
@@ -97,6 +95,9 @@ class LED(Diode):
                     buff=0,
                     tip_length=config_eng.symbol.arrow_tip_length,
                     stroke_width=config_eng.symbol.component_stroke_width,
+                    color=self.stroke_color,
+                    stroke_opacity=self.stroke_opacity,
+                    fill_opacity=self.stroke_opacity,
                 )
             )
 
@@ -128,6 +129,9 @@ class Photodiode(Diode):
                     buff=0,
                     tip_length=config_eng.symbol.arrow_tip_length,
                     stroke_width=config_eng.symbol.arrow_stroke_width,
+                    color=self.stroke_color,
+                    stroke_opacity=self.stroke_opacity,
+                    fill_opacity=self.stroke_opacity,
                 )
             )
 
@@ -143,17 +147,19 @@ class SchottkyDiode(Diode):
         height = np.linalg.norm(bottom - top)
         side_length = 0.2 * height
 
-        line = mn.VMobject(
-            stroke_width=config_eng.symbol.component_stroke_width
-        ).set_points_as_corners(
-            [
-                top + side_length * mn.DR,
-                top + side_length * mn.RIGHT,
-                top,
-                bottom,
-                bottom + side_length * mn.LEFT,
-                bottom + side_length * mn.UL,
-            ]
+        line = (
+            mn.VMobject()
+            .match_style(self)
+            .set_points_as_corners(
+                [
+                    top + side_length * mn.DR,
+                    top + side_length * mn.RIGHT,
+                    top,
+                    bottom,
+                    bottom + side_length * mn.LEFT,
+                    bottom + side_length * mn.UL,
+                ]
+            )
         )
         self._body.add(line)
 
@@ -169,15 +175,17 @@ class TunnelDiode(Diode):
         height = np.linalg.norm(bottom - top)
         side_length = 0.2 * height
 
-        line = mn.VMobject(
-            stroke_width=config_eng.symbol.component_stroke_width
-        ).set_points_as_corners(
-            [
-                top + side_length * mn.LEFT,
-                top,
-                bottom,
-                bottom + side_length * mn.LEFT,
-            ]
+        line = (
+            mn.VMobject()
+            .match_style(self)
+            .set_points_as_corners(
+                [
+                    top + side_length * mn.LEFT,
+                    top,
+                    bottom,
+                    bottom + side_length * mn.LEFT,
+                ]
+            )
         )
         self._body.add(line)
 
@@ -193,14 +201,16 @@ class ZenerDiode(Diode):
         height = np.linalg.norm(bottom - top)
         offset = 0.2 * height * mn.rotate_vector(mn.UP, angle=60 * mn.DEGREES)
 
-        line = mn.VMobject(
-            stroke_width=config_eng.symbol.component_stroke_width
-        ).set_points_as_corners(
-            [
-                bottom - offset,
-                bottom,
-                top,
-                top + offset,
-            ]
+        line = (
+            mn.VMobject()
+            .match_style(self)
+            .set_points_as_corners(
+                [
+                    bottom - offset,
+                    bottom,
+                    top,
+                    top + offset,
+                ]
+            )
         )
         self._body.add(line)

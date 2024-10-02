@@ -21,7 +21,6 @@ class CurrentArrow(mn.Triangle):
             radius=config_eng.symbol.current_arrow_radius,
             start_angle=0,
             color=mn.WHITE,
-            fill_color=mn.WHITE,
             fill_opacity=1,
         )
         self.move_to(position).rotate(rotation, about_point=position)

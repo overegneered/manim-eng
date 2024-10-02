@@ -6,6 +6,7 @@ from typing import Any, Self
 import manim as mn
 import manim.typing as mnt
 
+from manim_eng import config_eng
 from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
 from manim_eng._debug.anchor import AnnotationAnchor, CentreAnchor, LabelAnchor
@@ -39,7 +40,9 @@ class Component(Markable, metaclass=abc.ABCMeta):
         annotation: str | None = None,
         **kwargs: Any,
     ) -> None:
-        super().__init__(**kwargs)
+        super().__init__(
+            stroke_width=config_eng.symbol.component_stroke_width, **kwargs
+        )
 
         self.terminals = terminals
 

@@ -25,14 +25,15 @@ class Inductor(Bipole):
                 angle=-mn.PI,
                 arc_center=centre_x * mn.RIGHT,
                 stroke_width=config_eng.symbol.component_stroke_width,
-            )
+            ).match_style(self)
             self._body.add(arc)
 
         # Avoid the 'cut off' look at the ends of the inductor, due to the interface
         # between the terminal and inductor body
         for correction_direction in [mn.LEFT, mn.RIGHT]:
             visual_correction = (
-                mn.VMobject(stroke_width=config_eng.symbol.component_stroke_width)
+                mn.VMobject()
+                .match_style(self)
                 .set_points_as_corners(
                     [
                         0.001 * mn.UP,

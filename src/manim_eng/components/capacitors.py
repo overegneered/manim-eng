@@ -42,7 +42,7 @@ class Capacitor(Bipole):
                 start=plate_base,
                 end=plate_base + 2 * self.plate_half_height * mn.UP,
                 stroke_width=config_eng.symbol.component_stroke_width,
-            )
+            ).match_style(self)
             self._body.add(plate)
 
 

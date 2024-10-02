@@ -19,7 +19,7 @@ class Resistor(Bipole):
             width=config_eng.symbol.bipole_width,
             height=config_eng.symbol.bipole_height,
             stroke_width=config_eng.symbol.component_stroke_width,
-        )
+        ).match_style(self)
         self._body.add(box)
 
 

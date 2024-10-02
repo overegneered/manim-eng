@@ -13,13 +13,15 @@ __all__ = ["BipoleSwitchBase"]
 
 
 class OpenNode(mn.Arc):
-    def __init__(self) -> None:
+    def __init__(self, match_to: mn.VMobject) -> None:
         super().__init__(
             radius=config_eng.symbol.node_radius,
             angle=2 * mn.PI,
             fill_color=mn.config.background_color,
-            fill_opacity=1.0,
+            fill_opacity=match_to.stroke_opacity,
             stroke_width=config_eng.symbol.wire_stroke_width,
+            stroke_color=match_to.stroke_color,
+            stroke_opacity=match_to.stroke_opacity,
             z_index=10,
         )
 
@@ -33,8 +35,8 @@ class BipoleSwitchBase(Bipole, metaclass=abc.ABCMeta):
     def __init__(self, closed: bool = False, **kwargs: Any) -> None:
         half_width = config_eng.symbol.square_bipole_side_length / 2
         self.closed = False
-        self.left_node = OpenNode().move_to(half_width * mn.LEFT)
-        self.right_node = OpenNode().move_to(half_width * mn.RIGHT)
+        self.left_node = OpenNode(self).move_to(half_width * mn.LEFT)
+        self.right_node = OpenNode(self).move_to(half_width * mn.RIGHT)
 
         super().__init__(
             Terminal(

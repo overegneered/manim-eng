@@ -50,22 +50,25 @@ class Cells(VoltageSourceBase):
 
         for cell_index in range(self.num_cells):
             short_x = -self.half_width + 4 * cell_index * self.plate_half_gap
+
             short_plate_base = (short_x) * mn.RIGHT + (
                 short_plate_half_height
             ) * mn.DOWN
             long_plate_base = (
                 short_x + 2 * self.plate_half_gap
             ) * mn.RIGHT + self.long_plate_half_height * mn.DOWN
+
             short_plate = mn.Line(
                 start=short_plate_base,
                 end=short_plate_base + 2 * short_plate_half_height * mn.UP,
                 stroke_width=config_eng.symbol.component_stroke_width,
-            )
+            ).match_style(self)
             long_plate = mn.Line(
                 start=long_plate_base,
                 end=long_plate_base + 2 * self.long_plate_half_height * mn.UP,
                 stroke_width=config_eng.symbol.component_stroke_width,
-            )
+            ).match_style(self)
+
             self._body.add(short_plate, long_plate)
 
 

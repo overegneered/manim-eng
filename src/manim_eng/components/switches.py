@@ -30,11 +30,15 @@ class Switch(BipoleSwitchBase):
     def _construct(self) -> None:
         super()._construct()
 
-        self.wiper = mn.Line(
-            start=self.left_node.get_center(),
-            end=self.right_node.get_center(),
-            stroke_width=config_eng.symbol.component_stroke_width,
-        ).rotate(self.__open_wiper_angle, about_point=self.left_node.get_center())
+        self.wiper = (
+            mn.Line(
+                start=self.left_node.get_center(),
+                end=self.right_node.get_center(),
+                stroke_width=config_eng.symbol.component_stroke_width,
+            )
+            .match_style(self)
+            .rotate(self.__open_wiper_angle, about_point=self.left_node.get_center())
+        )
 
         self._body.add(self.wiper)
 
@@ -136,17 +140,17 @@ class PushSwitch(BipoleSwitchBase):
             start=start,
             end=end,
             stroke_width=config_eng.symbol.component_stroke_width,
-        )
+        ).match_style(self)
         connector = mn.Line(
             start=contact.get_center(),
             end=button_centre,
             stroke_width=config_eng.symbol.component_stroke_width,
-        )
+        ).match_style(self)
         button = mn.Line(
             start=button_centre + button_half_width * mn.LEFT,
             end=button_centre + button_half_width * mn.RIGHT,
             stroke_width=config_eng.symbol.component_stroke_width,
-        )
+        ).match_style(self)
         self.__button.add(contact, connector, button)
         self._body.add(self.__button)
 
