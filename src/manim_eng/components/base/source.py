@@ -16,7 +16,6 @@ class Source(Bipole, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        *args: Any,
         left: Terminal | None = None,
         right: Terminal | None = None,
         **kwargs: Any,
@@ -35,7 +34,6 @@ class Source(Bipole, metaclass=abc.ABCMeta):
             )
             if right is None
             else right,
-            *args,
             **kwargs,
         )
 
@@ -53,10 +51,8 @@ class Source(Bipole, metaclass=abc.ABCMeta):
 class VoltageSourceBase(Source, metaclass=abc.ABCMeta):
     """Base class of all voltage sources."""
 
-    def __init__(
-        self, arrow: bool, voltage: str | None = None, *args: Any, **kwargs: Any
-    ) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, arrow: bool, voltage: str | None = None, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
 
         self.should_arrow = arrow
         self.__arrow: mn.Arrow | None = None
@@ -181,8 +177,8 @@ class EuropeanVoltageSourceBase(VoltageSourceBase, metaclass=abc.ABCMeta):
         The voltage label to set initially. Takes a TeX math mode string.
     """
 
-    def __init__(self, voltage: str | None = None, *args: Any, **kwargs: Any) -> None:
-        super().__init__(True, voltage, *args, **kwargs)
+    def __init__(self, voltage: str | None = None, **kwargs: Any) -> None:
+        super().__init__(arrow=True, voltage=voltage, **kwargs)
 
     def _construct(self) -> None:
         super()._construct()
@@ -199,8 +195,8 @@ class EuropeanVoltageSourceBase(VoltageSourceBase, metaclass=abc.ABCMeta):
 class CurrentSourceBase(Source, metaclass=abc.ABCMeta):
     """Base class of all current sources."""
 
-    def __init__(self, current: str | None = None, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, current: str | None = None, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
         if current is not None:
             self.set_current(current)
 

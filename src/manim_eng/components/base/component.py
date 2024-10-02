@@ -37,10 +37,9 @@ class Component(Markable, metaclass=abc.ABCMeta):
         terminals: list[Terminal],
         label: str | None = None,
         annotation: str | None = None,
-        *args: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
         self.terminals = terminals
 

@@ -12,7 +12,7 @@ from manim_eng.components.base.terminal import Terminal
 class Capacitor(Bipole):
     """Circuit symbol for a basic capacitor."""
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         self.plate_half_gap = config_eng.symbol.bipole_width / 12
         self.plate_half_height = 5 * self.plate_half_gap
 
@@ -25,7 +25,6 @@ class Capacitor(Bipole):
                 position=mn.RIGHT * self.plate_half_gap,
                 direction=mn.RIGHT,
             ),
-            *args,
             **kwargs,
         )
 

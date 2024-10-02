@@ -11,14 +11,12 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
 
     Parameters
     ----------
-    *args : Any
-        Positional arguments to pass on to ``manim.VMobject``.
     **kwargs : Any
         Keyword arguments to pass on to ``manim.VMobject``.
     """
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
 
         self.__rotate = mn.VGroup()
         self.__marks = mn.VGroup()

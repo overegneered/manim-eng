@@ -35,7 +35,6 @@ class Bipole(Component, metaclass=abc.ABCMeta):
         self,
         left: Terminal | None = None,
         right: Terminal | None = None,
-        *args: Any,
         **kwargs: Any,
     ) -> None:
         half_width = config_eng.symbol.bipole_width / 2
@@ -50,7 +49,7 @@ class Bipole(Component, metaclass=abc.ABCMeta):
             if right is not None
             else Terminal(position=half_width * mn.RIGHT, direction=mn.RIGHT)
         )
-        super().__init__([left, right], *args, **kwargs)
+        super().__init__([left, right], **kwargs)
 
     def _construct(self) -> None:
         pass
