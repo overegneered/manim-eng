@@ -62,11 +62,12 @@ class Terminal(Markable):
         self.__rebuild_current_arrow()
 
         arrow_half_height = self._current_arrow.height / 2
+        perpendicular = np.cross(direction, mn.IN)
         self._top_anchor = CurrentAnchor().move_to(
-            self._centre_anchor.pos + np.array([0, arrow_half_height, 0])
+            self._centre_anchor.pos + arrow_half_height * perpendicular
         )
         self._bottom_anchor = CurrentAnchor().move_to(
-            self._centre_anchor.pos + np.array([0, -arrow_half_height, 0])
+            self._centre_anchor.pos - arrow_half_height * perpendicular
         )
 
         self.add(
@@ -99,8 +100,8 @@ class Terminal(Markable):
             the component, this is the default).
         below : bool
             Whether the annotation should be placed below the current arrow, or above it
-            (which is the default). Note that 'below' here is for when the component is
-            unrotated.
+            (which is the default). Note that 'below' here is defined as below the
+            terminal when it is pointing right.
 
         Returns
         -------

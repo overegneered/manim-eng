@@ -11,8 +11,9 @@ from manim_eng.components.base.monopole import Monopole
 __all__ = ["BottomRail", "Earth", "Ground", "TopRail", "VDD", "VSS"]
 
 
-# TODO: #9 fix curren anchor placements
+# TODO: #9 fix current anchor placements
 # TODO: #9 fix label/annotation placements
+# TODO: #9 allow set_current() / clear_current() to be called directly on monopoles
 
 
 class Earth(Monopole):
