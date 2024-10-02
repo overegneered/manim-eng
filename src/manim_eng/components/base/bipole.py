@@ -9,7 +9,7 @@ from manim_eng import config_eng
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.terminal import Terminal
 
-__all__ = ["Bipole"]
+__all__ = ["Bipole", "SquareBipole"]
 
 
 class Bipole(Component, metaclass=abc.ABCMeta):
