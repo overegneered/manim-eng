@@ -18,10 +18,9 @@ class OpenNode(mn.Arc):
             radius=config_eng.symbol.node_radius,
             angle=2 * mn.PI,
             fill_color=mn.config.background_color,
-            fill_opacity=match_to.stroke_opacity,
+            fill_opacity=1.0,
             stroke_width=config_eng.symbol.wire_stroke_width,
             stroke_color=match_to.stroke_color,
-            stroke_opacity=match_to.stroke_opacity,
             z_index=10,
         )
 
