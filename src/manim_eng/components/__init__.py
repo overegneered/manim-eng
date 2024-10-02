@@ -3,6 +3,7 @@
 from .base import *
 from .capacitors import *
 from .cells import *
+from .diodes import *
 from .inductors import *
 from .resistors import *
 from .sources import *

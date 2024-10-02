@@ -1,4 +1,4 @@
-"""Module containing the inductor component."""
+"""Inductor-based components."""
 
 import manim as mn
 

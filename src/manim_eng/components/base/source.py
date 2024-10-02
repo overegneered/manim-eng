@@ -16,24 +16,9 @@ class Source(Bipole, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        left: Terminal | None = None,
-        right: Terminal | None = None,
         **kwargs: Any,
     ) -> None:
-        half_width = config_eng.symbol.square_bipole_side_length / 2
         super().__init__(
-            Terminal(
-                position=mn.LEFT * half_width,
-                direction=mn.LEFT,
-            )
-            if left is None
-            else left,
-            Terminal(
-                position=mn.RIGHT * half_width,
-                direction=mn.RIGHT,
-            )
-            if right is None
-            else right,
             **kwargs,
         )
 

@@ -1,4 +1,4 @@
-"""Module containing the capacitor component."""
+"""Capacitor-based components."""
 
 from typing import Any
 
