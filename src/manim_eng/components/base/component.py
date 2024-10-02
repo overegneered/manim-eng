@@ -55,6 +55,8 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
         self._construct()
 
+        for terminal in self.terminals:
+            terminal.match_style(self)
         self._body.add(*self.terminals)
 
         self.__set_up_anchors()

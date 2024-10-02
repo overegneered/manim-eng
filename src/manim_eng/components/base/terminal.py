@@ -5,6 +5,7 @@ from typing import Any, Self
 import manim as mn
 import manim.typing as mnt
 import numpy as np
+from manim import VMobject
 
 from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
@@ -136,6 +137,25 @@ class Terminal(Markable):
         self.remove(self._current_arrow)
         self._current_arrow_showing = False
         self._clear_mark(self._current)
+        return self
+
+    def match_style(self, vmobject: VMobject, _family: bool = True) -> Self:
+        """Match the style of the terminal wire to another vmobject.
+
+        Parameters
+        ----------
+        vmobject : VMobject
+            The vmobject to match to.
+        _family : bool
+            Disregarded in this case.
+
+        Notes
+        -----
+        - It is not possible to override the stroke width.
+        - The ``_family`` argument has no effect.
+        """
+        self.line.match_style(vmobject)
+        self.line.stroke_width = config_eng.symbol.wire_stroke_width
         return self
 
     def __rebuild_current_arrow(self) -> None:
