@@ -1,8 +1,8 @@
 """Circuit symbols of all available components."""
 
 from .base import *
-from .capacitor import *
+from .capacitors import *
 from .cells import *
-from .inductor import *
-from .resistor import *
+from .inductors import *
+from .resistors import *
 from .sources import *
