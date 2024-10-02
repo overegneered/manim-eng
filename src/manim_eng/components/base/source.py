@@ -42,7 +42,7 @@ class Source(Bipole, metaclass=abc.ABCMeta):
 class VoltageSourceBase(Source, metaclass=abc.ABCMeta):
     """Base class of all voltage sources."""
 
-    def __init__(self, *args: Any, voltage: str | None = None, **kwargs: Any) -> None:
+    def __init__(self, voltage: str | None = None, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         if voltage is not None:
             self.set_voltage(voltage)
@@ -122,8 +122,8 @@ class EuropeanVoltageSourceBase(VoltageSourceBase, metaclass=abc.ABCMeta):
         Self
             The (modified) voltage source on which the method was called.
         """
-        if not self.__arrow:
-            self.__build_arrow()
+        if self.__arrow is None:
+            self.__construct_arrow()
         self.set_label(label)
         return self
 
@@ -142,7 +142,7 @@ class EuropeanVoltageSourceBase(VoltageSourceBase, metaclass=abc.ABCMeta):
         self.clear_label()
         return self
 
-    def __build_arrow(self) -> None:
+    def __construct_arrow(self) -> None:
         half_side_length = config_eng.symbol.square_bipole_side_length / 2
 
         direction_to_label_anchor = mn.normalize(
@@ -171,11 +171,45 @@ class EuropeanVoltageSourceBase(VoltageSourceBase, metaclass=abc.ABCMeta):
         self._body.remove(self.__arrow)
         self.__arrow = None
 
+    @mn.override_animate(set_voltage)
+    def __animate_set_voltage(
+        self, label: str, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        label_animation = self.animate(**anim_args).set_label(label).build()
+        animations = [label_animation]
+
+        if self.__arrow is None:
+            self.__construct_arrow()
+            arrow_animation = mn.Create(self.__arrow, **anim_args)
+            animations.append(arrow_animation)
+
+        return mn.AnimationGroup(*animations)
+
+    @mn.override_animate(clear_voltage)
+    def __animate_clear_voltage(
+        self, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        label_animation = self.animate(**anim_args).clear_label().build()
+        animations = [label_animation]
+
+        if self.__arrow is not None:
+            arrow_animation = mn.Uncreate(self.__arrow, **anim_args)
+            animations.append(arrow_animation)
+        self.__clear_arrow()
+
+        return mn.AnimationGroup(*animations)
+
 
 class CurrentSourceBase(Source, metaclass=abc.ABCMeta):
     """Base class of all current sources."""
 
-    def __init__(self, *args: Any, current: str | None = None, **kwargs: Any) -> None:
+    def __init__(self, current: str | None = None, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         if current is not None:
             self.set_current(current)
@@ -269,3 +303,21 @@ class EuropeanCurrentSourceBase(CurrentSourceBase, metaclass=abc.ABCMeta):
         """
         self.positive.clear_current()
         return self
+
+    @mn.override_animate(set_current)
+    def __animate_set_current(
+        self, label: str, anim_args: dict[Any, str] | None = None
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        return self.positive.animate(**anim_args).set_current(label, out=True).build()
+
+    @mn.override_animate(clear_current)
+    def __animate_clear_current(
+        self, anim_args: dict[Any, str] | None = None
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        return self.positive.animate(**anim_args).clear_current().build()
