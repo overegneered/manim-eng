@@ -1,7 +1,7 @@
 """Module for the Monopole base class."""
 
 import abc
-from typing import Any
+from typing import Any, Self
 
 import manim as mn
 import manim.typing as mnt
@@ -29,7 +29,23 @@ class Monopole(Component, metaclass=abc.ABCMeta):
         )
         super().__init__(terminals=[terminal], **kwargs)
 
+        self._label_anchor.move_to(self.get_critical_point(-direction))
+        self.update()
+        self.remove(self._annotation_anchor)
+
     @property
     def terminal(self) -> Terminal:
         """Get the terminal of the component."""
         return self.terminals[0]
+
+    def set_annotation(self, annotation: str) -> Self:
+        """Fails for monopoles, as they do not have annotations."""
+        raise NotImplementedError(
+            "Monopoles have no annotation. Please use `.set_label()`."
+        )
+
+    def clear_annotation(self) -> Self:
+        """Fails for monopoles, as they do not have annotations."""
+        raise NotImplementedError(
+            "Monopoles have no annotation. Please use `.clear_label()`."
+        )
