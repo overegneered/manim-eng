@@ -129,7 +129,7 @@ class PushSwitch(BipoleSwitchBase):
             start = self.left_node.get_bottom() + self.__travel * mn.DOWN
             end = self.right_node.get_bottom() + self.__travel * mn.DOWN
 
-        button_centre = self.get_top() + 1.5 * self.__travel * mn.UP
+        button_centre = self.get_top() + self.__travel * mn.UP
         button_half_width = config_eng.symbol.square_bipole_side_length / 8
 
         contact = mn.Line(
