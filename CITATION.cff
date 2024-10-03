@@ -1,3 +1,28 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
 cff-version: 1.2.0
+type: software
+title: manim-eng
+version: 0.1.0
+repository-code: 'https://github.com/overegneered/manim-eng'
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file. The use of the source code of
+  this software (including that of all auxillary files, such
+  as documentation) for the training of AI models is
+  EXPRESSLY PROHIBITED.
 authors:
-  - name: overegneered
+  - given-names: overegneered
+    email: overegneered@egneer.ing
+    orcid: "https://orcid.org/0009-0003-9009-5831"
+abstract: >-
+  manim-eng is a plugin for Manim Community Edition that
+  adds the ability to create and animate circuit diagrams.
+keywords:
+  - Manim
+  - ManimCE
+  - circuit theory
+  - animation
+  - circuits
+license: MIT
