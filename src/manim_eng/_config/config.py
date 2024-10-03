@@ -242,6 +242,9 @@ class ComponentSymbolConfig(ConfigBase):
     """The standard height to use for box-esque bipoles, such as resistors and fuses."""
     bipole_width: float = 1.0
     """The standard width to use for box-esque bipoles, such as resistors and fuses."""
+    square_bipole_side_length: float = 1.5 * bipole_height
+    """The standard height to use for bipoles with square bounding boxes, such as
+    voltage sources and sensors."""
     component_stroke_width: float = mn.DEFAULT_STROKE_WIDTH
     """The stroke width to use for the component symbols."""
     current_arrow_radius: float = (2 / np.sqrt(3)) * 0.2 * bipole_height
@@ -262,6 +265,16 @@ class ComponentSymbolConfig(ConfigBase):
     """The length of voltage arrow tips."""
     voltage_default_angle: float = 60 * mn.DEGREES
     """The angle a voltage arrow will sweep with no other reference provided."""
+    node_radius: float = 0.06
+    """The radius of wire nodes."""
+    variability_arrow_tip_length: float = 0.125
+    """The length of arrow tips in arrows signifying variability in a component."""
+    monopole_width: float = 0.5 * bipole_width
+    """The width of monopole source/ground symbols."""
+    plate_gap: float = bipole_width / 6
+    """The gap between plates of plated components (i.e. capacitors and cells)."""
+    plate_height: float = 5 * plate_gap
+    """The height of plates of plated components (i.e. capacitors and cells)."""
 
 
 @dc.dataclass

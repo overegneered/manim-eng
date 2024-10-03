@@ -1,19 +1,23 @@
+"""Module containing the Component base class."""
+
 import abc
 from typing import Any, Self
 
 import manim as mn
 import manim.typing as mnt
-import numpy as np
 
-from manim_eng._base.mark import Mark, Markable
-from manim_eng._base.terminal import Terminal
-from manim_eng._config import config_eng
+from manim_eng import config_eng
+from manim_eng._base.mark import Mark
+from manim_eng._base.markable import Markable
 from manim_eng._debug.anchor import AnnotationAnchor, CentreAnchor, LabelAnchor
 from manim_eng.circuit.voltage import Voltage
+from manim_eng.components.base.terminal import Terminal
+
+__all__ = ["Component"]
 
 
 class Component(Markable, metaclass=abc.ABCMeta):
-    """Base class for a circuit symbol.
+    """Base class for all components.
 
     Parameters
     ----------
@@ -34,10 +38,11 @@ class Component(Markable, metaclass=abc.ABCMeta):
         terminals: list[Terminal],
         label: str | None = None,
         annotation: str | None = None,
-        *args: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(
+            stroke_width=config_eng.symbol.component_stroke_width, **kwargs
+        )
 
         self.terminals = terminals
 
@@ -45,17 +50,20 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self._label_anchor = LabelAnchor()
         self._annotation_anchor = AnnotationAnchor()
 
-        self._body = mn.VGroup(*self.terminals)
+        self._body = mn.VGroup()
         self.add(self._body)
 
         self._construct()
+
+        for terminal in self.terminals:
+            terminal.match_style(self)
+        self._body.add(*self.terminals)
 
         self.__set_up_anchors()
         self._label = Mark(self._label_anchor, self._centre_anchor)
         self._annotation = Mark(self._annotation_anchor, self._centre_anchor)
         self.__initialise_marks(label, annotation)
 
-    @abc.abstractmethod
     def _construct(self) -> None:
         """Construct the shape of the component.
 
@@ -274,58 +282,3 @@ class Component(Markable, metaclass=abc.ABCMeta):
         if anim_args is None:
             anim_args = {}
         return self.animate(**anim_args)._clear_mark(self._annotation).build()
-
-
-class Bipole(Component, metaclass=abc.ABCMeta):
-    """Base class for bipole components, such as resistors and sources.
-
-    By default, adds two terminals: one from (-0.5, 0) to (-1, 0), and one from (0.5, 0)
-    to (1, 0).
-
-    Parameters
-    ----------
-    left : Terminal | None
-        The terminal to use as the left connection point for the component. If left
-        unspecified, a terminal from (-0.5, 0) to (-1, 0) will be used.
-    right : Terminal | None
-        The terminal to use as the right connection point for the component. If left
-        unspecified, a terminal from (-0.5, 0) to (-1, 0) will be used.
-    debug : bool
-        Whether to display debug information. If ``True``, the object's anchors will be
-        displayed visually.
-    """
-
-    def __init__(
-        self,
-        left: Terminal | None = None,
-        right: Terminal | None = None,
-        *args: Any,
-        **kwargs: Any,
-    ) -> None:
-        terminal_end_x = (
-            config_eng.symbol.bipole_width / 2
-        ) + config_eng.symbol.terminal_length
-        terminal_end = np.array([terminal_end_x, 0, 0])
-
-        left = (
-            left
-            if left is not None
-            else Terminal(position=-terminal_end, direction=mn.LEFT)
-        )
-        right = (
-            right
-            if right is not None
-            else Terminal(position=terminal_end, direction=mn.RIGHT)
-        )
-        super().__init__([left, right], *args, **kwargs)
-
-    def _construct(self) -> None:
-        pass
-
-    @property
-    def left(self) -> Terminal:
-        return self.terminals[0]
-
-    @property
-    def right(self) -> Terminal:
-        return self.terminals[1]

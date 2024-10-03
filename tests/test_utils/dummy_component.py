@@ -1,16 +1,16 @@
 from typing import Any
 
 import manim as mn
-from manim_eng._base.component import Component
-from manim_eng._base.terminal import Terminal
+from manim_eng.components.base.component import Component
+from manim_eng.components.base.terminal import Terminal
 
 
 class DummyComponent(Component):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         terminal_1 = Terminal(mn.RIGHT, mn.RIGHT)
         terminal_2 = Terminal(mn.LEFT, mn.LEFT)
         self.not_a_terminal = 3
-        super().__init__([terminal_1, terminal_2], *args, **kwargs)
+        super().__init__([terminal_1, terminal_2], **kwargs)
 
     def _construct(self) -> None:
         pass

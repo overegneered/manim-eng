@@ -1,13 +1,19 @@
+"""Module containing the Terminal base class and helper classes."""
+
 from typing import Any, Self
 
 import manim as mn
 import manim.typing as mnt
 import numpy as np
+from manim import VMobject
 
-from manim_eng._base.mark import Mark, Markable
+from manim_eng._base.mark import Mark
+from manim_eng._base.markable import Markable
 from manim_eng._config import config_eng
 from manim_eng._debug.anchor import CentreAnchor, CurrentAnchor, TerminalAnchor
 from manim_eng._utils import utils
+
+__all__ = ["Terminal"]
 
 
 class CurrentArrow(mn.Triangle):
@@ -16,7 +22,6 @@ class CurrentArrow(mn.Triangle):
             radius=config_eng.symbol.current_arrow_radius,
             start_angle=0,
             color=mn.WHITE,
-            fill_color=mn.WHITE,
             fill_opacity=1,
         )
         self.move_to(position).rotate(rotation, about_point=position)
@@ -28,8 +33,8 @@ class Terminal(Markable):
     Parameters
     ----------
     position : Vector3D
-        The position of the *end* of the terminal, i.e. the bit that other components or
-        wires would attach to.
+        The position of the *start* of the terminal, i.e. the bit that 'connects' to the
+        body of the component.
     direction : Vector3D
         The direction the terminal 'points', i.e. the direction you get by walking from
         the point on the component body where the terminal attaches to the end of the
@@ -40,16 +45,16 @@ class Terminal(Markable):
         super().__init__()
 
         direction /= np.linalg.norm(direction)
-        start = position - (direction * config_eng.symbol.terminal_length)
+        end = position + (direction * config_eng.symbol.terminal_length)
         self.line = mn.Line(
             start=position,
-            end=start,
+            end=end,
             stroke_width=config_eng.symbol.wire_stroke_width,
         )
         self.add(self.line)
 
         self._centre_anchor = CentreAnchor().move_to(self.line.get_center())
-        self._end_anchor = TerminalAnchor().move_to(position)
+        self._end_anchor = TerminalAnchor().move_to(end)
 
         self._current_arrow: CurrentArrow
         self._current_arrow_showing: bool = False
@@ -57,11 +62,12 @@ class Terminal(Markable):
         self.__rebuild_current_arrow()
 
         arrow_half_height = self._current_arrow.height / 2
+        perpendicular = np.cross(direction, mn.IN)
         self._top_anchor = CurrentAnchor().move_to(
-            self._centre_anchor.pos + np.array([0, arrow_half_height, 0])
+            self._centre_anchor.pos + arrow_half_height * perpendicular
         )
         self._bottom_anchor = CurrentAnchor().move_to(
-            self._centre_anchor.pos + np.array([0, -arrow_half_height, 0])
+            self._centre_anchor.pos - arrow_half_height * perpendicular
         )
 
         self.add(
@@ -73,10 +79,12 @@ class Terminal(Markable):
 
     @property
     def direction(self) -> mnt.Vector3D:
+        """Return the direction of the terminal as a normalised vector."""
         return utils.normalised(self._end_anchor.pos - self._centre_anchor.pos)
 
     @property
     def end(self) -> mnt.Point3D:
+        """Return the global position of the end of the terminal."""
         return self._end_anchor.pos
 
     def set_current(self, label: str, out: bool = False, below: bool = False) -> Self:
@@ -92,8 +100,8 @@ class Terminal(Markable):
             the component, this is the default).
         below : bool
             Whether the annotation should be placed below the current arrow, or above it
-            (which is the default). Note that 'below' here is for when the component is
-            unrotated.
+            (which is the default). Note that 'below' here is defined as below the
+            terminal when it is pointing right.
 
         Returns
         -------
@@ -132,6 +140,25 @@ class Terminal(Markable):
         self._clear_mark(self._current)
         return self
 
+    def match_style(self, vmobject: VMobject, _family: bool = True) -> Self:
+        """Match the style of the terminal wire to another vmobject.
+
+        Parameters
+        ----------
+        vmobject : VMobject
+            The vmobject to match to.
+        _family : bool
+            Disregarded in this case.
+
+        Notes
+        -----
+        - It is not possible to override the stroke width.
+        - The ``_family`` argument has no effect.
+        """
+        self.line.match_style(vmobject)
+        self.line.stroke_width = config_eng.symbol.wire_stroke_width
+        return self
+
     def __rebuild_current_arrow(self) -> None:
         """Rebuild the current arrow.
 
@@ -142,7 +169,6 @@ class Terminal(Markable):
         if not self._current_arrow_pointing_out:
             angle_to_rotate += np.pi
         self._current_arrow = CurrentArrow(self._centre_anchor.pos, angle_to_rotate)
-        self._current_arrow_uncreated = False
 
     @mn.override_animate(set_current)
     def __animate_set_current(
@@ -200,9 +226,8 @@ class Terminal(Markable):
         if anim_args is None:
             anim_args = {}
 
-        arrow_animation = mn.Uncreate(self._current_arrow, *anim_args)
+        arrow_animation = mn.Uncreate(self._current_arrow, **anim_args)
         self._current_arrow_showing = False
-        self._current_arrow_uncreated = True
 
         return mn.AnimationGroup(
             arrow_animation,

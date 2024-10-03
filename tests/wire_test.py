@@ -1,7 +1,7 @@
 import manim as mn
 import pytest
 from manim_eng import ManualWire, Wire
-from manim_eng._base.terminal import Terminal
+from manim_eng.components.base.terminal import Terminal
 
 
 def test_wire_throws_value_error_if_terminals_are_identical() -> None:

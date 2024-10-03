@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from manim_eng._base.component import Component
+from manim_eng.components.base.component import Component
 
 from .test_utils.dummy_component import DummyComponent
 

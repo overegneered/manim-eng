@@ -107,6 +107,7 @@ def test_isolate() -> None:
         ).connect(component_2.terminal_2, component_3.terminal_2)
 
     circuit.isolate(component_1, component_2.terminal_1)
+    circuit_animated.animate.isolate(component_1, component_2.terminal_1)
 
     for submobjects in [circuit.wires.submobjects, circuit_animated.wires.submobjects]:
         assert len(submobjects) == 1

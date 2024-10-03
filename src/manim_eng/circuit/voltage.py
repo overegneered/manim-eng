@@ -8,9 +8,10 @@ import numpy as np
 
 import manim_eng._utils as utils
 from manim_eng import config_eng
-from manim_eng._base.mark import Mark, Markable
-from manim_eng._base.terminal import Terminal
+from manim_eng._base.mark import Mark
+from manim_eng._base.markable import Markable
 from manim_eng._debug.anchor import CentreAnchor, VoltageAnchor
+from manim_eng.components.base.terminal import Terminal
 
 __all__ = ["Voltage"]
 
