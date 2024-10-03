@@ -271,6 +271,10 @@ class ComponentSymbolConfig(ConfigBase):
     """The length of arrow tips in arrows signifying variability in a component."""
     monopole_width: float = 0.5 * bipole_width
     """The width of monopole source/ground symbols."""
+    plate_gap: float = bipole_width / 6
+    """The gap between plates of plated components (i.e. capacitors and cells)."""
+    plate_height: float = 5 * plate_gap
+    """The height of plates of plated components (i.e. capacitors and cells)."""
 
 
 @dc.dataclass

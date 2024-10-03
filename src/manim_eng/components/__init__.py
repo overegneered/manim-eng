@@ -9,3 +9,4 @@ from .monopoles import *
 from .resistors import *
 from .sources import *
 from .switches import *
+from .xkcd import *

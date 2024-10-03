@@ -25,19 +25,18 @@ class Cells(VoltageSourceBase):
     def __init__(self, n: int, voltage: str | None = None, **kwargs: Any) -> None:
         self.num_cells = n
 
-        self.plate_half_gap = config_eng.symbol.bipole_width / 12
-        self.long_plate_half_height = 5 * self.plate_half_gap
-        self.half_width = (2 * n - 1) * self.plate_half_gap
+        self.__plate_half_gap = config_eng.symbol.plate_gap / 2
+        self.__half_width = (2 * n - 1) * self.__plate_half_gap
 
         super().__init__(
             arrow=False,
             voltage=voltage,
             left=Terminal(
-                position=mn.LEFT * self.half_width,
+                position=mn.LEFT * self.__half_width,
                 direction=mn.LEFT,
             ),
             right=Terminal(
-                position=mn.RIGHT * self.half_width,
+                position=mn.RIGHT * self.__half_width,
                 direction=mn.RIGHT,
             ),
             **kwargs,
@@ -46,17 +45,16 @@ class Cells(VoltageSourceBase):
     def _construct(self) -> None:
         super()._construct()
 
-        short_plate_half_height = self.long_plate_half_height / 2
+        long_plate_half_height = config_eng.symbol.plate_height / 2
+        short_plate_half_height = long_plate_half_height / 2
 
         for cell_index in range(self.num_cells):
-            short_x = -self.half_width + 4 * cell_index * self.plate_half_gap
+            short_x = -self.__half_width + 4 * cell_index * self.__plate_half_gap
 
-            short_plate_base = (short_x) * mn.RIGHT + (
-                short_plate_half_height
-            ) * mn.DOWN
+            short_plate_base = short_x * mn.RIGHT + (short_plate_half_height) * mn.DOWN
             long_plate_base = (
-                short_x + 2 * self.plate_half_gap
-            ) * mn.RIGHT + self.long_plate_half_height * mn.DOWN
+                short_x + 2 * self.__plate_half_gap
+            ) * mn.RIGHT + long_plate_half_height * mn.DOWN
 
             short_plate = mn.Line(
                 start=short_plate_base,
@@ -65,7 +63,7 @@ class Cells(VoltageSourceBase):
             ).match_style(self)
             long_plate = mn.Line(
                 start=long_plate_base,
-                end=long_plate_base + 2 * self.long_plate_half_height * mn.UP,
+                end=long_plate_base + 2 * long_plate_half_height * mn.UP,
                 stroke_width=config_eng.symbol.component_stroke_width,
             ).match_style(self)
 
