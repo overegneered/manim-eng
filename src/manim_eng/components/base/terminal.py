@@ -11,7 +11,6 @@ from manim_eng._base.anchor import CentreAnchor, CurrentAnchor, TerminalAnchor
 from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
 from manim_eng._config import config_eng
-from manim_eng._utils import utils
 
 __all__ = ["Terminal"]
 
@@ -80,7 +79,7 @@ class Terminal(Markable):
     @property
     def direction(self) -> mnt.Vector3D:
         """Return the direction of the terminal as a normalised vector."""
-        return utils.normalised(self._end_anchor.pos - self._centre_anchor.pos)
+        return mn.normalize(self._end_anchor.pos - self._centre_anchor.pos)
 
     @property
     def end(self) -> mnt.Point3D:

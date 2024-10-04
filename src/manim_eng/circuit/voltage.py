@@ -6,7 +6,6 @@ import manim as mn
 import manim.typing as mnt
 import numpy as np
 
-import manim_eng._utils as utils
 from manim_eng import config_eng
 from manim_eng._base.anchor import CentreAnchor, VoltageAnchor
 from manim_eng._base.mark import Mark
@@ -241,7 +240,7 @@ class Voltage(Markable):
             The new point.
         """
         relative_to_reference = middle_point - relative_to
-        direction = utils.normalised(relative_to_reference)
+        direction = mn.normalize(relative_to_reference)
         length = np.linalg.norm(relative_to_reference)
         return relative_to + direction * (length + buff)
 

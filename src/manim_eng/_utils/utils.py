@@ -5,22 +5,6 @@ import numpy as np
 from manim import typing as mnt
 
 
-def normalised(vector: mnt.Vector3D) -> mnt.Vector3D:
-    """Normalises the passed vector, and returns the result.
-
-    Parameters
-    ----------
-    vector : Vector3D
-        The vector to normalise.
-
-    Returns
-    -------
-    Vector3D
-        The resultant normalised vector.
-    """
-    return vector / np.linalg.norm(vector)
-
-
 def cardinalised(vector: mnt.Vector3D, margin: float | None = None) -> mnt.Vector3D:
     """If ``vector`` is within ``margin`` of a cardinal direction, snap it to it.
 

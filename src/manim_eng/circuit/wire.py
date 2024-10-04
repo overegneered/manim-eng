@@ -207,4 +207,4 @@ class Wire(WireBase):
         if distance_to_move <= 0:
             # No movement is necessary
             return point
-        return point + utils.normalised(normal) * distance_to_move
+        return point + mn.normalize(normal) * distance_to_move
