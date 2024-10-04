@@ -25,3 +25,7 @@ Methods should be documented in more depth, but not to the point of verbosity. I
 that is needed. In particular, methods that have `-> Self` in their signature need not have a `Returns` section in their
 docstring: this adds an extra four lines (including the blank one) but doesn't add any extra meaning. It is obvious from
 the signature that the method mutates the object and then returns the object.
+
+### Components
+
+The summary docstring of components should always begin `"""Circuit symbol for`.

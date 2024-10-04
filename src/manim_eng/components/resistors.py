@@ -11,7 +11,7 @@ from manim_eng.components.base.modifiers import SensorModifier, VariableModifier
 
 
 class Resistor(Bipole):
-    """The circuit symbol for a resistor."""
+    """Circuit symbol for a resistor."""
 
     def _construct(self) -> None:
         super()._construct()
@@ -24,14 +24,14 @@ class Resistor(Bipole):
 
 
 class Thermistor(SensorModifier, Resistor):
-    """The circuit symbol for a thermistor."""
+    """Circuit symbol for a thermistor."""
 
     def _construct(self) -> None:
         super()._construct()
 
 
 class VariableResistor(VariableModifier, Resistor):
-    """The circuit symbol for a variable resistor."""
+    """Circuit symbol for a variable resistor."""
 
     def _construct(self) -> None:
         super()._construct()

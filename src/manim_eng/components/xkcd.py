@@ -81,7 +81,7 @@ class RandalMunroeSourceBase(VoltageSourceBase):
 
 
 class Baertty(RandalMunroeSourceBase):
-    """Randall Munroe's baertty.
+    """Circuit symbol for Randall Munroe's baertty.
 
     See https://xkcd.com/2818/.
 
@@ -100,7 +100,7 @@ class Baertty(RandalMunroeSourceBase):
 
 
 class Battttttttttttery(RandalMunroeSourceBase):
-    """Randall Munroe's battttttttttttery.
+    """Circuit symbol for Randall Munroe's battttttttttttery.
 
     See https://xkcd.com/2818/.
 

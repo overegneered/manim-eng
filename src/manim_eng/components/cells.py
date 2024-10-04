@@ -12,7 +12,7 @@ __all__ = ["Cells", "Cell", "DoubleCell", "TripleCell", "QuadrupleCell", "Batter
 
 
 class Cells(VoltageSourceBase):
-    """Cell component with arbitrary number of cells.
+    """Circuit symbol for a cell set with an arbitrary number of cells.
 
     Parameters
     ----------
@@ -71,7 +71,7 @@ class Cells(VoltageSourceBase):
 
 
 class Cell(Cells):
-    """Cell component with a single cell.
+    """Circuit symbol for a single cell.
 
     Parameters
     ----------
@@ -84,7 +84,7 @@ class Cell(Cells):
 
 
 class DoubleCell(Cells):
-    """Cell component with two cells.
+    """Circuit symbol for a double cell (often used to represent a battery).
 
     Parameters
     ----------
@@ -100,7 +100,7 @@ Battery = DoubleCell
 
 
 class TripleCell(Cells):
-    """Cell component with three cells.
+    """Circuit symbol for a triple cell.
 
     Parameters
     ----------
@@ -113,7 +113,7 @@ class TripleCell(Cells):
 
 
 class QuadrupleCell(Cells):
-    """Cell component with four cells.
+    """Circuit symbol for a quadruple cell.
 
     Parameters
     ----------

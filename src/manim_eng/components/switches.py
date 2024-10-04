@@ -12,7 +12,7 @@ __all__ = ["Switch", "PushSwitch", "PushToBreakSwitch", "PushToMakeSwitch"]
 
 
 class Switch(BipoleSwitchBase):
-    """Basic two-terminal lever-arm switch.
+    """Circuit symbol for a basic two-terminal lever-arm switch.
 
     Parameters
     ----------
@@ -96,7 +96,9 @@ class Switch(BipoleSwitchBase):
 
 
 class PushSwitch(BipoleSwitchBase):
-    """Basic push switch, with option to be either a push-to-make or push-to-break.
+    """Circuit symbol for a basic push switch.
+
+     The switch can be push-to-make or push-to-break.
 
     **Note:** it is recommended to use the dedicated ``PushToMakeSwitch`` and
     ``PushToBreakSwitch`` components over this component. It is available here because
@@ -180,7 +182,7 @@ class PushSwitch(BipoleSwitchBase):
 
 
 class PushToMakeSwitch(PushSwitch):
-    """Push-to-make switch.
+    """Component symbol for a push-to-make switch.
 
     Parameters
     ----------
@@ -193,7 +195,7 @@ class PushToMakeSwitch(PushSwitch):
 
 
 class PushToBreakSwitch(PushSwitch):
-    """Push-to-break switch.
+    """Component symbol for a push-to-break switch.
 
     Parameters
     ----------
