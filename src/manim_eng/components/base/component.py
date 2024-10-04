@@ -1,4 +1,4 @@
-"""Module containing the Component base class."""
+"""Contains the Component base class."""
 
 import abc
 from typing import Any, Self
@@ -7,9 +7,9 @@ import manim as mn
 import manim.typing as mnt
 
 from manim_eng import config_eng
+from manim_eng._base.anchor import AnnotationAnchor, CentreAnchor, LabelAnchor
 from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
-from manim_eng._debug.anchor import AnnotationAnchor, CentreAnchor, LabelAnchor
 from manim_eng.circuit.voltage import Voltage
 from manim_eng.components.base.terminal import Terminal
 

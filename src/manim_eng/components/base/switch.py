@@ -1,4 +1,4 @@
-"""Base switch class and switch utility classes."""
+"""Base class for switches and implementation helper class."""
 
 import abc
 from typing import Any, Self

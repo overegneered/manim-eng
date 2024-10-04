@@ -1,4 +1,4 @@
-"""Inductor-based components."""
+"""Component symbols of inductor-based components."""
 
 import manim as mn
 

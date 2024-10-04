@@ -1,4 +1,4 @@
-"""Resistor-based components."""
+"""Component symbols of resistor-based components."""
 
 import manim as mn
 

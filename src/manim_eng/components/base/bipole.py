@@ -1,4 +1,4 @@
-"""Module containing the Bipole base class."""
+"""Base classes for bipole components."""
 
 import abc
 from typing import Any

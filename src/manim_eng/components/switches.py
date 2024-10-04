@@ -1,4 +1,4 @@
-"""Switches (both lever-arm and push-button)."""
+"""Component symbols of switches (both lever-arm and push-button)."""
 
 from typing import Any, Self
 

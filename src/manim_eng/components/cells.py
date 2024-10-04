@@ -1,4 +1,4 @@
-"""Cell components (a.k.a. batteries)."""
+"""Component symbols of cells (a.k.a. batteries)."""
 
 from typing import Any
 

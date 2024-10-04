@@ -1,4 +1,4 @@
-"""Module for the Monopole base class."""
+"""Contains the Monopole base class."""
 
 import abc
 from typing import Any, Self

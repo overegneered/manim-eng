@@ -1,4 +1,4 @@
-"""Module containing base classes for creating sources."""
+"""Base classes for creating sources."""
 
 import abc
 from typing import Any, Self
@@ -163,10 +163,18 @@ class VoltageSourceBase(Source, metaclass=abc.ABCMeta):
 class EuropeanVoltageSourceBase(VoltageSourceBase, metaclass=abc.ABCMeta):
     """Base class for all European voltage sources.
 
+    Designed to be used in conjunction with the ``RoundOuter`` and ``DiamondOuter``
+    modifiers, to produce standard and controlled sources.
+
     Parameters
     ----------
     voltage : str | None
         The voltage label to set initially. Takes a TeX math mode string.
+
+    See Also
+    --------
+    modifiers.RoundOuter
+    modifiers.DiamondOuter
     """
 
     def __init__(self, voltage: str | None = None, **kwargs: Any) -> None:
@@ -222,7 +230,15 @@ class EuropeanCurrentSourceBase(CurrentSourceBase, metaclass=abc.ABCMeta):
     """Base class for all European current sources.
 
     Implements the setting of current on the positive terminal that is unique to
-    European sources.
+    European sources, as well as the internal symbol of European current sources.
+
+    Designed to be used in conjunction with the ``RoundOuter`` and ``DiamondOuter``
+    modifiers, to produce standard and controlled sources.
+
+    See Also
+    --------
+    modifiers.RoundOuter
+    modifiers.DiamondOuter
     """
 
     def _construct(self) -> None:

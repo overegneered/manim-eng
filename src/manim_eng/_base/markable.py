@@ -1,3 +1,10 @@
+"""Contains the Markable base class.
+
+See Also
+--------
+mark
+"""
+
 import abc
 from typing import Any, Self
 

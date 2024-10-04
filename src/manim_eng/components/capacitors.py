@@ -1,4 +1,4 @@
-"""Capacitor-based components."""
+"""Component symbols of capacitor-based components."""
 
 from typing import Any
 

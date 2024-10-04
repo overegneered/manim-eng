@@ -1,4 +1,4 @@
-"""Terminal base class and helper classes."""
+"""Terminal base class and implementation helper class."""
 
 from typing import Any, Self
 
@@ -7,10 +7,10 @@ import manim.typing as mnt
 import numpy as np
 from manim import VMobject
 
+from manim_eng._base.anchor import CentreAnchor, CurrentAnchor, TerminalAnchor
 from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
 from manim_eng._config import config_eng
-from manim_eng._debug.anchor import CentreAnchor, CurrentAnchor, TerminalAnchor
 from manim_eng._utils import utils
 
 __all__ = ["Terminal"]

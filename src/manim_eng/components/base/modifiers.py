@@ -1,4 +1,15 @@
-"""Modifiers that can be applied to other components to add elements."""
+"""Modifiers that can be applied to other components to add elements.
+
+They are applied by inheritance, and should be the *first* class a subclass inherits
+from. The other requirement is that the subclass implement ``._construct()`` and call
+``super()._construct()``. A bare-minimum example is shown below.
+
+::
+
+    class ModifiedComponent(Modifier, ComponentToModify):
+        def _construct(self) -> None:
+            super()._construct()
+"""
 
 import abc
 
@@ -12,7 +23,10 @@ __all__ = ["RoundOuter", "DiamondOuter", "VariableModifier", "SensorModifier"]
 
 
 class RoundOuter(Component, metaclass=abc.ABCMeta):
-    """Circular component outline."""
+    """Modifier to add a circular outline to a component.
+
+    The diameter of the outline is equal to the side length of a square bipole.
+    """
 
     def _construct(self) -> None:
         super()._construct()
@@ -27,7 +41,11 @@ class RoundOuter(Component, metaclass=abc.ABCMeta):
 
 
 class DiamondOuter(Component, metaclass=abc.ABCMeta):
-    """Diamond component outline."""
+    """Modifier to add a diamond outline to a component.
+
+    The distance between opposite points of the outline is equal to the side length of a
+    square bipole.
+    """
 
     def _construct(self) -> None:
         super()._construct()
