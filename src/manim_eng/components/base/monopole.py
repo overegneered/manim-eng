@@ -1,4 +1,4 @@
-"""Module for the Monopole base class."""
+"""Contains the Monopole base class."""
 
 import abc
 from typing import Any, Self
@@ -8,6 +8,8 @@ import manim.typing as mnt
 
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.terminal import Terminal
+
+__all__ = ["Monopole"]
 
 
 class Monopole(Component, metaclass=abc.ABCMeta):

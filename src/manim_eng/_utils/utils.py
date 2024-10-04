@@ -1,3 +1,5 @@
+"""Utilities for the rest of manim-eng."""
+
 import manim as mn
 import numpy as np
 from manim import typing as mnt

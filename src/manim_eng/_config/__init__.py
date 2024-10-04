@@ -1,3 +1,9 @@
+"""Configuration management for manim-eng.
+
+Exposes the configuration of manim-eng through the ``config_eng`` variable as well as
+the temporary configuration context manager ``tempconfig_eng``.
+"""
+
 import contextlib
 import copy
 from typing import Any, Generator

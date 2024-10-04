@@ -1,4 +1,4 @@
-"""Voltage arrow annotation for applying between component terminals."""
+"""Contains Voltage class for drawing voltages between component terminals."""
 
 from typing import Any, Self, cast
 
@@ -8,9 +8,9 @@ import numpy as np
 
 import manim_eng._utils as utils
 from manim_eng import config_eng
+from manim_eng._base.anchor import CentreAnchor, VoltageAnchor
 from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
-from manim_eng._debug.anchor import CentreAnchor, VoltageAnchor
 from manim_eng.components.base.terminal import Terminal
 
 __all__ = ["Voltage"]
@@ -84,11 +84,6 @@ class Voltage(Markable):
         ----------
         label : str
             The label to set. Takes a TeX math mode string.
-
-        Returns
-        -------
-        Self
-            The (modified) voltage arrow.
         """
         self._set_mark(self._label, label)
         return self
@@ -101,11 +96,6 @@ class Voltage(Markable):
         clockwise : bool
             Whether the arrow should be clockwise (``True``) or anticlockwise
             (``False``).
-
-        Returns
-        -------
-        Self
-            The (modified) voltage arrow.
         """
         if clockwise == self.clockwise:
             return self
@@ -120,11 +110,6 @@ class Voltage(Markable):
         ----------
         terminal : Terminal
             The terminal that should be at the non-tip end of the voltage arrow.
-
-        Returns
-        -------
-        Self
-            The (modified) voltage arrow.
         """
         self.from_terminal = terminal
         self.update()
@@ -137,11 +122,6 @@ class Voltage(Markable):
         ----------
         terminal : Terminal
             The terminal that should be at the tip end of the voltage arrow.
-
-        Returns
-        -------
-        Self
-            The (modified) voltage arrow.
         """
         self.to_terminal = terminal
         self.update()
@@ -156,11 +136,6 @@ class Voltage(Markable):
             Whether to flip the sense of the arrow as well (clockwise to anticlockwise
             or anticlockwise to clockwise), so that the arrow remains on the same side
             of the component. Defaults to ``True``.
-
-        Returns
-        -------
-        Self
-            The (modified) voltage arrow.
         """
         self.from_terminal, self.to_terminal = self.to_terminal, self.from_terminal
         if flip_sense_as_well:

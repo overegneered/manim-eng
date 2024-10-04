@@ -1,4 +1,4 @@
-"""Diodes."""
+"""Component symbols of diodes."""
 
 import manim as mn
 import numpy as np

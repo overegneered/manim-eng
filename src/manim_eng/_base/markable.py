@@ -1,9 +1,18 @@
+"""Contains the Markable base class.
+
+See Also
+--------
+mark
+"""
+
 import abc
 from typing import Any, Self
 
 import manim as mn
 
 from manim_eng._base.mark import Mark
+
+__all__ = ["Markable"]
 
 
 class Markable(mn.VMobject, metaclass=abc.ABCMeta):

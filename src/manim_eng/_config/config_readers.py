@@ -1,3 +1,5 @@
+"""Configuration readers for parsing TOML config files to Python dictionaries."""
+
 import os
 from typing import Any
 

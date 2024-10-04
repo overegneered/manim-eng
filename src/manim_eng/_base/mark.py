@@ -1,10 +1,19 @@
+"""Contains the Mark class.
+
+See Also
+--------
+anchor, markable
+"""
+
 from typing import Any, Callable, Self
 
 import manim as mn
 
+from manim_eng._base.anchor import Anchor
 from manim_eng._config import config_eng
-from manim_eng._debug.anchor import Anchor
 from manim_eng._utils import utils
+
+__all__ = ["Mark"]
 
 
 class Mark(mn.VMobject):
@@ -17,6 +26,10 @@ class Mark(mn.VMobject):
     centre_reference : Anchor
         The anchor to use as a reference; the mark will be kept aligned to ``anchor``,
         attached to the side directly opposite the side ``centre_reference`` is on.
+
+    See Also
+    --------
+    anchor.Anchor
     """
 
     def __init__(self, anchor: Anchor, centre_reference: Anchor) -> None:

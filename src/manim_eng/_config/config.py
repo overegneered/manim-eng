@@ -1,3 +1,5 @@
+"""Configuration classes and parser as well as manim-eng's default configuration."""
+
 import dataclasses as dc
 import re
 from collections import defaultdict
@@ -112,11 +114,6 @@ class ConfigBase:
             The current TOML table the dictionary values are a representation of. Allows
             this method to produce error messages that reflect the structure of the
             TOML from which the ``dict`` was generated.
-
-        Returns
-        -------
-        Self
-            The (modified) config object on which it was called.
 
         Notes
         -----

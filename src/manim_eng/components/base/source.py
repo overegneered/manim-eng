@@ -1,4 +1,4 @@
-"""Module containing base classes for creating sources."""
+"""Base classes for creating sources."""
 
 import abc
 from typing import Any, Self
@@ -9,6 +9,14 @@ import numpy as np
 from manim_eng import config_eng
 from manim_eng.components.base.bipole import SquareBipole
 from manim_eng.components.base.terminal import Terminal
+
+__all__ = [
+    "Source",
+    "VoltageSourceBase",
+    "EuropeanVoltageSourceBase",
+    "CurrentSourceBase",
+    "EuropeanCurrentSourceBase",
+]
 
 
 class Source(SquareBipole, metaclass=abc.ABCMeta):
@@ -68,11 +76,6 @@ class VoltageSourceBase(Source, metaclass=abc.ABCMeta):
         ----------
         voltage : str
             The voltage label to set. Takes a TeX math mode string.
-
-        Returns
-        -------
-        Self
-            The (modified) voltage source on which the method was called.
         """
         if self.should_arrow and self.__arrow is None:
             self.__construct_arrow()
@@ -87,11 +90,6 @@ class VoltageSourceBase(Source, metaclass=abc.ABCMeta):
         and using `.clear_label()`, however for European sources the arrow is removed
         only when calling this method. For portability between source types it is
         therefore recommended to use this method over `.clear_label()`.
-
-        Returns
-        -------
-        Self
-            The (modified) voltage source on which the method was called.
         """
         if self.should_arrow:
             self.__clear_arrow()
@@ -165,10 +163,18 @@ class VoltageSourceBase(Source, metaclass=abc.ABCMeta):
 class EuropeanVoltageSourceBase(VoltageSourceBase, metaclass=abc.ABCMeta):
     """Base class for all European voltage sources.
 
+    Designed to be used in conjunction with the ``RoundOuter`` and ``DiamondOuter``
+    modifiers, to produce standard and controlled sources.
+
     Parameters
     ----------
     voltage : str | None
         The voltage label to set initially. Takes a TeX math mode string.
+
+    See Also
+    --------
+    modifiers.RoundOuter
+    modifiers.DiamondOuter
     """
 
     def __init__(self, voltage: str | None = None, **kwargs: Any) -> None:
@@ -207,11 +213,6 @@ class CurrentSourceBase(Source, metaclass=abc.ABCMeta):
         ----------
         label : str
             The current label to set. Takes a TeX math mode string.
-
-        Returns
-        -------
-        Self
-            The (modified) current source on which the method was called.
         """
 
     @abc.abstractmethod
@@ -222,11 +223,6 @@ class CurrentSourceBase(Source, metaclass=abc.ABCMeta):
         current label (for European sources) or the component's label (for American).
         It is recommended to use this method over `.positive.clear_current()` or
         `.clear_label()` for portability between European and American source types.
-
-        Returns
-        -------
-        Self
-            The (modified) current source on which the method was called.
         """
 
 
@@ -234,7 +230,15 @@ class EuropeanCurrentSourceBase(CurrentSourceBase, metaclass=abc.ABCMeta):
     """Base class for all European current sources.
 
     Implements the setting of current on the positive terminal that is unique to
-    European sources.
+    European sources, as well as the internal symbol of European current sources.
+
+    Designed to be used in conjunction with the ``RoundOuter`` and ``DiamondOuter``
+    modifiers, to produce standard and controlled sources.
+
+    See Also
+    --------
+    modifiers.RoundOuter
+    modifiers.DiamondOuter
     """
 
     def _construct(self) -> None:
@@ -259,11 +263,6 @@ class EuropeanCurrentSourceBase(CurrentSourceBase, metaclass=abc.ABCMeta):
         ----------
         label : str
             The current label to set. Takes a TeX math mode string.
-
-        Returns
-        -------
-        Self
-            The (modified) current source on which the method was called.
         """
         self.positive.set_current(label, out=True)
         return self
@@ -273,11 +272,6 @@ class EuropeanCurrentSourceBase(CurrentSourceBase, metaclass=abc.ABCMeta):
 
         Clears the current label (which for European sources is that of the positive
         terminal).
-
-        Returns
-        -------
-        Self
-            The (modified) current source on which the method was called.
         """
         self.positive.clear_current()
         return self

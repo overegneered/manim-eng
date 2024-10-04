@@ -1,4 +1,4 @@
-"""Monopoles, i.e. grounds and power rails."""
+"""Component symbols of monopoles, i.e. grounds and power rails."""
 
 from typing import Any
 

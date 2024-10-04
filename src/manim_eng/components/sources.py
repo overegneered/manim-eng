@@ -1,4 +1,4 @@
-"""Sources."""
+"""Component symbols of sources."""
 
 from manim_eng.components.base.modifiers import DiamondOuter, RoundOuter
 from manim_eng.components.base.source import (
