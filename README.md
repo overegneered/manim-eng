@@ -46,3 +46,7 @@ poetry run pytest
 ```
 
 though using an IDE integration, such as PyCharm's pytest runner, may be easier!
+
+## AI notice
+
+This project is mostly licenced under the MIT licence, like Manim itself. However, I specifically revoke any right or permissions to use the contents of this repository for the training of AI models without my prior written approval.
