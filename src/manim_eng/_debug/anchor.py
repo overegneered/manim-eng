@@ -6,6 +6,8 @@ import numpy as np
 
 from manim_eng._config import config_eng
 
+__all__ = ["Anchor"]
+
 
 class Anchor(mn.Arc, metaclass=abc.ABCMeta):
     def __init__(self, colour: mn.ManimColor) -> None:

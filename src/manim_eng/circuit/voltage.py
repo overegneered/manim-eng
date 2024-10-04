@@ -1,4 +1,4 @@
-"""Voltage arrow annotation for applying between component terminals."""
+"""Contains Voltage class arrow for drawing voltages between component terminals."""
 
 from typing import Any, Self, cast
 

@@ -9,6 +9,8 @@ import manim.typing as mnt
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.terminal import Terminal
 
+__all__ = ["Monopole"]
+
 
 class Monopole(Component, metaclass=abc.ABCMeta):
     """Base class for monopole components, such as grounds and rails.

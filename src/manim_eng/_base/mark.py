@@ -6,6 +6,8 @@ from manim_eng._config import config_eng
 from manim_eng._debug.anchor import Anchor
 from manim_eng._utils import utils
 
+__all__ = ["Mark"]
+
 
 class Mark(mn.VMobject):
     """A mark object, representing any textual annotation on a component.

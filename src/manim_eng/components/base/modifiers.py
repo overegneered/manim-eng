@@ -8,6 +8,8 @@ import numpy as np
 from manim_eng import config_eng
 from manim_eng.components.base.component import Component
 
+__all__ = ["RoundOuter", "DiamondOuter", "VariableModifier", "SensorModifier"]
+
 
 class RoundOuter(Component, metaclass=abc.ABCMeta):
     """Circular component outline."""

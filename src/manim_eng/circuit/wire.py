@@ -1,61 +1,19 @@
-"""Module containing wire-related classes."""
+"""Wire and related implementation classes."""
 
-import abc
 from typing import Sequence, cast
 
 import manim as mn
 import manim.typing as mnt
 import numpy as np
 
-from manim_eng import config_eng
 from manim_eng._utils import utils
+from manim_eng.circuit.base.wire import WireBase
 from manim_eng.components.base.terminal import Terminal
 
 __all__ = ["ManualWire", "Wire"]
 
 
-class _WireBase(mn.VMobject, metaclass=abc.ABCMeta):
-    def __init__(self, from_terminal: Terminal, to_terminal: Terminal, updating: bool):
-        super().__init__(stroke_width=config_eng.symbol.wire_stroke_width)
-
-        if from_terminal == to_terminal:
-            raise ValueError(
-                "`from_terminal` and `to_terminal` are identical. "
-                "Wires must have different terminals at each end."
-            )
-
-        self.from_terminal = from_terminal
-        self.to_terminal = to_terminal
-
-        self.__construct_wire()
-
-        if updating:
-            self.add_updater(lambda mob: mob.__construct_wire())
-
-    def __construct_wire(self) -> None:
-        # The extra points involving the 0.001 factors extend the wire ever so slightly
-        # into the terminals, producing a nice clean join between the terminals and the
-        # wire
-        self.set_points_as_corners(
-            [
-                self.from_terminal.end - 0.001 * self.from_terminal.direction,
-                self.from_terminal.end,
-                *self.get_corner_points(),
-                self.to_terminal.end,
-                self.to_terminal.end - 0.001 * self.to_terminal.direction,
-            ]
-        )
-
-    @abc.abstractmethod
-    def get_corner_points(self) -> list[mnt.Point3D]:
-        """Get the corner points of the wire.
-
-        Returns the vertices of the wire, not including the end points (i.e. at the
-        start and end terminals).
-        """
-
-
-class ManualWire(_WireBase):
+class ManualWire(WireBase):
     """Wire that requires its path to be manually specified.
 
     Parameters
@@ -101,7 +59,7 @@ class ManualWire(_WireBase):
         return self.corner_points
 
 
-class Wire(_WireBase):
+class Wire(WireBase):
     """Wire to automatically connect components together.
 
     The connection algorithm will do its best to avoid going 'backwards' through

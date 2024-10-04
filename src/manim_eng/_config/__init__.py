@@ -1,3 +1,5 @@
+"""Configuration management for manim-eng."""
+
 import contextlib
 import copy
 from typing import Any, Generator

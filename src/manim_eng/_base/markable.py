@@ -5,6 +5,8 @@ import manim as mn
 
 from manim_eng._base.mark import Mark
 
+__all__ = ["Markable"]
+
 
 class Markable(mn.VMobject, metaclass=abc.ABCMeta):
     """Base class for objects that can have marks attached.

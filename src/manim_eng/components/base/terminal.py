@@ -1,4 +1,4 @@
-"""Module containing the Terminal base class and helper classes."""
+"""Terminal base class and helper classes."""
 
 from typing import Any, Self
 
@@ -28,7 +28,7 @@ class CurrentArrow(mn.Triangle):
 
 
 class Terminal(Markable):
-    """Terminal for a circuit component.
+    """Terminal for a circuit component (i.e. the bit other wires connect to).
 
     Parameters
     ----------

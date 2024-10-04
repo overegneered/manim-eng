@@ -1,4 +1,4 @@
-"""Module containing the Circuit class."""
+"""Contains the Circuit class."""
 
 from typing import Any, Callable, Self, Sequence, cast
 
