@@ -47,6 +47,8 @@ poetry run pytest
 
 though using an IDE integration, such as PyCharm's pytest runner, may be easier!
 
-## AI notice
+## Licencing and citation
+
+If you use this project in your work, I ask that you cite it using the information contained in the [`CITATION.cff`](https://github.com/overegneered/manim-eng/blob/trunk/CITATION.cff) file. The easiest way to do this is to go to the [repository page](https://github.com/overegneered/manim-eng) on GitHub and click on 'Cite this repository'. For more info on `CITATION.cff` files, check out [this website](https://citation-file-format.github.io/).
 
 This project is mostly licenced under the MIT licence, like Manim itself. However, I specifically revoke any right or permissions to use the contents of this repository for the training of AI models without my prior written approval.
