@@ -36,11 +36,6 @@ class Circuit(mn.VMobject):
         ----------
         *components : Component
             The component(s) to add.
-
-        Returns
-        -------
-        Self
-            The circuit on which this method was called.
         """
         for component in components:
             # Update here to make sure that all marks are properly aligned
@@ -55,11 +50,6 @@ class Circuit(mn.VMobject):
         ----------
         *components : Component
             The component(s) to remove.
-
-        Returns
-        -------
-        Self
-            The circuit on which this method was called.
         """
         self.components.remove(*components)
         return self
@@ -73,11 +63,6 @@ class Circuit(mn.VMobject):
             The terminal the connecting wire should start at.
         to_terminal : Terminal
             The terminal the connecting wire should end at.
-
-        Returns
-        -------
-        Self
-            The circuit on which this method was called.
 
         Raises
         ------
@@ -101,11 +86,6 @@ class Circuit(mn.VMobject):
         ----------
         *components_or_terminals : Component | Terminal
             The group of components and terminals to disconnect from one another.
-
-        Returns
-        -------
-        Self
-            The circuit on which this method was called.
 
         Raises
         ------
@@ -136,11 +116,6 @@ class Circuit(mn.VMobject):
         ----------
         *components_or_terminals : Component | Terminal
             The components and terminals to completely disconnect from the circuit.
-
-        Returns
-        -------
-        Self
-            The circuit on which this method was called.
 
         Raises
         ------

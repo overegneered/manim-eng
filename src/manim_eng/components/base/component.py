@@ -95,23 +95,12 @@ class Component(Markable, metaclass=abc.ABCMeta):
         ----------
         label : str
             The label to set. Takes a TeX math mode string.
-
-        Returns
-        -------
-        Self
-            The (modified) component on which the method was called.
         """
         self._set_mark(self._label, label)
         return self
 
     def clear_label(self) -> Self:
-        """Clear the label of the component.
-
-        Returns
-        -------
-        Self
-            The (modified) component on which the method was called.
-        """
+        """Clear the label of the component."""
         self._clear_mark(self._label)
         return self
 
@@ -122,23 +111,12 @@ class Component(Markable, metaclass=abc.ABCMeta):
         ----------
         annotation : str
             The annotation to set. Takes a TeX math mode string.
-
-        Returns
-        -------
-        Self
-            The (modified) component on which the method was called.
         """
         self._set_mark(self._annotation, annotation)
         return self
 
     def clear_annotation(self) -> Self:
-        """Clear the annotation of the component.
-
-        Returns
-        -------
-        Self
-            The (modified) component on which the method was called.
-        """
+        """Clear the annotation of the component."""
         self._clear_mark(self._annotation)
         return self
 

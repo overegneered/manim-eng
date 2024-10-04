@@ -113,11 +113,6 @@ class ConfigBase:
             this method to produce error messages that reflect the structure of the
             TOML from which the ``dict`` was generated.
 
-        Returns
-        -------
-        Self
-            The (modified) config object on which it was called.
-
         Notes
         -----
         This method is written as a strict intermediary between the configuration TOML

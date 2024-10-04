@@ -68,11 +68,6 @@ class VoltageSourceBase(Source, metaclass=abc.ABCMeta):
         ----------
         voltage : str
             The voltage label to set. Takes a TeX math mode string.
-
-        Returns
-        -------
-        Self
-            The (modified) voltage source on which the method was called.
         """
         if self.should_arrow and self.__arrow is None:
             self.__construct_arrow()
@@ -87,11 +82,6 @@ class VoltageSourceBase(Source, metaclass=abc.ABCMeta):
         and using `.clear_label()`, however for European sources the arrow is removed
         only when calling this method. For portability between source types it is
         therefore recommended to use this method over `.clear_label()`.
-
-        Returns
-        -------
-        Self
-            The (modified) voltage source on which the method was called.
         """
         if self.should_arrow:
             self.__clear_arrow()
@@ -207,11 +197,6 @@ class CurrentSourceBase(Source, metaclass=abc.ABCMeta):
         ----------
         label : str
             The current label to set. Takes a TeX math mode string.
-
-        Returns
-        -------
-        Self
-            The (modified) current source on which the method was called.
         """
 
     @abc.abstractmethod
@@ -222,11 +207,6 @@ class CurrentSourceBase(Source, metaclass=abc.ABCMeta):
         current label (for European sources) or the component's label (for American).
         It is recommended to use this method over `.positive.clear_current()` or
         `.clear_label()` for portability between European and American source types.
-
-        Returns
-        -------
-        Self
-            The (modified) current source on which the method was called.
         """
 
 
@@ -259,11 +239,6 @@ class EuropeanCurrentSourceBase(CurrentSourceBase, metaclass=abc.ABCMeta):
         ----------
         label : str
             The current label to set. Takes a TeX math mode string.
-
-        Returns
-        -------
-        Self
-            The (modified) current source on which the method was called.
         """
         self.positive.set_current(label, out=True)
         return self
@@ -273,11 +248,6 @@ class EuropeanCurrentSourceBase(CurrentSourceBase, metaclass=abc.ABCMeta):
 
         Clears the current label (which for European sources is that of the positive
         terminal).
-
-        Returns
-        -------
-        Self
-            The (modified) current source on which the method was called.
         """
         self.positive.clear_current()
         return self
