@@ -116,7 +116,7 @@ class Mark(mn.VMobject):
 
         def updater(mark: mn.Mobject) -> None:
             line_of_connection = anchor.pos - centre_reference.pos
-            line_of_connection = utils.normalised(line_of_connection)
+            line_of_connection = mn.normalize(line_of_connection)
             line_of_connection = utils.cardinalised(
                 line_of_connection, config_eng.symbol.mark_cardinal_alignment_margin
             )

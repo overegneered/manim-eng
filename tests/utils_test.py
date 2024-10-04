@@ -4,25 +4,6 @@ import numpy as np
 import pytest
 from manim_eng._utils import utils
 
-
-@pytest.mark.parametrize(
-    ("vector", "expected"),
-    [
-        pytest.param([1, 0, 0], [1, 0, 0], id="unit vector doesn't change"),
-        pytest.param([1, 1, 0], [0.70710678, 0.70710678, 0], id="non-unit vector"),
-    ],
-)
-def test_normalised(vector: list[float], expected: list[float]) -> None:
-    vector = np.array(vector)  # type: ignore[assignment]
-    vector_original = copy.deepcopy(vector)
-    expected = np.array(expected)  # type: ignore[assignment]
-
-    result = utils.normalised(vector)
-
-    assert np.allclose(result, expected, rtol=0.001)
-    assert np.all(vector == vector_original)
-
-
 STANDARD_MARGIN = np.deg2rad(5)
 
 
