@@ -1,4 +1,4 @@
-# Docstring guide
+# Docstring style guide
 
 This short guide aims to be a quick reference on how docstrings should be written, for consistency. First of all,
 manim-eng's docstrings follow the `numpydoc` standard, so the
@@ -9,7 +9,9 @@ cover specifics however, so this aims to clear up some ambiguity for this specif
 
 Module docstrings should follow the `numpydoc` standard. The summary line should not include the words 'module',
 'package', or similar, as the fact that it is a module is obvious. It should rather be a summary of what the module
-*contains*.
+*contains*. The word 'contains' may itself only be used if the file contains a single class, to emphasise that the
+module itself is not the class. If the file contains several classes, the summary line should be a summary of the
+different classes contained within.
 
 ## Classes
 
