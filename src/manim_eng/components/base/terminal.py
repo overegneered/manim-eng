@@ -102,11 +102,6 @@ class Terminal(Markable):
             Whether the annotation should be placed below the current arrow, or above it
             (which is the default). Note that 'below' here is defined as below the
             terminal when it is pointing right.
-
-        Returns
-        -------
-        Self
-            The (modified) terminal on which the method was called.
         """
         if not self._current_arrow_showing:
             self.__rebuild_current_arrow()
@@ -128,13 +123,7 @@ class Terminal(Markable):
         return self
 
     def clear_current(self) -> Self:
-        """Clear the current annotation of the terminal.
-
-        Returns
-        -------
-        Self
-            The (modified) terminal on which the method was called.
-        """
+        """Clear the current annotation of the terminal."""
         self.remove(self._current_arrow)
         self._current_arrow_showing = False
         self._clear_mark(self._current)
