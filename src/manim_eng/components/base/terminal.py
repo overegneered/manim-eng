@@ -86,11 +86,13 @@ class Terminal(Markable):
         """Return the global position of the end of the terminal."""
         return self._end_anchor.pos
 
-    def reset_current(self, label: str, out: bool = False, below: bool = False) -> Self:
-        """Set the current label of the terminal. Unspecified arguments are reset.
+    def set_current(
+        self, label: str, out: bool | None = None, below: bool | None = None
+    ) -> Self:
+        """Set the current label of the terminal.
 
-        Set the current label, with unspecified arguments being reset to their original
-        (default) values.
+        Sets the current label, with unspecified arguments being left to their current
+        values.
 
         Parameters
         ----------
@@ -107,18 +109,19 @@ class Terminal(Markable):
 
         See Also
         --------
-        set_current - set the current label without resetting unspecified arguments.
+        reset_current: Set the current label, with unspecified arguments being reset
+                       to default.
         """
         if not self._current_arrow_showing:
             self.__rebuild_current_arrow()
             self.add(self._current_arrow)
             self._current_arrow_showing = True
 
-        if out != self._current_arrow_pointing_out:
+        if out is not None and out != self._current_arrow_pointing_out:
             self._current_arrow.rotate(mn.PI, about_point=self._centre_anchor.pos)
             self._current_arrow_pointing_out = out
 
-        if below != self._current_mark_anchored_below:
+        if below is not None and below != self._current_mark_anchored_below:
             self._current.change_anchors(
                 self._bottom_anchor if below else self._top_anchor,
                 self._centre_anchor,
@@ -127,6 +130,32 @@ class Terminal(Markable):
 
         self._set_mark(self._current, label)
         return self
+
+    def reset_current(self, label: str, out: bool = False, below: bool = False) -> Self:
+        """Set the current label of the terminal. Unspecified arguments are reset.
+
+        Sets the current label, with unspecified arguments being reset to their original
+        (default) values. In contrast to its sister method `.set_current()`, this method
+        will always produce the same result regardless of where it is called.
+
+        Parameters
+        ----------
+        label : str
+            The current label to set. Takes a TeX math mode string.
+        out : bool
+            Whether the arrow accompanying the annotation should point out (away from
+            the body of the component to which the terminal is attached), or in (towards
+            the component, this is the default).
+        below : bool
+            Whether the annotation should be placed below the current arrow, or above it
+            (which is the default). Note that 'below' here is defined as below the
+            terminal when it is pointing right.
+
+        See Also
+        --------
+        set_current: Set the current label without resetting unspecified arguments.
+        """
+        return self.set_current(label, out, below)
 
     def clear_current(self) -> Self:
         """Clear the current annotation of the terminal."""
