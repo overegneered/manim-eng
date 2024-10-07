@@ -134,6 +134,37 @@ class Voltage(Markable):
         """Set the sense of the voltage arrow to be anticlockwise."""
         return self.set_clockwise(clockwise=False)
 
+    def set_terminals(
+        self, from_terminal: Terminal | None = None, to_terminal: Terminal | None = None
+    ) -> Self:
+        """Set the terminal(s) the arrow goes from/to.
+
+        Parameters
+        ----------
+        from_terminal : Terminal | None
+            The terminal to attach the start of the arrow to.
+        to_terminal : Terminal | None
+            The terminal to attach the end of the arrow to.
+
+        Raises
+        ------
+        ValueError
+            If neither `from_terminal` or `to_terminal` are specified.
+
+        See Also
+        --------
+        set_from_terminal
+        set_to_terminal
+        """
+        if from_terminal == to_terminal is None:
+            raise ValueError("Neither `from_terminal` nor `to_terminal` specified.")
+        if from_terminal is not None:
+            self.from_terminal = from_terminal
+        if to_terminal is not None:
+            self.to_terminal = to_terminal
+        self.update()
+        return self
+
     def set_from_terminal(self, terminal: Terminal) -> Self:
         """Set the terminal the arrow should point from.
 
@@ -142,9 +173,7 @@ class Voltage(Markable):
         terminal : Terminal
             The terminal that should be at the non-tip end of the voltage arrow.
         """
-        self.from_terminal = terminal
-        self.update()
-        return self
+        return self.set_terminals(from_terminal=terminal)
 
     def set_to_terminal(self, terminal: Terminal) -> Self:
         """Set the terminal the arrow should point to.
@@ -154,9 +183,7 @@ class Voltage(Markable):
         terminal : Terminal
             The terminal that should be at the tip end of the voltage arrow.
         """
-        self.to_terminal = terminal
-        self.update()
-        return self
+        return self.set_terminals(to_terminal=terminal)
 
     def flip_direction(self, flip_sense_as_well: bool = True) -> Self:
         """Flip the direction of the voltage arrow.
