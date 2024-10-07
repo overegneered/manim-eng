@@ -346,7 +346,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
             self.set_annotation(annotation)
 
     @mn.override_animate(set_label)
-    def _animate_set_label(
+    def __animate_set_label(
         self, label: str, anim_args: dict[str, Any] | None = None
     ) -> mn.Animation:
         if anim_args is None:
@@ -354,7 +354,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
         return self.animate(**anim_args)._set_mark(self._label, label).build()
 
     @mn.override_animate(clear_label)
-    def _animate_clear_label(
+    def __animate_clear_label(
         self, anim_args: dict[str, Any] | None = None
     ) -> mn.Animation:
         if anim_args is None:
@@ -362,7 +362,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
         return self.animate(**anim_args)._clear_mark(self._label).build()
 
     @mn.override_animate(set_annotation)
-    def _animate_set_annotation(
+    def __animate_set_annotation(
         self, label: str, anim_args: dict[str, Any] | None = None
     ) -> mn.Animation:
         if anim_args is None:
@@ -370,7 +370,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
         return self.animate(**anim_args)._set_mark(self._annotation, label).build()
 
     @mn.override_animate(clear_annotation)
-    def _animate_clear_annotation(
+    def __animate_clear_annotation(
         self, anim_args: dict[str, Any] | None = None
     ) -> mn.Animation:
         if anim_args is None:
