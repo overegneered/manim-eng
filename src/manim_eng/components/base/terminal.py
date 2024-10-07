@@ -86,8 +86,11 @@ class Terminal(Markable):
         """Return the global position of the end of the terminal."""
         return self._end_anchor.pos
 
-    def set_current(self, label: str, out: bool = False, below: bool = False) -> Self:
-        """Set the current annotation of the terminal.
+    def reset_current(self, label: str, out: bool = False, below: bool = False) -> Self:
+        """Set the current label of the terminal. Unspecified arguments are reset.
+
+        Set the current label, with unspecified arguments being reset to their original
+        (default) values.
 
         Parameters
         ----------
@@ -101,6 +104,10 @@ class Terminal(Markable):
             Whether the annotation should be placed below the current arrow, or above it
             (which is the default). Note that 'below' here is defined as below the
             terminal when it is pointing right.
+
+        See Also
+        --------
+        set_current - set the current label without resetting unspecified arguments.
         """
         if not self._current_arrow_showing:
             self.__rebuild_current_arrow()
@@ -158,7 +165,7 @@ class Terminal(Markable):
             angle_to_rotate += np.pi
         self._current_arrow = CurrentArrow(self._centre_anchor.pos, angle_to_rotate)
 
-    @mn.override_animate(set_current)
+    @mn.override_animate(reset_current)
     def __animate_set_current(
         self,
         label: str,

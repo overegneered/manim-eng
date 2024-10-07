@@ -68,7 +68,7 @@ class Monopole(Component, metaclass=abc.ABCMeta):
             (which is the default). Note that 'below' here is defined as below the
             terminal when it is pointing right.
         """
-        self.terminal.set_current(label, out=out, below=below)
+        self.terminal.reset_current(label, out=out, below=below)
         return self
 
     def clear_current(self) -> Self:

@@ -264,7 +264,7 @@ class EuropeanCurrentSourceBase(CurrentSourceBase, metaclass=abc.ABCMeta):
         label : str
             The current label to set. Takes a TeX math mode string.
         """
-        self.positive.set_current(label, out=True)
+        self.positive.reset_current(label, out=True)
         return self
 
     def clear_current(self) -> Self:
