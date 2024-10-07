@@ -83,14 +83,37 @@ class Voltage(Markable):
         ----------
         label : str
             The label to set. Takes a TeX math mode string.
-        clockwise : bool
+        clockwise : bool | None
             Whether the arrow should go clockwise or anticlockwise. If unspecified,
             takes the previous setting.
+
+        See Also
+        --------
+        reset_label: Set the voltage label, with the sense of the arrow being reset to
+                     default if unspecified.
         """
         self._set_mark(self._label, label)
         if clockwise is not None:
             self.set_clockwise(clockwise=clockwise)
         return self
+
+    def reset_label(self, label: str, clockwise: bool = False) -> Self:
+        """Set the voltage label, with the sense being reset to default if unspecified.
+
+        Parameters
+        ----------
+        label : str
+            The label to set. Takes a TeX math mode string.
+        clockwise : bool
+            Whether the arrow should go clockwise or anticlockwise. If unspecified,
+            takes the default setting (``False``).
+
+        See Also
+        --------
+        set_label: Set the voltage label, with the sense of the arrow being left as-is
+                   if unspecified.
+        """
+        return self.set_label(label=label, clockwise=clockwise)
 
     def set_clockwise(self, clockwise: bool = True) -> Self:
         """Set the sense of the voltage arrow (clockwise or anticlockwise).
@@ -313,7 +336,7 @@ class Voltage(Markable):
         return 2 * cast(float, np.arcsin(length / (2 * radius)))
 
     @mn.override_animate(set_label)
-    def __animate_set_voltage(
+    def __animate_set_label(
         self,
         label: str,
         clockwise: bool | None = None,
@@ -334,3 +357,18 @@ class Voltage(Markable):
             animations.append(arrow_animation)
 
         return mn.AnimationGroup(*animations)
+
+    @mn.override_animate(reset_label)
+    def __animate_reset_label(
+        self,
+        label: str,
+        clockwise: bool = False,
+        anim_args: dict[str, Any] | None = None,
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+        return (
+            self.animate(**anim_args)
+            .set_label(label=label, clockwise=clockwise)
+            .build()
+        )
