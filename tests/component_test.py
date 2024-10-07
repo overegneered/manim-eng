@@ -1,7 +1,7 @@
 import pytest
 from manim_eng.components.base.component import Component
 
-from .test_utils.dummy_component import DummyComponent
+from .test_utils.dummy_component import DummyComponent, DummyComponentMockedTerminals
 
 
 def test_set_label_no_existing_label(dummy_component: Component) -> None:
@@ -103,6 +103,143 @@ def test_voltage_errors_if_terminals_are_the_same(
         dummy_component.voltage("terminal_1", "terminal_1")
 
 
+def test_set_current_no_terminal_specified(
+    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
+) -> None:
+    current_label = "current label"
+
+    dummy_component_mocked_terminals.set_current(current_label)
+
+    dummy_component_mocked_terminals.cast_terminals[
+        0
+    ].set_current.assert_called_once_with(current_label)
+    dummy_component_mocked_terminals.cast_terminals[1].set_current.assert_not_called()
+
+
+def test_set_current_string_terminal_specified(
+    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
+) -> None:
+    current_label = "current label still"
+
+    dummy_component_mocked_terminals.set_current(current_label, terminal="terminal_2")
+
+    dummy_component_mocked_terminals.terminal_2.set_current.assert_called_once_with(
+        current_label
+    )
+    dummy_component_mocked_terminals.terminal_1.set_current.assert_not_called()
+
+
+def test_set_current_actual_terminal_specified(
+    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
+) -> None:
+    current_label = "current label again"
+
+    dummy_component_mocked_terminals.set_current(
+        current_label, terminal=dummy_component_mocked_terminals.terminal_2
+    )
+
+    dummy_component_mocked_terminals.terminal_2.set_current.assert_called_once_with(
+        current_label
+    )
+    dummy_component_mocked_terminals.terminal_1.set_current.assert_not_called()
+
+
+def test_set_current_passes_kwargs_on_to_set_current_on_terminal(
+    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
+) -> None:
+    current_label = "current label once more"
+
+    dummy_component_mocked_terminals.set_current(current_label, out=True, below=True)
+
+    dummy_component_mocked_terminals.cast_terminals[
+        0
+    ].set_current.assert_called_once_with(current_label, out=True, below=True)
+
+
+def test_reset_current_no_terminal_specified(
+    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
+) -> None:
+    current_label = "current label"
+
+    dummy_component_mocked_terminals.reset_current(current_label)
+
+    dummy_component_mocked_terminals.cast_terminals[
+        0
+    ].reset_current.assert_called_once_with(current_label)
+    dummy_component_mocked_terminals.cast_terminals[1].reset_current.assert_not_called()
+
+
+def test_reset_current_string_terminal_specified(
+    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
+) -> None:
+    current_label = "current label still"
+
+    dummy_component_mocked_terminals.reset_current(current_label, terminal="terminal_2")
+
+    dummy_component_mocked_terminals.terminal_2.reset_current.assert_called_once_with(
+        current_label
+    )
+    dummy_component_mocked_terminals.terminal_1.reset_current.assert_not_called()
+
+
+def test_reset_current_actual_terminal_specified(
+    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
+) -> None:
+    current_label = "current label again"
+
+    dummy_component_mocked_terminals.reset_current(
+        current_label, terminal=dummy_component_mocked_terminals.terminal_2
+    )
+
+    dummy_component_mocked_terminals.terminal_2.reset_current.assert_called_once_with(
+        current_label
+    )
+    dummy_component_mocked_terminals.terminal_1.reset_current.assert_not_called()
+
+
+def test_reset_current_passes_kwargs_on_to_reset_current_on_terminal(
+    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
+) -> None:
+    current_label = "current label once more"
+
+    dummy_component_mocked_terminals.reset_current(current_label, out=True, below=True)
+
+    dummy_component_mocked_terminals.cast_terminals[
+        0
+    ].reset_current.assert_called_once_with(current_label, out=True, below=True)
+
+
+def test_clear_current_no_terminal_specified(
+    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
+) -> None:
+    dummy_component_mocked_terminals.clear_current()
+
+    dummy_component_mocked_terminals.cast_terminals[
+        0
+    ].clear_current.assert_called_once()
+    dummy_component_mocked_terminals.cast_terminals[1].clear_current.assert_not_called()
+
+
+def test_clear_current_string_terminal_specified(
+    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
+) -> None:
+    dummy_component_mocked_terminals.clear_current(terminal="terminal_2")
+
+    dummy_component_mocked_terminals.terminal_2.clear_current.assert_called_once()
+    dummy_component_mocked_terminals.terminal_1.clear_current.assert_not_called()
+
+
+def test_clear_current_actual_terminal_specified(
+    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
+) -> None:
+    dummy_component_mocked_terminals.clear_current(
+        terminal=dummy_component_mocked_terminals.terminal_2
+    )
+
+    dummy_component_mocked_terminals.terminal_2.clear_current.assert_called_once()
+    dummy_component_mocked_terminals.terminal_1.clear_current.assert_not_called()
+
+
 def test_get_or_check_terminal_non_belonging_terminal() -> None:
     component = DummyComponent()
     other_component = DummyComponent()
@@ -142,3 +279,11 @@ def test_get_or_check_terminal_valid_string(dummy_component: DummyComponent) -> 
     result = dummy_component._get_or_check_terminal("terminal_1")
 
     assert result == dummy_component.terminal_1
+
+
+def test_get_or_check_terminal_terminal_is_none(
+    dummy_component: DummyComponent,
+) -> None:
+    result = dummy_component._get_or_check_terminal(None)
+
+    assert result == dummy_component.terminals[0]

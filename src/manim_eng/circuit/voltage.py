@@ -76,29 +76,92 @@ class Voltage(Markable):
         self._label = Mark(self._anchor, self._centre_reference)
         self._set_mark(self._label, label)
 
-    def set_voltage(self, label: str) -> Self:
+    def set_label(self, label: str, clockwise: bool | None = None) -> Self:
         """Set the voltage label.
 
         Parameters
         ----------
         label : str
             The label to set. Takes a TeX math mode string.
+        clockwise : bool | None
+            Whether the arrow should go clockwise or anticlockwise. If unspecified,
+            takes the previous setting.
+
+        See Also
+        --------
+        reset_label: Set the voltage label, with the sense of the arrow being reset to
+                     default if unspecified.
         """
         self._set_mark(self._label, label)
+        if clockwise is not None:
+            self.set_clockwise(clockwise=clockwise)
         return self
 
-    def set_sense(self, clockwise: bool) -> Self:
+    def reset_label(self, label: str, clockwise: bool = False) -> Self:
+        """Set the voltage label, with the sense being reset to default if unspecified.
+
+        Parameters
+        ----------
+        label : str
+            The label to set. Takes a TeX math mode string.
+        clockwise : bool
+            Whether the arrow should go clockwise or anticlockwise. If unspecified,
+            takes the default setting (``False``).
+
+        See Also
+        --------
+        set_label: Set the voltage label, with the sense of the arrow being left as-is
+                   if unspecified.
+        """
+        return self.set_label(label=label, clockwise=clockwise)
+
+    def set_clockwise(self, clockwise: bool = True) -> Self:
         """Set the sense of the voltage arrow (clockwise or anticlockwise).
 
         Parameters
         ----------
         clockwise : bool
             Whether the arrow should be clockwise (``True``) or anticlockwise
-            (``False``).
+            (``False``). Defaults to clockwise.
         """
         if clockwise == self.clockwise:
             return self
         self.clockwise = clockwise
+        self.update()
+        return self
+
+    def set_anticlockwise(self) -> Self:
+        """Set the sense of the voltage arrow to be anticlockwise."""
+        return self.set_clockwise(clockwise=False)
+
+    def set_terminals(
+        self, from_terminal: Terminal | None = None, to_terminal: Terminal | None = None
+    ) -> Self:
+        """Set the terminal(s) the arrow goes from/to.
+
+        Parameters
+        ----------
+        from_terminal : Terminal | None
+            The terminal to attach the start of the arrow to.
+        to_terminal : Terminal | None
+            The terminal to attach the end of the arrow to.
+
+        Raises
+        ------
+        ValueError
+            If neither `from_terminal` or `to_terminal` are specified.
+
+        See Also
+        --------
+        set_from_terminal
+        set_to_terminal
+        """
+        if from_terminal == to_terminal is None:
+            raise ValueError("Neither `from_terminal` nor `to_terminal` specified.")
+        if from_terminal is not None:
+            self.from_terminal = from_terminal
+        if to_terminal is not None:
+            self.to_terminal = to_terminal
         self.update()
         return self
 
@@ -110,9 +173,7 @@ class Voltage(Markable):
         terminal : Terminal
             The terminal that should be at the non-tip end of the voltage arrow.
         """
-        self.from_terminal = terminal
-        self.update()
-        return self
+        return self.set_terminals(from_terminal=terminal)
 
     def set_to_terminal(self, terminal: Terminal) -> Self:
         """Set the terminal the arrow should point to.
@@ -122,9 +183,7 @@ class Voltage(Markable):
         terminal : Terminal
             The terminal that should be at the tip end of the voltage arrow.
         """
-        self.to_terminal = terminal
-        self.update()
-        return self
+        return self.set_terminals(to_terminal=terminal)
 
     def flip_direction(self, flip_sense_as_well: bool = True) -> Self:
         """Flip the direction of the voltage arrow.
@@ -303,10 +362,40 @@ class Voltage(Markable):
         length = np.linalg.norm(self._direction)
         return 2 * cast(float, np.arcsin(length / (2 * radius)))
 
-    @mn.override_animate(set_voltage)
-    def __animate_set_voltage(
-        self, label: str, anim_args: dict[str, Any] | None = None
+    @mn.override_animate(set_label)
+    def __animate_set_label(
+        self,
+        label: str,
+        clockwise: bool | None = None,
+        anim_args: dict[str, Any] | None = None,
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
-        return self.animate(**anim_args)._set_mark(self._label, label).build()
+
+        label_animation = (
+            self.animate(**anim_args)._set_mark(self._label, label).build()
+        )
+        animations = [label_animation]
+
+        if clockwise is not None:
+            self._arrow.generate_target()
+            self._arrow.target.set_clockwise(clockwise)
+            arrow_animation = mn.MoveToTarget(self._arrow)
+            animations.append(arrow_animation)
+
+        return mn.AnimationGroup(*animations)
+
+    @mn.override_animate(reset_label)
+    def __animate_reset_label(
+        self,
+        label: str,
+        clockwise: bool = False,
+        anim_args: dict[str, Any] | None = None,
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+        return (
+            self.animate(**anim_args)
+            .set_label(label=label, clockwise=clockwise)
+            .build()
+        )
