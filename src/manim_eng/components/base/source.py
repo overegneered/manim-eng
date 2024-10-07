@@ -199,32 +199,6 @@ class CurrentSourceBase(Source, metaclass=abc.ABCMeta):
         if current is not None:
             self.set_current(current)
 
-    @abc.abstractmethod
-    def set_current(self, label: str) -> Self:
-        """Set the current label.
-
-        Sets the current label of the source. The underlying label used to display this
-        differs by source type: European sources use the positive terminal's current
-        label, American sources use the component's label. It is recommended to use this
-        method over `.positive.set_current()` or `.set_label()` for portability between
-        European and American source types.
-
-        Parameters
-        ----------
-        label : str
-            The current label to set. Takes a TeX math mode string.
-        """
-
-    @abc.abstractmethod
-    def clear_current(self) -> Self:
-        """Clear the current label.
-
-        Clears the current label of the source, being either the positive terminal's
-        current label (for European sources) or the component's label (for American).
-        It is recommended to use this method over `.positive.clear_current()` or
-        `.clear_label()` for portability between European and American source types.
-        """
-
 
 class EuropeanCurrentSourceBase(CurrentSourceBase, metaclass=abc.ABCMeta):
     """Base class for all European current sources.
@@ -250,46 +224,3 @@ class EuropeanCurrentSourceBase(CurrentSourceBase, metaclass=abc.ABCMeta):
                 end=mn.DOWN * half_width,
             ).match_style(self)
         )
-
-    def set_current(self, label: str) -> Self:
-        """Set the current of the source.
-
-        Sets the current label of the source using the positive terminal's current
-        label. Can be used in conjunction with `.positive.set_current()` and
-        `.positive.clear_current()` methods, but for portability with the American
-        current sources this is not recommended.
-
-        Parameters
-        ----------
-        label : str
-            The current label to set. Takes a TeX math mode string.
-        """
-        self.positive.reset_current(label, out=True)
-        return self
-
-    def clear_current(self) -> Self:
-        """Clear the current label of the source.
-
-        Clears the current label (which for European sources is that of the positive
-        terminal).
-        """
-        self.positive.clear_current()
-        return self
-
-    @mn.override_animate(set_current)
-    def __animate_set_current(
-        self, label: str, anim_args: dict[Any, str] | None = None
-    ) -> mn.Animation:
-        if anim_args is None:
-            anim_args = {}
-
-        return self.positive.animate(**anim_args).set_current(label, out=True).build()
-
-    @mn.override_animate(clear_current)
-    def __animate_clear_current(
-        self, anim_args: dict[Any, str] | None = None
-    ) -> mn.Animation:
-        if anim_args is None:
-            anim_args = {}
-
-        return self.positive.animate(**anim_args).clear_current().build()
