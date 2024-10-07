@@ -98,14 +98,16 @@ class Terminal(Markable):
         ----------
         label : str
             The current label to set. Takes a TeX math mode string.
-        out : bool
+        out : bool | None
             Whether the arrow accompanying the annotation should point out (away from
             the body of the component to which the terminal is attached), or in (towards
-            the component, this is the default).
-        below : bool
-            Whether the annotation should be placed below the current arrow, or above it
-            (which is the default). Note that 'below' here is defined as below the
-            terminal when it is pointing right.
+            the component). If unspecified, falls back to the previous setting, or if
+            there is none, the default (``False``).
+        below : bool | None
+            Whether the annotation should be placed below the current arrow, or above
+            it. Note that 'below' here is defined as below the terminal when it is
+            pointing right. If unspecified, falls back to the previous setting, or if
+            there is none, the default (``False``).
 
         See Also
         --------
@@ -155,7 +157,7 @@ class Terminal(Markable):
         --------
         set_current: Set the current label without resetting unspecified arguments.
         """
-        return self.set_current(label, out, below)
+        return self.set_current(label=label, out=out, below=below)
 
     def clear_current(self) -> Self:
         """Clear the current annotation of the terminal."""
@@ -194,12 +196,12 @@ class Terminal(Markable):
             angle_to_rotate += np.pi
         self._current_arrow = CurrentArrow(self._centre_anchor.pos, angle_to_rotate)
 
-    @mn.override_animate(reset_current)
+    @mn.override_animate(set_current)
     def __animate_set_current(
         self,
         label: str,
-        out: bool = False,
-        below: bool = False,
+        out: bool | None = None,
+        below: bool | None = None,
         anim_args: dict[str, Any] | None = None,
     ) -> mn.Animation:
         if anim_args is None:
@@ -207,7 +209,7 @@ class Terminal(Markable):
 
         animations: list[mn.Animation] = []
 
-        rotation_needed = out != self._current_arrow_pointing_out
+        rotation_needed = out is not None and out != self._current_arrow_pointing_out
 
         if not self._current_arrow_showing:
             self.__rebuild_current_arrow()
@@ -215,7 +217,7 @@ class Terminal(Markable):
             self._current_arrow_showing = True
             if rotation_needed:
                 self._current_arrow.rotate(mn.PI, about_point=self._centre_anchor.pos)
-            self._current_arrow_pointing_out = out
+                self._current_arrow_pointing_out = out  # type: ignore[assignment]
             arrow_animation = mn.Create(self._current_arrow, **anim_args)
             animations.append(arrow_animation)
 
@@ -226,10 +228,10 @@ class Terminal(Markable):
                 about_point=self._centre_anchor.pos,
                 **anim_args,
             )
-            self._current_arrow_pointing_out = out
+            self._current_arrow_pointing_out = out  # type: ignore[assignment]
             animations.append(arrow_animation)
 
-        if below != self._current_mark_anchored_below:
+        if below is not None and below != self._current_mark_anchored_below:
             self._current.change_anchors(
                 self._bottom_anchor if below else self._top_anchor,
                 self._centre_anchor,
@@ -242,6 +244,22 @@ class Terminal(Markable):
         animations.append(label_animation)
 
         return mn.AnimationGroup(*animations)
+
+    @mn.override_animate(reset_current)
+    def __animate_reset_current(
+        self,
+        label: str,
+        out: bool = False,
+        below: bool = False,
+        anim_args: dict[str, Any] | None = None,
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+        return (
+            self.animate(**anim_args)
+            .set_current(label=label, out=out, below=below)
+            .build()
+        )
 
     @mn.override_animate(clear_current)
     def __animate_clear_current(
