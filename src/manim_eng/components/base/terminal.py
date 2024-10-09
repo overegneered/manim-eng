@@ -182,7 +182,7 @@ class Terminal(Markable):
         - The ``_family`` argument has no effect.
         """
         self.line.match_style(vmobject)
-        self.line.stroke_width = config_eng.symbol.wire_stroke_width
+        self.line.set_stroke(width=config_eng.symbol.wire_stroke_width)
         return self
 
     def __rebuild_current_arrow(self) -> None:

@@ -1,7 +1,7 @@
 """Contains the Component base class."""
 
 import abc
-from typing import Any, Self
+from typing import Any, Self, cast
 
 import manim as mn
 import manim.typing as mnt
@@ -44,20 +44,19 @@ class Component(Markable, metaclass=abc.ABCMeta):
             stroke_width=config_eng.symbol.component_stroke_width, **kwargs
         )
 
-        self.terminals = terminals
-
         self._centre_anchor = CentreAnchor()
         self._label_anchor = LabelAnchor()
         self._annotation_anchor = AnnotationAnchor()
 
+        for terminal in terminals:
+            terminal.match_style(self)
+        self._terminals = mn.VGroup(*terminals)
         self._body = mn.VGroup()
         self.add(self._body)
 
         self._construct()
 
-        for terminal in self.terminals:
-            terminal.match_style(self)
-        self._body.add(*self.terminals)
+        self._body.add(self._terminals)
 
         self.__set_up_anchors()
         self._label = Mark(self._label_anchor, self._centre_anchor)
@@ -72,6 +71,11 @@ class Component(Markable, metaclass=abc.ABCMeta):
         has to perform initialisation both before (to set up the groups etc.) and after
         (to set the anchor positions for annotations) the component's shape setup.
         """
+
+    @property
+    def terminals(self) -> list[Terminal]:
+        """The list of terminals of the component."""
+        return cast(list[Terminal], self._terminals.submobjects)
 
     def get_center(self) -> mnt.Point3D:
         """Get the centre of the components.

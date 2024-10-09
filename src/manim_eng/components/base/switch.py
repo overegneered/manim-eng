@@ -13,6 +13,7 @@ from manim_eng.components.base.terminal import Terminal
 __all__ = ["BipoleSwitchBase", "PushSwitchBase"]
 
 
+# TODO: #18 review this in light of the new Node class
 class OpenNode(mn.Arc):
     def __init__(self, match_to: mn.VMobject) -> None:
         super().__init__(
