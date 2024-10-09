@@ -272,46 +272,31 @@ class Node(Component):
         """
         return self.set_autoblobbing(False)
 
-    def set_open(self, open_: bool, reenable_autoblobbing: bool = True) -> Self:
-        """Set the type of the node (open or filled).
+    def make_open(self, make_visible: bool = True) -> Self:
+        """Set the type of the node to open (an empty circle).
 
-        If the node type is set to open, autoblobbing will be automatically disabled. If
-        set to filled, autoblobbing will be automatically enabled if
-        ``reenable_autoblobbing`` is ``True``.
+        Autoblobbing will be automatically disabled by this call. By default, it will
+        also make the node symbol appear (i.e. an unfilled circle), regardless of
+        whether it was showing before. Use the ``make_visible`` parameter to adjust this
+        behaviour.
 
         Parameters
         ----------
-        open_ : bool
-            Whether the node should be open (``True``) or filled (``False``).
-        reenable_autoblobbing : bool
-            Whether autoblobbing should be automatically re-enabled in the case the node
-            is being set to filled. Defaults to ``True`` (automatic re-enablement). Only
-            has an effect if the node is being set to filled.
+        make_visible : bool
+            Whether the open node symbol should be forced to become visible by this
+            call. Note that a value of ``False`` will *not* force the node symbol to be
+            invisible, but the symbol will maintain its previous visiblity. Defaults to
+            ``True``.
 
         See Also
         --------
-        make_open
         make_filled
         """
-        self.__blob.set_fill(color=mn.config.background_color if open_ else self.color)
-        self.open = open_
-        if open_:
-            self.disable_autoblobbing()
-        elif reenable_autoblobbing:
-            self.enable_autoblobbing()
+        self.__blob.set_fill(color=mn.config.background_color)
+        self.disable_autoblobbing()
+        if make_visible:
+            self.show_blob()
         return self
-
-    def make_open(self) -> Self:
-        """Set the type of the node to open (an empty circle).
-
-        Autoblobbing will be automatically disabled by this call.
-
-        See Also
-        --------
-        set_open
-        make_filled
-        """
-        return self.set_open(open_=True)
 
     def make_filled(self, reenable_autoblobbing: bool = True) -> Self:
         """Set the type of the node to filled (a filled solder blob, i.e. circle).
@@ -326,10 +311,12 @@ class Node(Component):
 
         See Also
         --------
-        set_open
         make_open
         """
-        return self.set_open(open_=False, reenable_autoblobbing=reenable_autoblobbing)
+        self.__blob.set_fill(color=self.color)
+        if reenable_autoblobbing:
+            self.enable_autoblobbing()
+        return self
 
     def get_center(self) -> mnt.Point3D:
         """Get the centre of the node.
