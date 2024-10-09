@@ -78,11 +78,13 @@ class Node(Component):
         -------
         Terminal
             The terminal on the node in the specifed direction.
+
+        See Also
+        --------
+        clear
+        right, up, left, down, up_right, up_left, down_left, down_right
         """
-        if isinstance(direction, float):
-            direction = mn.rotate_vector(mn.RIGHT, direction)
-        else:
-            direction = mn.normalize(direction)
+        direction = self._get_normalised_direction(direction)
 
         for terminal in self.terminals:
             if np.allclose(terminal.direction, direction):
@@ -98,6 +100,44 @@ class Node(Component):
             self._autoblob_if_autoblobbing()
 
         return to_return
+
+    def clear(self, direction: mnt.Vector3D | float) -> Self:
+        """Remove a terminal of the node in a given direction.
+
+        Parameters
+        ----------
+        direction : mnt.Vector3D | float
+            The direction to get a terminal in, as either a direction vector or an angle
+            in radians. Note that the angle is defined as is mathematical standard:
+            measured anticlockwise from the positive horizontal.
+
+        Raises
+        ------
+        ValueError
+            If no terminal exists with a direction of ``direction``.
+
+        See Also
+        --------
+        get
+        """
+        direction = self._get_normalised_direction(direction)
+
+        for terminal in self.terminals:
+            if np.allclose(terminal.direction, direction):
+                self._terminals.remove(terminal)
+                self._autoblob_if_autoblobbing()
+                return self
+        raise ValueError(
+            f"No terminal was found with the direction specified: "
+            f"{tuple(direction)} ({mn.angle_of_vector(direction)} degrees)"
+        )
+
+    def clear_all(self) -> Self:
+        """Remove all terminals of the node."""
+        for terminal in self.terminals[::-1]:
+            self._terminals.remove(terminal)
+        self._autoblob_if_autoblobbing()
+        return self
 
     @property
     def right(self) -> Terminal:
@@ -307,6 +347,13 @@ class Node(Component):
         if self.autoblob:
             self._set_blob_visibility(len(self.terminals) > AUTOBLOBBING_BLOB_THRESHOLD)
         return self
+
+    def _get_normalised_direction(
+        self, direction: mnt.Vector3D | float
+    ) -> mnt.Vector3D:
+        if isinstance(direction, float):
+            return mn.rotate_vector(mn.RIGHT, direction)
+        return mn.normalize(direction)
 
 
 class OpenNode(Node):
