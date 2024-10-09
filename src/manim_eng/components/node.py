@@ -7,11 +7,26 @@ import manim.typing as mnt
 import numpy as np
 
 from manim_eng import config_eng
-from manim_eng.components.base import Component, Terminal
+from manim_eng.components.base.component import Component
+from manim_eng.components.base.terminal import Terminal
 
 __all__ = ["Node", "OpenNode"]
 
 AUTOBLOBBING_BLOB_THRESHOLD = 2
+BLOB_Z_INDEX = 10
+
+
+# Allows switch components to get an identical shape without bringing in all the extra
+# baggage of the full Node class (anchors etc.)
+def _create_node_blob(match_to: Component, open_: bool) -> mn.Dot:
+    return mn.Dot(
+        radius=config_eng.symbol.node_radius,
+        stroke_width=config_eng.symbol.wire_stroke_width,
+        stroke_color=match_to.color,
+        fill_opacity=1.0,
+        fill_color=mn.config.background_color if open_ else match_to.color,
+        z_index=BLOB_Z_INDEX,
+    )
 
 
 class Node(Component):
@@ -44,14 +59,7 @@ class Node(Component):
     def _construct(self) -> None:
         super()._construct()
 
-        self.__blob = mn.Dot(
-            radius=config_eng.symbol.node_radius,
-            stroke_width=config_eng.symbol.wire_stroke_width,
-            stroke_color=self.color,
-            fill_opacity=1.0,
-            fill_color=mn.config.background_color if self.open else self.color,
-            z_index=10,
-        )
+        self.__blob = _create_node_blob(self, self.open)
         self._body.add(self.__blob)
 
         self._autoblob_if_autoblobbing()
