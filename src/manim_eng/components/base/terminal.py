@@ -256,14 +256,8 @@ class Terminal(Markable):
             anim_args = {}
 
         animations: list[mn.Animation] = []
-        visibility_change_needed = self.autovisibility and self._connection_count == 0
-        rotation_needed = out is not None and out != self._current_arrow_pointing_out
 
-        if visibility_change_needed:
-            # The terminal is not yet showing, so 'create' it
-            self.add(self._line)
-            terminal_animation = mn.Create(self._line, introducer=False, **anim_args)
-            animations.append(terminal_animation)
+        rotation_needed = out is not None and out != self._current_arrow_pointing_out
 
         if not self._current_arrow_showing:
             self.__rebuild_current_arrow()
@@ -298,6 +292,13 @@ class Terminal(Markable):
             self.animate(**anim_args)._set_mark(self._current, label).build()
         )
         animations.append(label_animation)
+
+        visibility_change_needed = self.autovisibility and self._connection_count == 0
+        if visibility_change_needed:
+            # The terminal is not yet showing, so 'create' it
+            self.add(self._line)
+            terminal_animation = mn.Create(self._line, introducer=False, **anim_args)
+            animations.append(terminal_animation)
 
         return mn.AnimationGroup(*animations)
 
