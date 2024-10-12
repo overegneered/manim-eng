@@ -21,11 +21,12 @@ class CurrentArrow(mn.Triangle):
             radius=config_eng.symbol.current_arrow_radius,
             start_angle=0,
             color=mn.WHITE,
-            fill_opacity=1,
+            fill_opacity=1.0,
         )
         self.move_to(position).rotate(rotation, about_point=position)
 
 
+# TODO: #18 integrate autoterminal calls with Wire class
 class Terminal(Markable):
     """Terminal for a circuit component (i.e. the bit other wires connect to).
 
@@ -38,21 +39,32 @@ class Terminal(Markable):
         The direction the terminal 'points', i.e. the direction you get by walking from
         the point on the component body where the terminal attaches to the end of the
         terminal.
+    auto : bool
+        Whether the terminal should control its visibility. When set to ``True``, the
+        terminal will only be shown if there is at least one connection to it *or* there
+        is a current annotation set on the terminal. When set to ``False``, the terminal
+        is displayed no matter what. This is the default.
     """
 
-    def __init__(self, position: mnt.Vector3D, direction: mnt.Vector3D) -> None:
+    def __init__(
+        self, position: mnt.Vector3D, direction: mnt.Vector3D, auto: bool = False
+    ) -> None:
         super().__init__()
+
+        self.autovisibility = auto
+        self._connection_count = 0
 
         direction /= np.linalg.norm(direction)
         end = position + (direction * config_eng.symbol.terminal_length)
-        self.line = mn.Line(
+        self._line = mn.Line(
             start=position,
             end=end,
             stroke_width=config_eng.symbol.wire_stroke_width,
         )
-        self.add(self.line)
+        if not self.autovisibility:
+            self.add(self._line)
 
-        self._centre_anchor = CentreAnchor().move_to(self.line.get_center())
+        self._centre_anchor = CentreAnchor().move_to(self._line.get_center())
         self._end_anchor = TerminalAnchor().move_to(end)
 
         self._current_arrow: CurrentArrow
@@ -85,6 +97,13 @@ class Terminal(Markable):
     def end(self) -> mnt.Point3D:
         """Return the global position of the end of the terminal."""
         return self._end_anchor.pos
+
+    @property
+    def visible(self) -> bool:
+        """Whether the terminal is currently visible on screen."""
+        return (not self.autovisibility) or (
+            self._connection_count > 0 or self._current_arrow_showing
+        )
 
     def set_current(
         self, label: str, out: bool | None = None, below: bool | None = None
@@ -131,6 +150,7 @@ class Terminal(Markable):
             self._current_mark_anchored_below = below
 
         self._set_mark(self._current, label)
+        self.__update_terminal_visibility()
         return self
 
     def reset_current(self, label: str, out: bool = False, below: bool = False) -> Self:
@@ -164,6 +184,7 @@ class Terminal(Markable):
         self.remove(self._current_arrow)
         self._current_arrow_showing = False
         self._clear_mark(self._current)
+        self.__update_terminal_visibility()
         return self
 
     def match_style(self, vmobject: VMobject, _family: bool = True) -> Self:
@@ -178,11 +199,22 @@ class Terminal(Markable):
 
         Notes
         -----
-        - It is not possible to override the stroke width.
+        - It is not possible to override the stroke width
         - The ``_family`` argument has no effect.
         """
-        self.line.match_style(vmobject)
-        self.line.set_stroke(width=config_eng.symbol.wire_stroke_width)
+        self._line.match_style(vmobject).set_stroke(
+            width=config_eng.symbol.wire_stroke_width
+        )
+        return self
+
+    def _increment_connection_count(self) -> Self:
+        self._connection_count += 1
+        self.__update_terminal_visibility()
+        return self
+
+    def _decrement_connection_count(self) -> Self:
+        self._connection_count -= 1
+        self.__update_terminal_visibility()
         return self
 
     def __rebuild_current_arrow(self) -> None:
@@ -196,6 +228,22 @@ class Terminal(Markable):
             angle_to_rotate += np.pi
         self._current_arrow = CurrentArrow(self._centre_anchor.pos, angle_to_rotate)
 
+    def __update_terminal_visibility(self) -> None:
+        if not self.autovisibility:
+            return
+
+        if self._connection_count < 0:
+            raise RuntimeError(
+                f"Terminal cannot have negative connection count "
+                f"({self._connection_count})."
+            )
+
+        should_be_visible = self._connection_count > 0 or self._current_arrow_showing
+        if should_be_visible:
+            self.add(self._line)
+        else:
+            self.remove(self._line)
+
     @mn.override_animate(set_current)
     def __animate_set_current(
         self,
@@ -208,8 +256,14 @@ class Terminal(Markable):
             anim_args = {}
 
         animations: list[mn.Animation] = []
-
+        visibility_change_needed = self.autovisibility and self._connection_count == 0
         rotation_needed = out is not None and out != self._current_arrow_pointing_out
+
+        if visibility_change_needed:
+            # The terminal is not yet showing, so 'create' it
+            self.add(self._line)
+            terminal_animation = mn.Create(self._line, introducer=False, **anim_args)
+            animations.append(terminal_animation)
 
         if not self._current_arrow_showing:
             self.__rebuild_current_arrow()
@@ -218,7 +272,9 @@ class Terminal(Markable):
             if rotation_needed:
                 self._current_arrow.rotate(mn.PI, about_point=self._centre_anchor.pos)
                 self._current_arrow_pointing_out = out  # type: ignore[assignment]
-            arrow_animation = mn.Create(self._current_arrow, **anim_args)
+            arrow_animation = mn.Create(
+                self._current_arrow, introducer=False, **anim_args
+            )
             animations.append(arrow_animation)
 
         elif rotation_needed:
@@ -269,9 +325,45 @@ class Terminal(Markable):
             anim_args = {}
 
         arrow_animation = mn.Uncreate(self._current_arrow, **anim_args)
+        label_animation = self.animate(**anim_args)._clear_mark(self._current).build()
+        animations: list[mn.Animation] = [arrow_animation, label_animation]
+
+        if self.autovisibility and self._connection_count == 0:
+            # The current arrow was the only reason for the terminal being shown, so
+            # 'uncreate' it
+            terminal_animation = mn.Uncreate(self._line, **anim_args)
+            animations.append(terminal_animation)
+
         self._current_arrow_showing = False
 
-        return mn.AnimationGroup(
-            arrow_animation,
-            self.animate(**anim_args)._clear_mark(self._current).build(),
-        )
+        return mn.AnimationGroup(*animations)
+
+    @mn.override_animate(_increment_connection_count)
+    def __animate_increment_connection_count(
+        self, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation | None:
+        if anim_args is None:
+            anim_args = {}
+
+        self._connection_count += 1
+
+        terminal_already_visible = (
+            self._connection_count > 1
+        ) or self._current_arrow_showing
+        self.__update_terminal_visibility()
+        if terminal_already_visible:
+            return None
+
+        self.add(self._line)
+        return mn.Create(self._line, introducer=False, **anim_args)
+
+    @mn.override_animate(_decrement_connection_count)
+    def __animate_decrement_connection_count(
+        self, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation | None:
+        if anim_args is None:
+            anim_args = {}
+
+        self._connection_count -= 1
+        self.__update_terminal_visibility()
+        return mn.Uncreate(self._line, **anim_args)
