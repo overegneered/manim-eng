@@ -72,7 +72,7 @@ class Circuit(mn.VMobject):
             If either terminal doesn't belong to a component in this circuit.
         """
         self.__check_terminals_all_belong_to_this_circuit([from_terminal, to_terminal])
-        self.wires.add(Wire(from_terminal, to_terminal))
+        self.wires.add(Wire(from_terminal, to_terminal).attach())
         return self
 
     def disconnect(self, *components_or_terminals: Component | Terminal) -> Self:
@@ -104,6 +104,8 @@ class Circuit(mn.VMobject):
             terminals, lambda start, end: start and end
         )
         self.wires.remove(*to_remove)
+        for wire in to_remove:
+            wire.detach()
         return self
 
     def isolate(self, *components_or_terminals: Component | Terminal) -> Self:

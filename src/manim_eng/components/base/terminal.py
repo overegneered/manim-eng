@@ -26,7 +26,6 @@ class CurrentArrow(mn.Triangle):
         self.move_to(position).rotate(rotation, about_point=position)
 
 
-# TODO: #18 integrate autoterminal calls with Wire class
 class Terminal(Markable):
     """Terminal for a circuit component (i.e. the bit other wires connect to).
 
