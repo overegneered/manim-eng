@@ -108,6 +108,6 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
     @mn.override_animation(mn.Uncreate)
     def __override_uncreate(self, **kwargs: Any) -> mn.Animation:
         return mn.AnimationGroup(
-            self.animate(**kwargs).detatch(),
+            self.animate(**kwargs).detach(),
             mn.Uncreate(self, use_override=False),
         )
