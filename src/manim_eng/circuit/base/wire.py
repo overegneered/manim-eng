@@ -76,10 +76,6 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
         start and end terminals).
         """
 
-    # TODO: #18 overrides for all creation and destruction methods that play the
-    #       terminal animations (and increment/decrement the terminal counts!)
-    #       BEWARE the terminal counts currently incremented on lines 30 and 31!
-
     @mn.override_animate(attach)
     def __animate_attach(self, anim_args: dict[str, Any] | None = None) -> mn.Animation:
         if anim_args is None:
