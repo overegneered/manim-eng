@@ -343,10 +343,12 @@ class Terminal(Markable):
     def __animate_increment_connection_count(
         self, anim_args: dict[str, Any] | None = None
     ) -> mn.Animation | None:
+        self._connection_count += 1
+        if not self.autovisibility:
+            return None
+
         if anim_args is None:
             anim_args = {}
-
-        self._connection_count += 1
 
         terminal_already_visible = (
             self._connection_count > 1
@@ -362,9 +364,12 @@ class Terminal(Markable):
     def __animate_decrement_connection_count(
         self, anim_args: dict[str, Any] | None = None
     ) -> mn.Animation | None:
+        self._connection_count -= 1
+        if not self.autovisibility:
+            return None
+
         if anim_args is None:
             anim_args = {}
 
-        self._connection_count -= 1
         self.__update_terminal_visibility()
         return mn.Uncreate(self._line, **anim_args)

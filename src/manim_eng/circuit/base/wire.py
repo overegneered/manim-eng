@@ -1,6 +1,7 @@
 """Wire implementation class."""
 
 import abc
+from typing import Any, Self
 
 import manim as mn
 from manim import typing as mnt
@@ -35,6 +36,24 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
         if updating:
             self.add_updater(lambda mob: mob.__construct_wire())
 
+    def attach(self) -> Self:
+        """Attach the wire to the terminals it goes to and from.
+
+        This updates the terminals so that they know they have one more connection.
+        """
+        self.from_terminal._increment_connection_count()
+        self.to_terminal._increment_connection_count()
+        return self
+
+    def detach(self) -> Self:
+        """Detach the wire from the terminals it goes to and from.
+
+        This updates the terminals so that they know they have one fewer connection.
+        """
+        self.from_terminal._decrement_connection_count()
+        self.to_terminal._decrement_connection_count()
+        return self
+
     def __construct_wire(self) -> None:
         # The extra points involving the 0.001 factors extend the wire ever so slightly
         # into the terminals, producing a nice clean join between the terminals and the
@@ -56,3 +75,39 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
         Returns the vertices of the wire, not including the end points (i.e. at the
         start and end terminals).
         """
+
+    # TODO: #18 overrides for all creation and destruction methods that play the
+    #       terminal animations (and increment/decrement the terminal counts!)
+    #       BEWARE the terminal counts currently incremented on lines 30 and 31!
+
+    @mn.override_animate(attach)
+    def __animate_attach(self, anim_args: dict[str, Any] | None = None) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+        return mn.AnimationGroup(
+            self.from_terminal.animate(**anim_args)._increment_connection_count(),
+            self.to_terminal.animate(**anim_args)._increment_connection_count(),
+        )
+
+    @mn.override_animate(detach)
+    def __animate_detach(self, anim_args: dict[str, Any] | None = None) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+        return mn.AnimationGroup(
+            self.from_terminal.animate(**anim_args)._decrement_connection_count(),
+            self.to_terminal.animate(**anim_args)._decrement_connection_count(),
+        )
+
+    @mn.override_animation(mn.Create)
+    def __override_create(self, **kwargs: Any) -> mn.Animation:
+        return mn.AnimationGroup(
+            self.animate(**kwargs).attach(),
+            mn.Create(self, use_override=False),
+        )
+
+    @mn.override_animation(mn.Uncreate)
+    def __override_uncreate(self, **kwargs: Any) -> mn.Animation:
+        return mn.AnimationGroup(
+            self.animate(**kwargs).detatch(),
+            mn.Uncreate(self, use_override=False),
+        )
