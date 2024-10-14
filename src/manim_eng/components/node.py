@@ -1,6 +1,6 @@
 """Nodes for wire routing and display of circuit terminals and solder blobs."""
 
-from typing import Any, Self
+from typing import Any, Self, cast
 
 import manim as mn
 import manim.typing as mnt
@@ -56,13 +56,14 @@ class Node(Component):
 
         super().__init__(terminals=[], **kwargs)
 
+        if self.autoblob:
+            self.add_updater(self.__blob_updater)
+
     def _construct(self) -> None:
         super()._construct()
 
         self.__blob = _create_node_blob(self, self.open)
         self._body.add(self.__blob)
-
-        self._autoblob_if_autoblobbing()
 
     def get(self, direction: mnt.Vector3D | float) -> Terminal:
         """Get a terminal of the node in a given direction, creating it if necessary.
@@ -77,7 +78,7 @@ class Node(Component):
         Returns
         -------
         Terminal
-            The terminal on the node in the specifed direction.
+            The terminal on the node in the specified direction.
 
         See Also
         --------
@@ -94,50 +95,11 @@ class Node(Component):
             to_return = Terminal(
                 position=self.get_center(),
                 direction=direction,
+                auto=True,
             ).match_style(self)
             self._terminals.add(to_return)
 
-            self._autoblob_if_autoblobbing()
-
         return to_return
-
-    def clear(self, direction: mnt.Vector3D | float) -> Self:
-        """Remove a terminal of the node in a given direction.
-
-        Parameters
-        ----------
-        direction : mnt.Vector3D | float
-            The direction to get a terminal in, as either a direction vector or an angle
-            in radians. Note that the angle is defined as is mathematical standard:
-            measured anticlockwise from the positive horizontal.
-
-        Raises
-        ------
-        ValueError
-            If no terminal exists with a direction of ``direction``.
-
-        See Also
-        --------
-        get
-        """
-        direction = self._get_normalised_direction(direction)
-
-        for terminal in self.terminals:
-            if np.allclose(terminal.direction, direction):
-                self._terminals.remove(terminal)
-                self._autoblob_if_autoblobbing()
-                return self
-        raise ValueError(
-            f"No terminal was found with the direction specified: "
-            f"{tuple(direction)} ({mn.angle_of_vector(direction)} degrees)"
-        )
-
-    def clear_all(self) -> Self:
-        """Remove all terminals of the node."""
-        for terminal in self.terminals[::-1]:
-            self._terminals.remove(terminal)
-        self._autoblob_if_autoblobbing()
-        return self
 
     @property
     def right(self) -> Terminal:
@@ -243,6 +205,12 @@ class Node(Component):
         disable_autoblobbing
         """
         self.autoblob = autoblob
+        if autoblob:
+            if self.__blob_updater not in self.updaters:
+                self.add_updater(self.__blob_updater)
+            self.update()
+        else:
+            self.remove_updater(self.__blob_updater)
         self._autoblob_if_autoblobbing()
         return self
 
@@ -330,17 +298,23 @@ class Node(Component):
         self.__blob.set_opacity(1.0 if visible else 0.0)
         return self
 
-    def _autoblob_if_autoblobbing(self) -> Self:
-        if self.autoblob:
-            self._set_blob_visibility(len(self.terminals) > AUTOBLOBBING_BLOB_THRESHOLD)
-        return self
-
     def _get_normalised_direction(
         self, direction: mnt.Vector3D | float
     ) -> mnt.Vector3D:
         if isinstance(direction, float):
             return mn.rotate_vector(mn.RIGHT, direction)
         return mn.normalize(direction)
+
+    def _should_be_visible(self) -> bool:
+        visible_terminal_count = sum(
+            [terminal.is_visible() for terminal in self.terminals]
+        )
+        return visible_terminal_count > AUTOBLOBBING_BLOB_THRESHOLD
+
+    @staticmethod
+    def __blob_updater(mobject: mn.Mobject) -> None:
+        node = cast(Node, mobject)
+        node._set_blob_visibility(node._should_be_visible())
 
 
 class OpenNode(Node):

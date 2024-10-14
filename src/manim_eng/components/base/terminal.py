@@ -97,13 +97,6 @@ class Terminal(Markable):
         """Return the global position of the end of the terminal."""
         return self._end_anchor.pos
 
-    @property
-    def visible(self) -> bool:
-        """Whether the terminal is currently visible on screen."""
-        return (not self.autovisibility) or (
-            self._connection_count > 0 or self._current_arrow_showing
-        )
-
     def set_current(
         self, label: str, out: bool | None = None, below: bool | None = None
     ) -> Self:
@@ -185,6 +178,12 @@ class Terminal(Markable):
         self._clear_mark(self._current)
         self.__update_terminal_visibility()
         return self
+
+    def is_visible(self) -> bool:
+        """Whether the terminal is currently visible on screen."""
+        return (not self.autovisibility) or (
+            self._connection_count > 0 or self._current_arrow_showing
+        )
 
     def match_style(self, vmobject: VMobject, _family: bool = True) -> Self:
         """Match the style of the terminal wire to another vmobject.

@@ -9,6 +9,7 @@ __all__ = ["Circuit"]
 from manim_eng.circuit.wire import Wire
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.terminal import Terminal
+from manim_eng.components.node import Node
 
 
 class Circuit(mn.VMobject):
@@ -23,11 +24,19 @@ class Circuit(mn.VMobject):
     def __init__(self, *components: Component) -> None:
         super().__init__()
 
+        self.nodes = mn.VGroup()
         self.components = mn.VGroup()
         self.wires = mn.VGroup()
-        super().add(self.components, self.wires)
+        super().add(self.nodes, self.components, self.wires)
 
         self.add(*components)
+
+    @property
+    def elements(self) -> list[Component]:
+        """Returns a list of all components (including nodes) in the circuit."""
+        return cast(
+            list[Component], self.components.submobjects + self.nodes.submobjects
+        )
 
     def add(self, *components: Component) -> Self:
         """Add one or more components to the circuit.
@@ -40,7 +49,10 @@ class Circuit(mn.VMobject):
         for component in components:
             # Update here to make sure that all marks are properly aligned
             component.update()
-            self.components.add(component)
+            if isinstance(component, Node):
+                self.nodes.add(component)
+            else:
+                self.components.add(component)
         return self
 
     def remove(self, *components: Component) -> Self:
@@ -73,6 +85,7 @@ class Circuit(mn.VMobject):
         """
         self.__check_terminals_all_belong_to_this_circuit([from_terminal, to_terminal])
         self.wires.add(Wire(from_terminal, to_terminal).attach())
+        self.nodes.update()
         return self
 
     def disconnect(self, *components_or_terminals: Component | Terminal) -> Self:
@@ -106,6 +119,7 @@ class Circuit(mn.VMobject):
         self.wires.remove(*to_remove)
         for wire in to_remove:
             wire.detach()
+        self.nodes.update()
         return self
 
     def isolate(self, *components_or_terminals: Component | Terminal) -> Self:
@@ -136,6 +150,7 @@ class Circuit(mn.VMobject):
             terminals, lambda start, end: start or end
         )
         self.wires.remove(*to_remove)
+        self.nodes.update()
         return self
 
     @staticmethod
@@ -189,7 +204,7 @@ class Circuit(mn.VMobject):
     ) -> None:
         terminal_set = set(terminals)
         owned_terminal_set = set()
-        for component in self.components.submobjects:
+        for component in self.elements:
             owned_terminal_set.update(component.terminals)
 
         terminals_not_owned = terminal_set.difference(owned_terminal_set)
@@ -219,7 +234,10 @@ class Circuit(mn.VMobject):
             )
         new_wire = Wire(from_terminal, to_terminal)
         self.wires.add(new_wire)
-        return mn.Create(new_wire, **anim_args)
+        return mn.AnimationGroup(
+            mn.Create(new_wire, **anim_args),
+            self.nodes.animate(**anim_args).update().build(),
+        )
 
     @mn.override_animate(disconnect)
     def __animate_disconnect(
@@ -239,6 +257,9 @@ class Circuit(mn.VMobject):
         )
         animations = [mn.Uncreate(wire, **anim_args) for wire in to_remove]
         self.wires.remove(*to_remove)
+
+        node_update_animation = self.nodes.animate(**anim_args).update().build()
+        animations.append(node_update_animation)
 
         return mn.AnimationGroup(*animations)
 
@@ -260,5 +281,8 @@ class Circuit(mn.VMobject):
         )
         animations = [mn.Uncreate(wire, **anim_args) for wire in to_remove]
         self.wires.remove(*to_remove)
+
+        node_update_animation = self.nodes.animate(**anim_args).update().build()
+        animations.append(node_update_animation)
 
         return mn.AnimationGroup(*animations)
