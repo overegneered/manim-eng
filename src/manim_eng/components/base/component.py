@@ -5,6 +5,7 @@ from typing import Any, Self, cast
 
 import manim as mn
 import manim.typing as mnt
+import numpy as np
 
 from manim_eng import config_eng
 from manim_eng._base.anchor import AnnotationAnchor, CentreAnchor, LabelAnchor
@@ -91,6 +92,76 @@ class Component(Markable, metaclass=abc.ABCMeta):
             The centre of the components.
         """
         return self._centre_anchor.get_center()
+
+    def align_terminal(
+        self,
+        self_terminal: Terminal | str,
+        other: Terminal | mnt.Point3D,
+        direction: mnt.Vector3D | None = None,
+    ) -> Self:
+        """Align a component terminal with a point or a terminal on another component.
+
+        Move this component along the line perpendicular to ``direction`` such that the
+        line between the end of ``self_terminal`` and ``other``
+        has direction vector ``direction``.
+
+        Parameters
+        ----------
+        self_terminal : Terminal | str
+             Either a ``Terminal`` belonging to this component, or a string representing
+            an attribute of this component that returns a terminal (e.g. ``"right"``).
+        other : Terminal | Point3D
+            A ``Terminal`` belonging to another component or a point in space.
+        direction : Vector3D | None
+            The direction to align the terminals in. If not supplied, uses
+            ``self_terminal``'s direction.
+
+        Raises
+        ------
+        ValueError
+            If a ``Terminal`` passed to ``self_terminal`` does not belong to this
+            component.
+        AttributeError
+            If a string passed to ``self_terminal`` does not represent an existing
+            attribute on this component.
+        ValueError
+            If a string passed to ``self_terminal`` does not represent an attribute of
+            this component that produces a ``Terminal`` instance.
+        ValueError
+            If ``other_terminal`` belongs to this component.
+
+        Notes
+        -----
+        In geometric terms, the component in moved such that the end of
+        ``self_terminal`` is at the intersection of the lines that
+
+        - Have direction vector perpendicular to ``direction`` and go through the
+          current position of the end of ``self_terminal``; and
+        - Have direction vector ``direction`` and go through the end of
+          ``other`` (in the case that it is a ``Terminal``) or through ``other`` (in the
+           case that it is a point).
+        """
+        self_terminal = self._get_or_check_terminal(self_terminal)
+        if isinstance(other, Terminal):
+            if other in self.terminals:
+                raise ValueError(
+                    "Terminal passed to `other_terminal` belongs to this component. "
+                    "It must belong to a different component."
+                )
+            other = other.end
+        if direction is None:
+            direction = self_terminal.direction
+
+        movement_direction = np.cross(direction, mn.OUT)
+        target_position = mn.find_intersection(
+            [self_terminal.end],
+            [movement_direction],
+            [other],
+            [direction],
+        )[0]
+
+        self.shift(target_position - self_terminal.end)
+        return self
 
     def set_label(self, label: str) -> Self:
         """Set the label of the component.
