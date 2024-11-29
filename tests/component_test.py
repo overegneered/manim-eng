@@ -4,6 +4,8 @@ import numpy as np
 import pytest
 from manim_eng import config_eng
 from manim_eng.components.base.component import Component
+from manim_eng.components.base.monopole import Monopole
+from manim_eng.components.node import Node
 
 from .test_utils.dummy_component import DummyComponent, DummyComponentMockedTerminals
 
@@ -45,6 +47,32 @@ def test_align_terminal(
     )
 
     assert np.allclose(dummy_component.right.end, expected_end)
+
+
+def test_align_value_errors_if_terminal_belongs_to_same_component(
+    dummy_component: Component,
+) -> None:
+    with pytest.raises(
+        ValueError,
+        match="Terminal passed to `other_terminal` belongs to this component.",
+    ):
+        dummy_component.align_terminal(dummy_component.right, dummy_component.right)
+
+
+def test_align_value_errors_if_node_passed_itself() -> None:
+    node = Node()
+    with pytest.raises(
+        ValueError, match="Node passed to `other_terminal` is this component."
+    ):
+        node.align_terminal(node.right, node)
+
+
+def test_align_value_errors_if_monopole_passed_itself() -> None:
+    monopole = Monopole(mn.UP)
+    with pytest.raises(
+        ValueError, match="Monopole passed to `other_terminal` is this component."
+    ):
+        monopole.align_terminal(monopole.terminal, monopole)
 
 
 def test_set_label_no_existing_label(dummy_component: Component) -> None:

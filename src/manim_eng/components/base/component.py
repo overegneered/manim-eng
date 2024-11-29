@@ -135,7 +135,9 @@ class Component(Markable, metaclass=abc.ABCMeta):
             If a string passed to ``self_terminal`` does not represent an attribute of
             this component that produces a ``Terminal`` instance.
         ValueError
-            If ``other_terminal`` belongs to this component.
+            If ``other_terminal`` belongs to this component (if it is a ``Terminal``)
+            or if ``other_terminal`` *is* this component (if it is a ``Node`` or
+            ``Monopole``).
 
         Notes
         -----
@@ -156,12 +158,25 @@ class Component(Markable, metaclass=abc.ABCMeta):
             if other in self.terminals:
                 raise ValueError(
                     "Terminal passed to `other_terminal` belongs to this component. "
-                    "It must belong to a different component."
+                    "`other_terminal` should be a terminal of another component, "
+                    "a point, or a separate Node or Monopole."
                 )
             other = other.end
         elif isinstance(other, Node):
+            if other == self:
+                raise ValueError(
+                    "Node passed to `other_terminal` is this component. "
+                    "`other_terminal` should be a terminal of another component, "
+                    "a point, or a separate Node or Monopole."
+                )
             other = other.get_center()
         elif isinstance(other, Monopole):
+            if other == self:
+                raise ValueError(
+                    "Monopole passed to `other_terminal` is this component. "
+                    "`other_terminal` should be a terminal of another component, "
+                    "a point, or a separate Node or Monopole."
+                )
             other = other.terminal.end
 
         if direction is None:
