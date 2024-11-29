@@ -15,8 +15,8 @@ def test_connect() -> None:
 
     for submobjects in [circuit.wires.submobjects, circuit_animated.wires.submobjects]:
         assert len(submobjects) == 1
-        assert submobjects[0].from_terminal == component_1.left
-        assert submobjects[0].to_terminal == component_2.right
+        assert submobjects[0].start == component_1.left
+        assert submobjects[0].end == component_2.right
 
 
 def test_connect_throws_value_error_if_terminals_are_identical(
@@ -24,13 +24,9 @@ def test_connect_throws_value_error_if_terminals_are_identical(
 ) -> None:
     circuit = Circuit(dummy_component)
 
-    with pytest.raises(
-        ValueError, match="`from_terminal` and `to_terminal` are identical"
-    ):
+    with pytest.raises(ValueError, match="`start` and `end` are identical"):
         circuit.connect(dummy_component.left, dummy_component.left)
-    with pytest.raises(
-        ValueError, match="`from_terminal` and `to_terminal` are identical"
-    ):
+    with pytest.raises(ValueError, match="`start` and `end` are identical"):
         circuit.animate.connect(dummy_component.left, dummy_component.left)
 
 
@@ -68,8 +64,8 @@ def test_disconnect() -> None:
 
     for submobjects in [circuit.wires.submobjects, circuit_animated.wires.submobjects]:
         assert len(submobjects) == 1
-        assert submobjects[0].from_terminal == component_1.left
-        assert submobjects[0].to_terminal == component_2.left
+        assert submobjects[0].start == component_1.left
+        assert submobjects[0].end == component_2.left
 
 
 def test_disconnect_throws_error_if_terminals_do_not_belong_to_components_in_circuit(
@@ -109,8 +105,8 @@ def test_isolate() -> None:
 
     for submobjects in [circuit.wires.submobjects, circuit_animated.wires.submobjects]:
         assert len(submobjects) == 1
-        assert submobjects[0].from_terminal == component_2.right
-        assert submobjects[0].to_terminal == component_3.right
+        assert submobjects[0].start == component_2.right
+        assert submobjects[0].end == component_3.right
 
 
 def test_isolate_throws_error_if_terminals_do_not_belong_to_components_in_the_circuit(

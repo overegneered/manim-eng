@@ -66,14 +66,14 @@ class Circuit(mn.VMobject):
         self.components.remove(*components)
         return self
 
-    def connect(self, from_terminal: Terminal, to_terminal: Terminal) -> Self:
+    def connect(self, start: Terminal, end: Terminal) -> Self:
         """Connect two terminals together.
 
         Parameters
         ----------
-        from_terminal : Terminal
+        start : Terminal
             The terminal the connecting wire should start at.
-        to_terminal : Terminal
+        end : Terminal
             The terminal the connecting wire should end at.
 
         Raises
@@ -83,8 +83,8 @@ class Circuit(mn.VMobject):
         ValueError
             If either terminal doesn't belong to a component in this circuit.
         """
-        self.__check_terminals_all_belong_to_this_circuit([from_terminal, to_terminal])
-        self.wires.add(Wire(from_terminal, to_terminal).attach())
+        self.__check_terminals_all_belong_to_this_circuit([start, end])
+        self.wires.add(Wire(start, end).attach())
         self.nodes.update()
         return self
 
@@ -193,8 +193,8 @@ class Circuit(mn.VMobject):
         to_remove = []
         for wire in cast(list[Wire], self.wires.submobjects):
             if condition(
-                wire.from_terminal in terminals,
-                wire.to_terminal in terminals,
+                wire.start in terminals,
+                wire.end in terminals,
             ):
                 to_remove.append(wire)
         return to_remove
@@ -219,20 +219,20 @@ class Circuit(mn.VMobject):
     @mn.override_animate(connect)
     def __animate_connect(
         self,
-        from_terminal: Terminal,
-        to_terminal: Terminal,
+        start: Terminal,
+        end: Terminal,
         anim_args: dict[str, Any] | None = None,
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
 
-        self.__check_terminals_all_belong_to_this_circuit([from_terminal, to_terminal])
-        if from_terminal == to_terminal:
+        self.__check_terminals_all_belong_to_this_circuit([start, end])
+        if start == end:
             raise ValueError(
-                "`from_terminal` and `to_terminal` are identical. "
+                "`start` and `end` are identical. "
                 "`connect()` requires two different terminals."
             )
-        new_wire = Wire(from_terminal, to_terminal)
+        new_wire = Wire(start, end)
         self.wires.add(new_wire)
         return mn.AnimationGroup(
             mn.Create(new_wire, **anim_args),

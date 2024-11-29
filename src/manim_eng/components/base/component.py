@@ -339,8 +339,8 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
     def voltage(
         self,
-        from_terminal: Terminal | str,
-        to_terminal: Terminal | str,
+        start: Terminal | str,
+        end: Terminal | str,
         *args: Any,
         **kwargs: Any,
     ) -> Voltage:
@@ -353,10 +353,10 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        from_terminal : Terminal | str
+        start : Terminal | str
             Either a ``Terminal`` belonging to this component, or a string representing
             an attribute of this component that returns a terminal (e.g. ``"right"``).
-        to_terminal : Terminal | str
+        end : Terminal | str
             Either a ``Terminal`` belonging to this component, or a string representing
             an attribute of this component that returns a terminal (e.g. ``"left"``).
         *args
@@ -381,20 +381,20 @@ class Component(Markable, metaclass=abc.ABCMeta):
             If a string passed for either terminal does not represent an attribute of
             this component that produces a ``Terminal`` instance.
         ValueError
-            If the terminals specified for both 'from' and 'to' are the same.
+            If the terminals specified for both ``start`` and ``end`` are the same.
         """
-        from_terminal = self._get_or_check_terminal(from_terminal)
-        to_terminal = self._get_or_check_terminal(to_terminal)
+        start = self._get_or_check_terminal(start)
+        end = self._get_or_check_terminal(end)
 
-        if from_terminal == to_terminal:
+        if start == end:
             raise ValueError(
-                "The terminals specified through `from_terminal` and `to_terminal` are "
+                "The terminals specified through `start` and `end` are "
                 "identical. They must be different."
             )
 
         kwargs["avoid"] = self
 
-        return Voltage(from_terminal, to_terminal, *args, **kwargs)
+        return Voltage(start, end, *args, **kwargs)
 
     def _get_or_check_terminal(self, terminal: Terminal | str | None) -> Terminal:
         """Get a terminal or check a passed terminal belongs to this component.

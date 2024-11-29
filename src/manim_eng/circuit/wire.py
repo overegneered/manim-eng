@@ -18,15 +18,15 @@ class ManualWire(WireBase):
 
     Parameters
     ----------
-    from_terminal : Terminal
+    start : Terminal
         The terminal the wire starts at.
-    to_terminal : Terminal
+    end : Terminal
         The terminal the wire ends at.
     corner_points : Sequence[Point3D]
         The vertices the line should have between the two terminals. Should not include
         the positions of the two terminals, as these are inserted automatically when the
-        wire is drawn. These should be in order from ``from_terminal`` to
-        ``to_terminal``.
+        wire is drawn. These should be in order from ``start`` to
+        ``end``.
     updating : bool
         Whether the ends of the wire should update automatically to keep connected to
         the terminals. This is disabled by default. If this is enabled, it is
@@ -36,17 +36,17 @@ class ManualWire(WireBase):
     Raises
     ------
     ValueError
-        If ``from_terminal`` and ``to_terminal`` are the same.
+        If ``start`` and ``end`` are the same.
     """
 
     def __init__(
         self,
-        from_terminal: Terminal,
-        to_terminal: Terminal,
+        start: Terminal,
+        end: Terminal,
         corner_points: Sequence[mnt.Point3D],
         updating: bool = False,
     ):
-        super().__init__(from_terminal, to_terminal, updating)
+        super().__init__(start, end, updating)
 
         self.corner_points = list(corner_points)
 
@@ -68,19 +68,19 @@ class Wire(WireBase):
 
     Parameters
     ----------
-    from_terminal : Terminal
+    start : Terminal
         The terminal the wire starts at.
-    to_terminal : Terminal
+    end : Terminal
         The terminal the wire ends at.
 
     Raises
     ------
     ValueError
-        If ``from_terminal`` and ``to_terminal`` are the same.
+        If ``start`` and ``end`` are the same.
     """
 
-    def __init__(self, from_terminal: Terminal, to_terminal: Terminal) -> None:
-        super().__init__(from_terminal, to_terminal, updating=True)
+    def __init__(self, start: Terminal, end: Terminal) -> None:
+        super().__init__(start, end, updating=True)
 
     def get_corner_points(self) -> list[mnt.Point3D]:
         """Get the corner points of the wire.
@@ -88,8 +88,8 @@ class Wire(WireBase):
         Returns the vertices of the wire, not including the end points (i.e. at the
         start and end terminals).
         """
-        from_direction = utils.cardinalised(self.from_terminal.direction)
-        to_direction = utils.cardinalised(self.to_terminal.direction)
+        from_direction = utils.cardinalised(self.start.direction)
+        to_direction = utils.cardinalised(self.end.direction)
 
         if np.isclose(np.dot(from_direction, to_direction), 0):
             return self.__get_corner_points_for_perpendicular_terminals(
@@ -102,8 +102,8 @@ class Wire(WireBase):
     def __get_corner_points_for_perpendicular_terminals(
         self, from_direction: mnt.Vector3D, to_direction: mnt.Vector3D
     ) -> list[mnt.Point3D]:
-        from_end = self.from_terminal.end
-        to_end = self.to_terminal.end
+        from_end = self.start.end
+        to_end = self.end.end
 
         corner_point = mn.find_intersection(
             [from_end], [from_direction], [to_end], [to_direction]
@@ -125,13 +125,13 @@ class Wire(WireBase):
     def __get_corner_points_for_parallel_terminals(
         self, from_direction: mnt.Vector3D, to_direction: mnt.Vector3D
     ) -> list[mnt.Point3D]:
-        midpoint = mn.midpoint(self.from_terminal.end, self.to_terminal.end)
+        midpoint = mn.midpoint(self.start.end, self.end.end)
 
         to_behind_from = self.__point_is_behind_plane(
-            self.to_terminal.end, self.from_terminal.end, from_direction
+            self.end.end, self.start.end, from_direction
         )
         from_behind_to = self.__point_is_behind_plane(
-            self.from_terminal.end, self.to_terminal.end, to_direction
+            self.start.end, self.end.end, to_direction
         )
 
         if to_behind_from and from_behind_to:
@@ -143,18 +143,18 @@ class Wire(WireBase):
         # direction, so we really want an elbow rather than an 'S'
         elif to_behind_from:
             midpoint = self.__move_point_forward_of_plane(
-                midpoint, self.from_terminal.end, from_direction
+                midpoint, self.start.end, from_direction
             )
         elif from_behind_to:
             midpoint = self.__move_point_forward_of_plane(
-                midpoint, self.to_terminal.end, to_direction
+                midpoint, self.end.end, to_direction
             )
 
         perpendicular_direction = np.cross(from_direction, mn.OUT)
         corner_points = mn.find_intersection(
             [midpoint] * 2,
             [perpendicular_direction] * 2,
-            [self.from_terminal.end, self.to_terminal.end],
+            [self.start.end, self.end.end],
             [from_direction, to_direction],
         )
         return list(corner_points)
