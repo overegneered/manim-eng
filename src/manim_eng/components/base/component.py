@@ -105,7 +105,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
         other: Terminal | mnt.Point3D | Node | Monopole,
         direction: mnt.Vector3D | None = None,
     ) -> Self:
-        """Align a component terminal with a point or a terminal on another component.
+        """Align a component terminal with a point or another component.
 
         Moves this component along the line perpendicular to ``direction`` such that the
         line between the end of ``self_terminal`` and ``other``
@@ -135,8 +135,8 @@ class Component(Markable, metaclass=abc.ABCMeta):
             If a string passed to ``self_terminal`` does not represent an attribute of
             this component that produces a ``Terminal`` instance.
         ValueError
-            If ``other_terminal`` belongs to this component (if it is a ``Terminal``)
-            or if ``other_terminal`` *is* this component (if it is a ``Node`` or
+            If ``other`` belongs to this component (if it is a ``Terminal``)
+            or if ``other`` *is* this component (if it is a ``Node`` or
             ``Monopole``).
 
         Notes
