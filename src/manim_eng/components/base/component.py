@@ -17,6 +17,7 @@ from manim_eng.circuit.voltage import Voltage
 from manim_eng.components.base.terminal import Terminal
 
 if TYPE_CHECKING:
+    from manim_eng.components.base.monopole import Monopole
     from manim_eng.components.node import Node
 
 __all__ = ["Component"]
@@ -101,7 +102,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
     def align_terminal(
         self,
         self_terminal: Terminal | str,
-        other: Terminal | mnt.Point3D | Node,
+        other: Terminal | mnt.Point3D | Node | Monopole,
         direction: mnt.Vector3D | None = None,
     ) -> Self:
         """Align a component terminal with a point or a terminal on another component.
@@ -115,9 +116,9 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self_terminal : Terminal | str
              Either a ``Terminal`` belonging to this component, or a string representing
             an attribute of this component that returns a terminal (e.g. ``"right"``).
-        other : Terminal | Point3D | Node
-            A ``Terminal`` belonging to another component, a ``Node``, or a point in
-            space.
+        other : Terminal | Point3D | Node | Monopole
+            A ``Terminal`` belonging to another component, a ``Node``, a ``Monopole``
+            (for which its single terminal is selected), or a point in space.
         direction : Vector3D | None
             The direction to align the terminals in. If not supplied, uses
             ``self_terminal``'s direction.
@@ -147,6 +148,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
           ``other`` (in the case that it is a ``Terminal``) or through ``other`` (in the
            case that it is a point).
         """
+        from manim_eng.components.base.monopole import Monopole
         from manim_eng.components.node import Node
 
         self_terminal = self._get_or_check_terminal(self_terminal)
@@ -159,6 +161,8 @@ class Component(Markable, metaclass=abc.ABCMeta):
             other = other.end
         elif isinstance(other, Node):
             other = other.get_center()
+        elif isinstance(other, Monopole):
+            other = other.terminal.end
 
         if direction is None:
             direction = self_terminal.direction
