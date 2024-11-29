@@ -20,10 +20,10 @@ class Voltage(Markable):
 
     Parameters
     ----------
-    from_terminal : Terminal
+    start : Terminal
         The terminal the non-tip end of the arrow should be attached to, i.e. the
         'negative' end.
-    to_terminal : Terminal
+    end : Terminal
         The terminal the tip end of the arrow should be attached to, i.e. the 'positive'
         end.
     label : str
@@ -44,8 +44,8 @@ class Voltage(Markable):
 
     def __init__(
         self,
-        from_terminal: Terminal,
-        to_terminal: Terminal,
+        start: Terminal,
+        end: Terminal,
         label: str,
         clockwise: bool = False,
         buff: float = mn.SMALL_BUFF,
@@ -54,14 +54,14 @@ class Voltage(Markable):
     ) -> None:
         super().__init__()
 
-        self.from_terminal = from_terminal
-        self.to_terminal = to_terminal
+        self.start = start
+        self.end = end
         self.clockwise = clockwise
         self.buff = buff
         self.component_to_avoid = avoid
         self.component_buff = component_buff
 
-        self._direction = to_terminal.end - from_terminal.end
+        self._direction = end.end - start.end
         self._angle_of_direction = mn.angle_of_vector(self._direction)
 
         self._arrow: mn.Arrow = mn.Arrow(mn.ORIGIN, mn.ORIGIN)
@@ -135,47 +135,47 @@ class Voltage(Markable):
         return self.set_clockwise(clockwise=False)
 
     def set_terminals(
-        self, from_terminal: Terminal | None = None, to_terminal: Terminal | None = None
+        self, start: Terminal | None = None, end: Terminal | None = None
     ) -> Self:
         """Set the terminal(s) the arrow goes from/to.
 
         Parameters
         ----------
-        from_terminal : Terminal | None
+        start : Terminal | None
             The terminal to attach the start of the arrow to.
-        to_terminal : Terminal | None
+        end : Terminal | None
             The terminal to attach the end of the arrow to.
 
         Raises
         ------
         ValueError
-            If neither `from_terminal` or `to_terminal` are specified.
+            If neither `start` or `end` are specified.
 
         See Also
         --------
-        set_from_terminal
-        set_to_terminal
+        set_start
+        set_end
         """
-        if from_terminal == to_terminal is None:
-            raise ValueError("Neither `from_terminal` nor `to_terminal` specified.")
-        if from_terminal is not None:
-            self.from_terminal = from_terminal
-        if to_terminal is not None:
-            self.to_terminal = to_terminal
+        if start == end is None:
+            raise ValueError("Neither `start` nor `end` specified.")
+        if start is not None:
+            self.start = start
+        if end is not None:
+            self.end = end
         self.update()
         return self
 
-    def set_from_terminal(self, terminal: Terminal) -> Self:
-        """Set the terminal the arrow should point from.
+    def set_start(self, terminal: Terminal) -> Self:
+        """Set the terminal the arrow should start from.
 
         Parameters
         ----------
         terminal : Terminal
             The terminal that should be at the non-tip end of the voltage arrow.
         """
-        return self.set_terminals(from_terminal=terminal)
+        return self.set_terminals(start=terminal)
 
-    def set_to_terminal(self, terminal: Terminal) -> Self:
+    def set_end(self, terminal: Terminal) -> Self:
         """Set the terminal the arrow should point to.
 
         Parameters
@@ -183,7 +183,7 @@ class Voltage(Markable):
         terminal : Terminal
             The terminal that should be at the tip end of the voltage arrow.
         """
-        return self.set_terminals(to_terminal=terminal)
+        return self.set_terminals(end=terminal)
 
     def flip_direction(self, flip_sense_as_well: bool = True) -> Self:
         """Flip the direction of the voltage arrow.
@@ -195,14 +195,14 @@ class Voltage(Markable):
             or anticlockwise to clockwise), so that the arrow remains on the same side
             of the component. Defaults to ``True``.
         """
-        self.from_terminal, self.to_terminal = self.to_terminal, self.from_terminal
+        self.start, self.end = self.end, self.start
         if flip_sense_as_well:
             self.clockwise ^= True
         self.update()
         return self
 
     def __arrow_updater(self) -> None:
-        self._direction = self.to_terminal.end - self.from_terminal.end
+        self._direction = self.end.end - self.start.end
         self._angle_of_direction = mn.angle_of_vector(self._direction)
 
         self.__update_arrow()
@@ -226,8 +226,8 @@ class Voltage(Markable):
             angle *= -1
 
         new_arrow = mn.Arrow(
-            start=self.from_terminal.end,
-            end=self.to_terminal.end,
+            start=self.start.end,
+            end=self.end.end,
             path_arc=angle,
             stroke_width=config_eng.symbol.arrow_stroke_width,
             tip_length=config_eng.symbol.arrow_tip_length,
@@ -308,7 +308,7 @@ class Voltage(Markable):
 
         Calculates the necessary angle to be swept by the voltage arrow's arc for it to
         pass through ``middle_point`` as well as its endpoints defined by the
-        ``from_terminal`` and ``to_terminal`` as passed to the constructor.
+        ``start`` and ``end`` as passed to the constructor.
 
         In all cases two possible angles are available, one reflex and one not. This
         method will always return the non-reflex one. As such, avoid passing in points
@@ -318,7 +318,7 @@ class Voltage(Markable):
         ----------
         middle_point : Point3D
             The extra point the arrow should pass through, as well as the two end points
-            defined by the ``from`` and ``to`` terminals.
+            defined by the ``start`` and ``end`` terminals.
 
         Returns
         -------
@@ -340,10 +340,10 @@ class Voltage(Markable):
         equations from the vector equations of the bisectors and solving for the scaling
         factors.
         """
-        chord_ab = middle_point - self.from_terminal.end
-        chord_bc = self.to_terminal.end - middle_point
+        chord_ab = middle_point - self.start.end
+        chord_bc = self.end.end - middle_point
 
-        mid_ab = self.from_terminal.end + chord_ab / 2
+        mid_ab = self.start.end + chord_ab / 2
         mid_bc = middle_point + chord_bc / 2
 
         perp_ab = np.cross(chord_ab, mn.OUT)

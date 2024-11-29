@@ -9,7 +9,7 @@ def test_wire_throws_value_error_if_terminals_are_identical() -> None:
 
     with pytest.raises(
         ValueError,
-        match=r"`from_terminal` and `to_terminal` are identical\. "
+        match=r"`start` and `end` are identical\. "
         r"Wires must have different terminals at each end\.",
     ):
         Wire(terminal, terminal)
@@ -20,7 +20,7 @@ def test_manual_wire_throws_value_error_if_terminals_are_identical() -> None:
 
     with pytest.raises(
         ValueError,
-        match=r"`from_terminal` and `to_terminal` are identical\. "
+        match=r"`start` and `end` are identical\. "
         r"Wires must have different terminals at each end\.",
     ):
         ManualWire(terminal, terminal, [])

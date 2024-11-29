@@ -138,14 +138,14 @@ def test_voltage_processes_terminals_correctly(dummy_component: DummyComponent) 
     voltage_3 = dummy_component.voltage(dummy_component.left, "right", "V")
     voltage_4 = dummy_component.voltage("left", "right", "V")
 
-    assert voltage_1.from_terminal == dummy_component.left
-    assert voltage_1.to_terminal == dummy_component.right
-    assert voltage_2.from_terminal == dummy_component.left
-    assert voltage_2.to_terminal == dummy_component.right
-    assert voltage_3.from_terminal == dummy_component.left
-    assert voltage_3.to_terminal == dummy_component.right
-    assert voltage_4.from_terminal == dummy_component.left
-    assert voltage_4.to_terminal == dummy_component.right
+    assert voltage_1.start == dummy_component.left
+    assert voltage_1.end == dummy_component.right
+    assert voltage_2.start == dummy_component.left
+    assert voltage_2.end == dummy_component.right
+    assert voltage_3.start == dummy_component.left
+    assert voltage_3.end == dummy_component.right
+    assert voltage_4.start == dummy_component.left
+    assert voltage_4.end == dummy_component.right
 
 
 def test_voltage_sets_component_it_is_called_on_as_avoid(
@@ -160,8 +160,7 @@ def test_voltage_errors_if_terminals_are_the_same(
     dummy_component: DummyComponent,
 ) -> None:
     expected_message = (
-        "The terminals specified through `from_terminal` and "
-        "`to_terminal` are identical."
+        "The terminals specified through `start` and `end` are identical."
     )
 
     with pytest.raises(ValueError, match=expected_message):

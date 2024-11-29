@@ -19,17 +19,17 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
     wire should have corners.
     """
 
-    def __init__(self, from_terminal: Terminal, to_terminal: Terminal, updating: bool):
+    def __init__(self, start: Terminal, end: Terminal, updating: bool):
         super().__init__(stroke_width=config_eng.symbol.wire_stroke_width)
 
-        if from_terminal == to_terminal:
+        if start == end:
             raise ValueError(
-                "`from_terminal` and `to_terminal` are identical. "
+                "`start` and `end` are identical. "
                 "Wires must have different terminals at each end."
             )
 
-        self.from_terminal = from_terminal
-        self.to_terminal = to_terminal
+        self.start = start
+        self.end = end
 
         self.__construct_wire()
 
@@ -41,8 +41,8 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
 
         This updates the terminals so that they know they have one more connection.
         """
-        self.from_terminal._increment_connection_count()
-        self.to_terminal._increment_connection_count()
+        self.start._increment_connection_count()
+        self.end._increment_connection_count()
         return self
 
     def detach(self) -> Self:
@@ -50,8 +50,8 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
 
         This updates the terminals so that they know they have one fewer connection.
         """
-        self.from_terminal._decrement_connection_count()
-        self.to_terminal._decrement_connection_count()
+        self.start._decrement_connection_count()
+        self.end._decrement_connection_count()
         return self
 
     def __construct_wire(self) -> None:
@@ -60,11 +60,11 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
         # wire
         self.set_points_as_corners(
             [
-                self.from_terminal.end - 0.001 * self.from_terminal.direction,
-                self.from_terminal.end,
+                self.start.end - 0.001 * self.start.direction,
+                self.start.end,
                 *self.get_corner_points(),
-                self.to_terminal.end,
-                self.to_terminal.end - 0.001 * self.to_terminal.direction,
+                self.end.end,
+                self.end.end - 0.001 * self.end.direction,
             ]
         )
 
@@ -81,8 +81,8 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
         if anim_args is None:
             anim_args = {}
         return mn.AnimationGroup(
-            self.from_terminal.animate(**anim_args)._increment_connection_count(),
-            self.to_terminal.animate(**anim_args)._increment_connection_count(),
+            self.start.animate(**anim_args)._increment_connection_count(),
+            self.end.animate(**anim_args)._increment_connection_count(),
         )
 
     @mn.override_animate(detach)
@@ -90,8 +90,8 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
         if anim_args is None:
             anim_args = {}
         return mn.AnimationGroup(
-            self.from_terminal.animate(**anim_args)._decrement_connection_count(),
-            self.to_terminal.animate(**anim_args)._decrement_connection_count(),
+            self.start.animate(**anim_args)._decrement_connection_count(),
+            self.end.animate(**anim_args)._decrement_connection_count(),
         )
 
     @mn.override_animation(mn.Create)
