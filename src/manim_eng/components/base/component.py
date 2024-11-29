@@ -1,10 +1,13 @@
 """Contains the Component base class."""
 
+from __future__ import annotations
+
 import abc
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any, Self, cast
 
 import manim as mn
 import manim.typing as mnt
+import numpy as np
 
 from manim_eng import config_eng
 from manim_eng._base.anchor import AnnotationAnchor, CentreAnchor, LabelAnchor
@@ -12,6 +15,10 @@ from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
 from manim_eng.circuit.voltage import Voltage
 from manim_eng.components.base.terminal import Terminal
+
+if TYPE_CHECKING:
+    from manim_eng.components.base.monopole import Monopole
+    from manim_eng.components.node import Node
 
 __all__ = ["Component"]
 
@@ -44,20 +51,19 @@ class Component(Markable, metaclass=abc.ABCMeta):
             stroke_width=config_eng.symbol.component_stroke_width, **kwargs
         )
 
-        self.terminals = terminals
-
         self._centre_anchor = CentreAnchor()
         self._label_anchor = LabelAnchor()
         self._annotation_anchor = AnnotationAnchor()
 
+        for terminal in terminals:
+            terminal.match_style(self)
+        self._terminals = mn.VGroup(*terminals)
         self._body = mn.VGroup()
         self.add(self._body)
 
         self._construct()
 
-        for terminal in self.terminals:
-            terminal.match_style(self)
-        self._body.add(*self.terminals)
+        self._body.add(self._terminals)
 
         self.__set_up_anchors()
         self._label = Mark(self._label_anchor, self._centre_anchor)
@@ -73,6 +79,11 @@ class Component(Markable, metaclass=abc.ABCMeta):
         (to set the anchor positions for annotations) the component's shape setup.
         """
 
+    @property
+    def terminals(self) -> list[Terminal]:
+        """The list of terminals of the component."""
+        return cast(list[Terminal], self._terminals.submobjects)
+
     def get_center(self) -> mnt.Point3D:
         """Get the centre of the components.
 
@@ -87,6 +98,100 @@ class Component(Markable, metaclass=abc.ABCMeta):
             The centre of the components.
         """
         return self._centre_anchor.get_center()
+
+    def align_terminal(
+        self,
+        self_terminal: Terminal | str,
+        other: Terminal | mnt.Point3D | Node | Monopole,
+        direction: mnt.Vector3D | None = None,
+    ) -> Self:
+        """Align a component terminal with a point or a terminal on another component.
+
+        Moves this component along the line perpendicular to ``direction`` such that the
+        line between the end of ``self_terminal`` and ``other``
+        has direction vector ``direction``.
+
+        Parameters
+        ----------
+        self_terminal : Terminal | str
+             Either a ``Terminal`` belonging to this component, or a string representing
+            an attribute of this component that returns a terminal (e.g. ``"right"``).
+        other : Terminal | Point3D | Node | Monopole
+            A ``Terminal`` belonging to another component, a ``Node``, a ``Monopole``
+            (for which its single terminal is selected), or a point in space.
+        direction : Vector3D | None
+            The direction to align the terminals in. If not supplied, uses
+            ``self_terminal``'s direction.
+
+        Raises
+        ------
+        ValueError
+            If a ``Terminal`` passed to ``self_terminal`` does not belong to this
+            component.
+        AttributeError
+            If a string passed to ``self_terminal`` does not represent an existing
+            attribute on this component.
+        ValueError
+            If a string passed to ``self_terminal`` does not represent an attribute of
+            this component that produces a ``Terminal`` instance.
+        ValueError
+            If ``other_terminal`` belongs to this component (if it is a ``Terminal``)
+            or if ``other_terminal`` *is* this component (if it is a ``Node`` or
+            ``Monopole``).
+
+        Notes
+        -----
+        In geometric terms, the component in moved such that the end of
+        ``self_terminal`` is at the intersection of the lines that
+
+        - Have direction vector perpendicular to ``direction`` and go through the
+          current position of the end of ``self_terminal``; and
+        - Have direction vector ``direction`` and go through the end of
+          ``other`` (in the case that it is a ``Terminal``) or through ``other`` (in the
+           case that it is a point).
+        """
+        from manim_eng.components.base.monopole import Monopole
+        from manim_eng.components.node import Node
+
+        self_terminal = self._get_or_check_terminal(self_terminal)
+        if isinstance(other, Terminal):
+            if other in self.terminals:
+                raise ValueError(
+                    "Terminal passed to `other_terminal` belongs to this component. "
+                    "`other_terminal` should be a terminal of another component, "
+                    "a point, or a separate Node or Monopole."
+                )
+            other = other.end
+        elif isinstance(other, Node):
+            if other == self:
+                raise ValueError(
+                    "Node passed to `other_terminal` is this component. "
+                    "`other_terminal` should be a terminal of another component, "
+                    "a point, or a separate Node or Monopole."
+                )
+            other = other.get_center()
+        elif isinstance(other, Monopole):
+            if other == self:
+                raise ValueError(
+                    "Monopole passed to `other_terminal` is this component. "
+                    "`other_terminal` should be a terminal of another component, "
+                    "a point, or a separate Node or Monopole."
+                )
+            other = other.terminal.end
+
+        if direction is None:
+            direction = self_terminal.direction
+
+        movement_direction = np.cross(direction, mn.OUT)
+        target_position = mn.find_intersection(
+            [self_terminal.end],
+            [movement_direction],
+            [other],
+            [direction],
+        )[0]
+
+        self.shift(target_position - self_terminal.end)
+        return self
 
     def set_label(self, label: str) -> Self:
         """Set the label of the component.

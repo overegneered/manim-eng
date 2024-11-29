@@ -8,39 +8,39 @@ from manim_eng.components.base.terminal import Terminal
 
 class DummyComponent(Component):
     def __init__(self, **kwargs: Any) -> None:
-        terminal_1 = Terminal(mn.RIGHT, mn.RIGHT)
-        terminal_2 = Terminal(mn.LEFT, mn.LEFT)
+        left = Terminal(mn.LEFT, mn.LEFT)
+        right = Terminal(mn.RIGHT, mn.RIGHT)
         self.not_a_terminal = 3
-        super().__init__([terminal_1, terminal_2], **kwargs)
+        super().__init__([left, right], **kwargs)
 
     def _construct(self) -> None:
         pass
 
     @property
-    def terminal_1(self) -> Terminal:
+    def left(self) -> Terminal:
         return self.terminals[0]
 
     @property
-    def terminal_2(self) -> Terminal:
+    def right(self) -> Terminal:
         return self.terminals[1]
 
 
 class DummyComponentMockedTerminals(Component):
     def __init__(self, **kwargs: Any) -> None:
-        terminal_1 = mock.MagicMock(Terminal)
-        terminal_2 = mock.MagicMock(Terminal)
+        left = mock.MagicMock(Terminal)
+        right = mock.MagicMock(Terminal)
         self.not_a_terminal = 3
-        super().__init__([terminal_1, terminal_2], **kwargs)
+        super().__init__([left, right], **kwargs)
 
     def _construct(self) -> None:
         pass
 
     @property
-    def terminal_1(self) -> mock.MagicMock:
+    def left(self) -> mock.MagicMock:
         return cast(mock.MagicMock, self.terminals[0])
 
     @property
-    def terminal_2(self) -> mock.MagicMock:
+    def right(self) -> mock.MagicMock:
         return cast(mock.MagicMock, self.terminals[1])
 
     @property

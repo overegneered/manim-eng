@@ -1,8 +1,6 @@
 import os
-from unittest import mock
 
 import pytest
-from manim_eng.components.base import Terminal
 from manim_eng.components.base.component import Component
 
 from .test_utils.dummy_component import DummyComponent, DummyComponentMockedTerminals
@@ -21,7 +19,4 @@ def dummy_component() -> Component:
 
 @pytest.fixture()
 def dummy_component_mocked_terminals() -> Component:
-    dummy_component = DummyComponentMockedTerminals()
-    dummy_component.terminals[0] = mock.MagicMock(Terminal)
-    dummy_component.terminals[1] = mock.MagicMock(Terminal)
-    return dummy_component
+    return DummyComponentMockedTerminals()
