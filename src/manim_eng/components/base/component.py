@@ -1,7 +1,9 @@
 """Contains the Component base class."""
 
+from __future__ import annotations
+
 import abc
-from typing import Any, Self, cast
+from typing import TYPE_CHECKING, Any, Self, cast
 
 import manim as mn
 import manim.typing as mnt
@@ -13,6 +15,9 @@ from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
 from manim_eng.circuit.voltage import Voltage
 from manim_eng.components.base.terminal import Terminal
+
+if TYPE_CHECKING:
+    from manim_eng.components.node import Node
 
 __all__ = ["Component"]
 
@@ -96,12 +101,12 @@ class Component(Markable, metaclass=abc.ABCMeta):
     def align_terminal(
         self,
         self_terminal: Terminal | str,
-        other: Terminal | mnt.Point3D,
+        other: Terminal | mnt.Point3D | Node,
         direction: mnt.Vector3D | None = None,
     ) -> Self:
         """Align a component terminal with a point or a terminal on another component.
 
-        Move this component along the line perpendicular to ``direction`` such that the
+        Moves this component along the line perpendicular to ``direction`` such that the
         line between the end of ``self_terminal`` and ``other``
         has direction vector ``direction``.
 
@@ -110,8 +115,9 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self_terminal : Terminal | str
              Either a ``Terminal`` belonging to this component, or a string representing
             an attribute of this component that returns a terminal (e.g. ``"right"``).
-        other : Terminal | Point3D
-            A ``Terminal`` belonging to another component or a point in space.
+        other : Terminal | Point3D | Node
+            A ``Terminal`` belonging to another component, a ``Node``, or a point in
+            space.
         direction : Vector3D | None
             The direction to align the terminals in. If not supplied, uses
             ``self_terminal``'s direction.
@@ -141,6 +147,8 @@ class Component(Markable, metaclass=abc.ABCMeta):
           ``other`` (in the case that it is a ``Terminal``) or through ``other`` (in the
            case that it is a point).
         """
+        from manim_eng.components.node import Node
+
         self_terminal = self._get_or_check_terminal(self_terminal)
         if isinstance(other, Terminal):
             if other in self.terminals:
@@ -149,6 +157,9 @@ class Component(Markable, metaclass=abc.ABCMeta):
                     "It must belong to a different component."
                 )
             other = other.end
+        elif isinstance(other, Node):
+            other = other.get_center()
+
         if direction is None:
             direction = self_terminal.direction
 
