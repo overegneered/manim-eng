@@ -7,7 +7,7 @@ from manim_eng.components.base.component import Component
 from manim_eng.components.base.monopole import Monopole
 from manim_eng.components.node import Node
 
-from .test_utils.dummy_component import DummyComponent, DummyComponentMockedTerminals
+from .utils.dummy_component import DummyComponent, DummyComponentMockedTerminals
 
 
 @pytest.mark.parametrize(

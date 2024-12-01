@@ -3,7 +3,7 @@ import os
 import pytest
 from manim_eng.components.base.component import Component
 
-from .test_utils.dummy_component import DummyComponent, DummyComponentMockedTerminals
+from .utils.dummy_component import DummyComponent, DummyComponentMockedTerminals
 
 # Create the media directory required by some of the tests if it doesn't already exist
 # Ordinarily Manim would create this, but the tests run Manim code outside the usual
