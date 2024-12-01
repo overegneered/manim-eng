@@ -62,7 +62,6 @@ standard_engineering_prefixes = [
 ]
 
 
-# TODO: tests for this
 def value_to_si(value: float) -> tuple[float, str]:
     """Convert a value to a SI prefix symbol and the new value that should precede it.
 
