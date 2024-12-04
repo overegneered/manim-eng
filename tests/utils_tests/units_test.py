@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from manim_eng._utils.units import (
+from manim_eng.units import (
     AMP,
     ATTO,
     COULOMB,
@@ -29,26 +29,26 @@ from manim_eng._utils.units import (
     ZEPTO,
     ZETTA,
     Unit,
-    Units,
+    UnitSequence,
     Value,
 )
 
 
 def test_unit_multiplication() -> None:
-    assert Units([VOLT, AMP]) == VOLT * AMP
+    assert UnitSequence([VOLT, AMP]) == VOLT * AMP
 
 
 def test_unit_multiplication_cascading() -> None:
-    assert Units([VOLT, AMP, COULOMB]) == VOLT * AMP * COULOMB
+    assert UnitSequence([VOLT, AMP, COULOMB]) == VOLT * AMP * COULOMB
 
 
 def test_unit_division() -> None:
-    assert Units([VOLT, Unit(AMP.symbol, -1)]) == VOLT / AMP
+    assert UnitSequence([VOLT, Unit(AMP.symbol, -1)]) == VOLT / AMP
 
 
 def test_unit_division_cascading() -> None:
     assert (
-        Units(
+        UnitSequence(
             [
                 VOLT,
                 Unit(AMP.symbol, -1),
@@ -68,19 +68,19 @@ def test_unit_power_prefix_does_not_power() -> None:
 
 
 def test_unit_multiply_to_value() -> None:
-    assert Value(3, Units([VOLT])) == 3 * VOLT
+    assert Value(3, UnitSequence([VOLT])) == 3 * VOLT
 
 
 def test_unit_divide_to_value() -> None:
-    assert Value(3, Units([Unit(VOLT.symbol, -1)])) == 3 / VOLT
+    assert Value(3, UnitSequence([Unit(VOLT.symbol, -1)])) == 3 / VOLT
 
 
 def test_units_multiplication() -> None:
-    assert Units([VOLT, AMP, COULOMB, FARAD]) == (VOLT * AMP) * (COULOMB * FARAD)
+    assert UnitSequence([VOLT, AMP, COULOMB, FARAD]) == (VOLT * AMP) * (COULOMB * FARAD)
 
 
 def test_units_division() -> None:
-    assert Units(
+    assert UnitSequence(
         [
             VOLT,
             AMP,
@@ -91,17 +91,17 @@ def test_units_division() -> None:
 
 
 def test_units_division_does_not_change_prefix_exponent() -> None:
-    assert Units([VOLT, MILLI, Unit(AMP.symbol, -1)]) == VOLT / (MILLI * AMP)
+    assert UnitSequence([VOLT, MILLI, Unit(AMP.symbol, -1)]) == VOLT / (MILLI * AMP)
 
 
 def test_units_multiply_to_value() -> None:
-    assert Value(3, Units([VOLT, AMP])) == 3 * (VOLT * AMP)
+    assert Value(3, UnitSequence([VOLT, AMP])) == 3 * (VOLT * AMP)
 
 
 def test_units_divide_to_value() -> None:
     assert Value(
         3,
-        Units(
+        UnitSequence(
             [
                 Unit(VOLT.symbol, -1),
                 Unit(AMP.symbol, -1),
@@ -111,12 +111,12 @@ def test_units_divide_to_value() -> None:
 
 
 def test_unit_multiply_with_units() -> None:
-    assert Units([VOLT, AMP, COULOMB]) == VOLT * (AMP * COULOMB)
-    assert Units([VOLT, AMP, COULOMB]) == (VOLT * AMP) * COULOMB
+    assert UnitSequence([VOLT, AMP, COULOMB]) == VOLT * (AMP * COULOMB)
+    assert UnitSequence([VOLT, AMP, COULOMB]) == (VOLT * AMP) * COULOMB
 
 
 def test_unit_divide_with_units() -> None:
-    assert Units(
+    assert UnitSequence(
         [
             VOLT,
             Unit(AMP.symbol, -1),
@@ -124,7 +124,7 @@ def test_unit_divide_with_units() -> None:
         ]
     ) == VOLT / (AMP * COULOMB)
     assert (
-        Units(
+        UnitSequence(
             [
                 VOLT,
                 AMP,
@@ -137,7 +137,7 @@ def test_unit_divide_with_units() -> None:
 
 def test_combined_expression() -> None:
     assert Value(
-        7.54, Units([KILO, WATT, HOUR, MEGA, Unit(HENRY.symbol, -2)])
+        7.54, UnitSequence([KILO, WATT, HOUR, MEGA, Unit(HENRY.symbol, -2)])
     ) == 7.54 * KILO * WATT * HOUR / (MEGA * HENRY**2)
 
 
@@ -217,4 +217,4 @@ def test_value_to_si(
     actual_value = Value.to_si(number)
 
     assert np.isclose(actual_value.value, expected_value)
-    assert actual_value.units == Units(expected_prefix)
+    assert actual_value.units == UnitSequence(expected_prefix)
