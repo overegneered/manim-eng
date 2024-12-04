@@ -16,10 +16,11 @@ This is because the system stores units as they would be *written*, and you woul
 
 from __future__ import annotations
 
-import dataclasses as dc
 from typing import Sequence
 
 import numpy as np
+
+# TODO: E(number) that adds 'x 10^number' to the value
 
 __all__ = [
     "Unit",
@@ -61,7 +62,6 @@ __all__ = [
 ]
 
 
-@dc.dataclass
 class Unit:
     """An SI unit or prefix.
 
@@ -69,6 +69,9 @@ class Unit:
     ----------
     symbol : str
         The symbol of the unit. For metres this would be 'm'.
+    latex : str, optional
+        The latex math mode code to present the unit symbol. If not given, defaults to
+        ``symbol``.
     exponent : int | float, optional
         The exponent of the unit (e.g. 2 for :math:`m^{2}`). Defaults to 1 if
         unspecified.
@@ -77,9 +80,23 @@ class Unit:
         Defaults to ``False`` if unspecified.
     """
 
-    symbol: str
-    exponent: int | float = 1
-    prefix: bool = False
+    def __init__(
+        self,
+        symbol: str,
+        latex: str | None = None,
+        exponent: int | float = 1,
+        prefix: bool = False,
+    ):
+        self.symbol = symbol
+        self.latex = latex if latex is not None else symbol
+        self.exponent = exponent
+        self.prefix = prefix
+
+    def to_latex(self) -> str:
+        """Return a LaTeX math mode string representation of the unit."""
+        if self.exponent == 1:
+            return self.latex
+        return f"{self.latex}^{{{self.exponent}}}"
 
     def __mul__(self, other: Unit | UnitSequence) -> UnitSequence:
         """Create a UnitSequence from this Unit and another Unit(Sequence)."""
@@ -114,8 +131,8 @@ class Unit:
         if isinstance(exponent, int | float):
             return Unit(
                 self.symbol,
-                self.exponent * exponent if not self.prefix else 1,
-                self.prefix,
+                exponent=self.exponent * exponent if not self.prefix else 1,
+                prefix=self.prefix,
             )
         return NotImplemented
 
@@ -132,7 +149,7 @@ class Unit:
     def __repr__(self) -> str:
         """Return a string representation of the unit."""
         if self.exponent == 1:
-            return f"{self.symbol}"
+            return self.symbol
         return f"{self.symbol}^{self.exponent}"
 
 
@@ -156,6 +173,16 @@ class UnitSequence:
 
     def __init__(self, units: Sequence[Unit]) -> None:
         self.units = units
+
+    def to_latex(self) -> str:
+        """Return a LaTeX math mode string representation of the unit."""
+        rm_internal = ""
+        for unit in self.units:
+            rm_internal += unit.to_latex()
+            if not unit.prefix:
+                rm_internal += r"\,"
+        rm_internal = rm_internal.rstrip(r"\,")
+        return rf"\mathrm{{{rm_internal}}}"
 
     def __mul__(self, other: UnitSequence | Unit) -> UnitSequence:
         """Append the RHS units to the unit sequence."""
@@ -222,7 +249,7 @@ class UnitSequence:
 
 VOLT = Unit("V")
 AMP = Unit("A")
-OHM = Unit("Ω")
+OHM = Unit("Ω", r"\Omega")
 FARAD = Unit("F")
 HENRY = Unit("H")
 COULOMB = Unit("C")
@@ -308,6 +335,10 @@ class Value:
     def __init__(self, value: int | float, units: UnitSequence) -> None:
         self.value = value
         self.units = units
+
+    def to_latex(self) -> str:
+        """Return a LaTeX math mode string representation of the unit."""
+        return rf"{self.value}\,{self.units.to_latex()}"
 
     @staticmethod
     def to_si(number: int | float) -> Value:

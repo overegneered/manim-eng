@@ -15,12 +15,14 @@ from manim_eng.units import (
     MICRO,
     MILLI,
     NANO,
+    OHM,
     PETA,
     PICO,
     QUECTO,
     QUETTA,
     RONNA,
     RONTO,
+    SECOND,
     TERA,
     VOLT,
     WATT,
@@ -43,7 +45,7 @@ def test_unit_multiplication_cascading() -> None:
 
 
 def test_unit_division() -> None:
-    assert UnitSequence([VOLT, Unit(AMP.symbol, -1)]) == VOLT / AMP
+    assert UnitSequence([VOLT, Unit(AMP.symbol, exponent=-1)]) == VOLT / AMP
 
 
 def test_unit_division_cascading() -> None:
@@ -51,8 +53,8 @@ def test_unit_division_cascading() -> None:
         UnitSequence(
             [
                 VOLT,
-                Unit(AMP.symbol, -1),
-                Unit(COULOMB.symbol, -1),
+                Unit(AMP.symbol, exponent=-1),
+                Unit(COULOMB.symbol, exponent=-1),
             ]
         )
         == VOLT / AMP / COULOMB
@@ -60,7 +62,7 @@ def test_unit_division_cascading() -> None:
 
 
 def test_unit_power() -> None:
-    assert Unit(VOLT.symbol, 2) == VOLT**2
+    assert Unit(VOLT.symbol, exponent=2) == VOLT**2
 
 
 def test_unit_power_prefix_does_not_power() -> None:
@@ -72,39 +74,41 @@ def test_unit_multiply_to_value() -> None:
 
 
 def test_unit_divide_to_value() -> None:
-    assert Value(3, UnitSequence([Unit(VOLT.symbol, -1)])) == 3 / VOLT
+    assert Value(3, UnitSequence([Unit(VOLT.symbol, exponent=-1)])) == 3 / VOLT
 
 
-def test_units_multiplication() -> None:
+def test_unit_sequence_multiplication() -> None:
     assert UnitSequence([VOLT, AMP, COULOMB, FARAD]) == (VOLT * AMP) * (COULOMB * FARAD)
 
 
-def test_units_division() -> None:
+def test_unit_sequence_division() -> None:
     assert UnitSequence(
         [
             VOLT,
             AMP,
-            Unit(COULOMB.symbol, -1),
-            Unit(FARAD.symbol, -1),
+            Unit(COULOMB.symbol, exponent=-1),
+            Unit(FARAD.symbol, exponent=-1),
         ]
     ) == (VOLT * AMP) / (COULOMB * FARAD)
 
 
-def test_units_division_does_not_change_prefix_exponent() -> None:
-    assert UnitSequence([VOLT, MILLI, Unit(AMP.symbol, -1)]) == VOLT / (MILLI * AMP)
+def test_unit_sequence_division_does_not_change_prefix_exponent() -> None:
+    assert UnitSequence([VOLT, MILLI, Unit(AMP.symbol, exponent=-1)]) == VOLT / (
+        MILLI * AMP
+    )
 
 
-def test_units_multiply_to_value() -> None:
+def test_unit_sequence_multiply_to_value() -> None:
     assert Value(3, UnitSequence([VOLT, AMP])) == 3 * (VOLT * AMP)
 
 
-def test_units_divide_to_value() -> None:
+def test_unit_sequence_divide_to_value() -> None:
     assert Value(
         3,
         UnitSequence(
             [
-                Unit(VOLT.symbol, -1),
-                Unit(AMP.symbol, -1),
+                Unit(VOLT.symbol, exponent=-1),
+                Unit(AMP.symbol, exponent=-1),
             ]
         ),
     ) == 3 / (VOLT * AMP)
@@ -119,8 +123,8 @@ def test_unit_divide_with_units() -> None:
     assert UnitSequence(
         [
             VOLT,
-            Unit(AMP.symbol, -1),
-            Unit(COULOMB.symbol, -1),
+            Unit(AMP.symbol, exponent=-1),
+            Unit(COULOMB.symbol, exponent=-1),
         ]
     ) == VOLT / (AMP * COULOMB)
     assert (
@@ -128,7 +132,7 @@ def test_unit_divide_with_units() -> None:
             [
                 VOLT,
                 AMP,
-                Unit(COULOMB.symbol, -1),
+                Unit(COULOMB.symbol, exponent=-1),
             ]
         )
         == (VOLT * AMP) / COULOMB
@@ -137,8 +141,78 @@ def test_unit_divide_with_units() -> None:
 
 def test_combined_expression() -> None:
     assert Value(
-        7.54, UnitSequence([KILO, WATT, HOUR, MEGA, Unit(HENRY.symbol, -2)])
+        7.54, UnitSequence([KILO, WATT, HOUR, MEGA, Unit(HENRY.symbol, exponent=-2)])
     ) == 7.54 * KILO * WATT * HOUR / (MEGA * HENRY**2)
+
+
+def test_unit_takes_symbol_if_no_latex_specified() -> None:
+    unit = Unit("m")
+
+    assert unit.latex == "m"
+
+
+def test_unit_takes_latex_if_latex_specified() -> None:
+    unit = Unit("Ω", r"\Omega")
+
+    assert unit.latex == r"\Omega"
+
+
+@pytest.mark.parametrize(
+    ("unit", "expected_latex"),
+    [
+        pytest.param(VOLT, "V", id="normal"),
+        pytest.param(VOLT**2, "V^{2}", id="positive exponent"),
+        pytest.param(VOLT**-4, "V^{-4}", id="negative exponent"),
+        pytest.param(OHM, r"\Omega", id="latex symbol"),
+    ],
+)
+def test_unit_to_latex(unit: Unit, expected_latex: str) -> None:
+    actual_latex = unit.to_latex()
+
+    assert actual_latex == expected_latex
+
+
+@pytest.mark.parametrize(
+    ("unit_sequence", "expected_latex"),
+    [
+        pytest.param(VOLT * AMP, r"V\,A", id="two units"),
+        pytest.param(KILO * VOLT, r"kV", id="prefix has no space"),
+        pytest.param(VOLT**2 * AMP, r"V^{2}\,A", id="positive exponent"),
+        pytest.param(VOLT * AMP**-4, r"V\,A^{-4}", id="negative exponent"),
+        pytest.param(
+            KILO * VOLT / (MILLI * AMP), r"kV\,mA^{-1}", id="multiple prefixes"
+        ),
+    ],
+)
+def test_unit_sequence_to_latex(
+    unit_sequence: UnitSequence, expected_latex: str
+) -> None:
+    actual_latex = unit_sequence.to_latex()
+
+    assert actual_latex == rf"\mathrm{{{expected_latex}}}"
+
+
+@pytest.mark.parametrize(
+    ("value", "expected_latex"),
+    [
+        pytest.param(2 * VOLT, r"2\,\mathrm{V}", id="single unit"),
+        pytest.param(2 * KILO * VOLT, r"2\,\mathrm{kV}", id="unit with prefix"),
+        pytest.param(
+            3.14 / SECOND,
+            r"3.14\,\mathrm{s^{-1}}",
+            id="float with negative unit exponent",
+        ),
+        pytest.param(
+            7.54 * KILO * WATT * HOUR / (MEGA * HENRY**2),
+            r"7.54\,\mathrm{kW\,hr\,MH^{-2}}",
+            id="altogether now!",
+        ),
+    ],
+)
+def test_value_to_latex(value: Value, expected_latex: str) -> None:
+    actual_latex = value.to_latex()
+
+    assert actual_latex == expected_latex
 
 
 @pytest.mark.parametrize(
