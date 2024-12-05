@@ -11,6 +11,7 @@ from manim_eng._base.anchor import CentreAnchor, VoltageAnchor
 from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
 from manim_eng.components.base.terminal import Terminal
+from manim_eng.units import Value
 
 __all__ = ["Voltage"]
 
@@ -26,8 +27,9 @@ class Voltage(Markable):
     end : Terminal
         The terminal the tip end of the arrow should be attached to, i.e. the 'positive'
         end.
-    label : str
-        The label for the voltage arrow. Takes a TeX math mode string.
+    label : str | Value
+        The label for the voltage arrow. Takes a TeX math mode string, or a ``Value``
+        to be typeset as a math mode string.
     clockwise : bool
         Whether the arrow should go clockwise or anticlockwise. The default is
         anticlockwise.
@@ -46,7 +48,7 @@ class Voltage(Markable):
         self,
         start: Terminal,
         end: Terminal,
-        label: str,
+        label: str | Value,
         clockwise: bool = False,
         buff: float = mn.SMALL_BUFF,
         avoid: mn.VMobject | None = None,
@@ -76,13 +78,14 @@ class Voltage(Markable):
         self._label = Mark(self._anchor, self._centre_reference)
         self._set_mark(self._label, label)
 
-    def set_label(self, label: str, clockwise: bool | None = None) -> Self:
+    def set_label(self, label: str | Value, clockwise: bool | None = None) -> Self:
         """Set the voltage label.
 
         Parameters
         ----------
-        label : str
-            The label to set. Takes a TeX math mode string.
+        label : str | Value
+            The label to set. Takes a TeX math mode string, or a ``Value`` to be typeset
+            as a math mode string.
         clockwise : bool | None
             Whether the arrow should go clockwise or anticlockwise. If unspecified,
             takes the previous setting.
@@ -97,13 +100,14 @@ class Voltage(Markable):
             self.set_clockwise(clockwise=clockwise)
         return self
 
-    def reset_label(self, label: str, clockwise: bool = False) -> Self:
+    def reset_label(self, label: str | Value, clockwise: bool = False) -> Self:
         """Set the voltage label, with the sense being reset to default if unspecified.
 
         Parameters
         ----------
-        label : str
-            The label to set. Takes a TeX math mode string.
+        label : str | Value
+            The label to set. Takes a TeX math mode string, or a ``Value`` to be typeset
+            as a math mode string.
         clockwise : bool
             Whether the arrow should go clockwise or anticlockwise. If unspecified,
             takes the default setting (``False``).
