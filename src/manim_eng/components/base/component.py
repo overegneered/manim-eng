@@ -237,14 +237,15 @@ class Component(Markable, metaclass=abc.ABCMeta):
         return self
 
     def set_current(
-        self, label: str, terminal: Terminal | str | None = None, **kwargs: Any
+        self, label: str | Value, terminal: Terminal | str | None = None, **kwargs: Any
     ) -> Self:
         """Set the current label on one of the terminals of the component.
 
         Parameters
         ----------
-        label : str | None
-            The current label to set. Takes a TeX math mode string.
+        label : str | Value
+            The current label to set. Takes a TeX math mode string, or a ``Value`` to be
+            typeset as a math mode string.
         terminal : Terminal | str | None
             Either a ``Terminal`` belonging to this component, or a string representing
             an attribute of this component that returns a component (e.g. ``"right"``).
@@ -276,7 +277,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
         return self
 
     def reset_current(
-        self, label: str, terminal: Terminal | str | None = None, **kwargs: Any
+        self, label: str | Value, terminal: Terminal | str | None = None, **kwargs: Any
     ) -> Self:
         """Reset the current label on one of the terminals of the component.
 
@@ -286,8 +287,9 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        label : str | None
-            The current label to set. Takes a TeX math mode string.
+        label : str | Value
+            The current label to set. Takes a TeX math mode string, or a ``Value`` to be
+            typeset as a math mode string.
         terminal : Terminal | str | None
             Either a ``Terminal`` belonging to this component, or a string representing
             an attribute of this component that returns a component (e.g. ``"right"``).

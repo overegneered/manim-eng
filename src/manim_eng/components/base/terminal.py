@@ -11,6 +11,7 @@ from manim_eng._base.anchor import CentreAnchor, CurrentAnchor, TerminalAnchor
 from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
 from manim_eng._config import config_eng
+from manim_eng.units import Value
 
 __all__ = ["Terminal"]
 
@@ -98,7 +99,7 @@ class Terminal(Markable):
         return self._end_anchor.pos
 
     def set_current(
-        self, label: str, out: bool | None = None, below: bool | None = None
+        self, label: str | Value, out: bool | None = None, below: bool | None = None
     ) -> Self:
         """Set the current label of the terminal.
 
@@ -107,8 +108,9 @@ class Terminal(Markable):
 
         Parameters
         ----------
-        label : str
-            The current label to set. Takes a TeX math mode string.
+        label : str | Value
+            The current label to set. Takes a TeX math mode string, or a ``Value`` to be
+            typeset as a math mode string.
         out : bool | None
             Whether the arrow accompanying the annotation should point out (away from
             the body of the component to which the terminal is attached), or in (towards
@@ -145,7 +147,9 @@ class Terminal(Markable):
         self.__update_terminal_visibility()
         return self
 
-    def reset_current(self, label: str, out: bool = False, below: bool = False) -> Self:
+    def reset_current(
+        self, label: str | Value, out: bool = False, below: bool = False
+    ) -> Self:
         """Set the current label of the terminal. Unspecified arguments are reset.
 
         Sets the current label, with unspecified arguments being reset to their original
@@ -154,8 +158,9 @@ class Terminal(Markable):
 
         Parameters
         ----------
-        label : str
-            The current label to set. Takes a TeX math mode string.
+        label : str | Value
+            The current label to set. Takes a TeX math mode string, or a ``Value`` to be
+            typeset as a math mode string.
         out : bool
             Whether the arrow accompanying the annotation should point out (away from
             the body of the component to which the terminal is attached), or in (towards
@@ -245,7 +250,7 @@ class Terminal(Markable):
     @mn.override_animate(set_current)
     def __animate_set_current(
         self,
-        label: str,
+        label: str | Value,
         out: bool | None = None,
         below: bool | None = None,
         anim_args: dict[str, Any] | None = None,
@@ -303,7 +308,7 @@ class Terminal(Markable):
     @mn.override_animate(reset_current)
     def __animate_reset_current(
         self,
-        label: str,
+        label: str | Value,
         out: bool = False,
         below: bool = False,
         anim_args: dict[str, Any] | None = None,
