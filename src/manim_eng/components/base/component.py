@@ -469,10 +469,11 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
     @mn.override_animate(set_label)
     def __animate_set_label(
-        self, label: str, anim_args: dict[str, Any] | None = None
+        self, label: str | Value, anim_args: dict[str, Any] | None = None
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
+        label = label if isinstance(label, str) else label.to_latex()
         return self.animate(**anim_args)._set_mark(self._label, label).build()
 
     @mn.override_animate(clear_label)
@@ -485,11 +486,14 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
     @mn.override_animate(set_annotation)
     def __animate_set_annotation(
-        self, label: str, anim_args: dict[str, Any] | None = None
+        self, annotation: str | Value, anim_args: dict[str, Any] | None = None
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
-        return self.animate(**anim_args)._set_mark(self._annotation, label).build()
+        annotation = (
+            annotation if isinstance(annotation, str) else annotation.to_latex()
+        )
+        return self.animate(**anim_args)._set_mark(self._annotation, annotation).build()
 
     @mn.override_animate(clear_annotation)
     def __animate_clear_annotation(
