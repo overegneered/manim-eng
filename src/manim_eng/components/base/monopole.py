@@ -11,6 +11,7 @@ import manim.typing as mnt
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.terminal import Terminal
 from manim_eng.components.node import Node
+from manim_eng.units import Value
 
 __all__ = ["Monopole"]
 
@@ -83,7 +84,7 @@ class Monopole(Component, metaclass=abc.ABCMeta):
         """
         return super().align_terminal(self.terminal, other, direction)
 
-    def set_annotation(self, annotation: str) -> Self:
+    def set_annotation(self, annotation: str | Value) -> Self:
         """Fails for monopoles, as they do not have annotations."""
         raise NotImplementedError(
             "Monopoles have no annotation. Please use `.set_label()`."

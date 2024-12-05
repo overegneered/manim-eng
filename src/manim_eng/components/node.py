@@ -9,6 +9,7 @@ import numpy as np
 from manim_eng import config_eng
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.terminal import Terminal
+from manim_eng.units import Value
 
 __all__ = ["Node", "OpenNode"]
 
@@ -68,7 +69,7 @@ class Node(Component):
         self._body.add(self.__blob)
 
     def set_label(
-        self, label: str, direction: mnt.Vector3D | float | None = None
+        self, label: str | Value, direction: mnt.Vector3D | float | None = None
     ) -> Self:
         """Set the label of the node, optionally specifying where it should be.
 
@@ -81,7 +82,8 @@ class Node(Component):
         Parameters
         ----------
         label : str
-            The label to set. Takes a TeX math mode string.
+            The label to set. Takes a TeX math mode string, or a ``Value`` to be typeset
+            as a math mode string.
         direction : Vector3D | float | None
             The direction in which to place the label. Can either be a direction vector
             (``Vector3D``), an angle in radians (``float``), or ``None``, which
@@ -91,7 +93,7 @@ class Node(Component):
         super().set_label(label)
         return self
 
-    def set_annotation(self, annotation: str) -> Self:
+    def set_annotation(self, annotation: str | Value) -> Self:
         """Fails for nodes, as they do not have annotations."""
         raise NotImplementedError(
             "Monopoles have no annotation. Please use `.set_label()`."
