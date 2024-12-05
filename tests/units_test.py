@@ -30,6 +30,7 @@ from manim_eng.units import (
     YOTTA,
     ZEPTO,
     ZETTA,
+    E,
     Unit,
     UnitSequence,
     Value,
@@ -114,12 +115,12 @@ def test_unit_sequence_divide_to_value() -> None:
     ) == 3 / (VOLT * AMP)
 
 
-def test_unit_multiply_with_units() -> None:
+def test_unit_multiply_with_unit_sequence() -> None:
     assert UnitSequence([VOLT, AMP, COULOMB]) == VOLT * (AMP * COULOMB)
     assert UnitSequence([VOLT, AMP, COULOMB]) == (VOLT * AMP) * COULOMB
 
 
-def test_unit_divide_with_units() -> None:
+def test_unit_divide_with_unit_sequence() -> None:
     assert UnitSequence(
         [
             VOLT,
@@ -170,6 +171,46 @@ def test_unit_to_latex(unit: Unit, expected_latex: str) -> None:
     actual_latex = unit.to_latex()
 
     assert actual_latex == expected_latex
+
+
+@pytest.mark.parametrize(
+    ("exponent", "expected_latex"),
+    [
+        pytest.param(5, r"\times 10^{5}", id="standard exponent"),
+        pytest.param(1, r"\times 10^{1}", id="exponent of 1 is printed"),
+        pytest.param(-1, r"\times 10^{-1}", id="negative exponent"),
+    ],
+)
+def test_e_to_latex(exponent: int, expected_latex: str) -> None:
+    actual_latex = E(exponent).to_latex()
+
+    assert actual_latex == expected_latex
+
+
+@pytest.mark.parametrize(
+    ("exponent", "expected_string"),
+    [
+        pytest.param(5, r"×10^5", id="standard exponent"),
+        pytest.param(1, r"×10^1", id="exponent of 1 is printed"),
+        pytest.param(-1, r"×10^-1", id="negative exponent"),
+    ],
+)
+def test_e_repr(exponent: int, expected_string: str) -> None:
+    actual_string = f"{E(exponent)}"
+
+    assert actual_string == expected_string
+
+
+def test_value_with_e_first_has_no_spacing_in_latex() -> None:
+    actual_latex = (3.4 * E(3) * VOLT).to_latex()
+
+    assert actual_latex == r"3.4\mathrm{\times 10^{3}\,V}"
+
+
+def test_value_with_e_first_has_no_spacing_in_repr() -> None:
+    actual_repr = f"{(3.4 * E(3) * VOLT)}"
+
+    assert actual_repr == r"3.4×10^3 V"
 
 
 @pytest.mark.parametrize(

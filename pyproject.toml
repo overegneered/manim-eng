@@ -67,6 +67,8 @@ ignore = [
     # Deactivated because manim-eng has functions that have a lot of configuration arguments that have default values
     "PLR0913",
 ]
+# Allow the multiplication sign (this is flagged as similar to the small letter 'x')
+allowed-confusables = ["×"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"

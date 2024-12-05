@@ -20,11 +20,10 @@ from typing import Sequence
 
 import numpy as np
 
-# TODO: E(number) that adds 'x 10^number' to the value
-
 __all__ = [
     "Unit",
     "Value",
+    "E",
     "VOLT",
     "AMP",
     "OHM",
@@ -153,6 +152,27 @@ class Unit:
         return f"{self.symbol}^{self.exponent}"
 
 
+class E(Unit):
+    """Unit representing scientific notation. Printed as '×10^{exponent}'.
+
+    Parameters
+    ----------
+    exponent: int
+        The exponent of the '10'.
+    """
+
+    def __init__(self, exponent: int) -> None:
+        super().__init__("×10", latex=r"\times 10", exponent=exponent)
+
+    def to_latex(self) -> str:
+        """Return a LaTeX math mode string representation of scientific notation."""
+        return f"{self.latex}^{{{self.exponent}}}"
+
+    def __repr__(self) -> str:
+        """Return a string representation of scientific notation."""
+        return f"{self.symbol}^{self.exponent}"
+
+
 class UnitSequence:
     r"""A sequence of individual units.
 
@@ -243,8 +263,7 @@ class UnitSequence:
             to_return += f"{unit}"
             if not unit.prefix:
                 to_return += " "
-        to_return.rstrip()
-        return to_return
+        return to_return.rstrip()
 
 
 VOLT = Unit("V")
@@ -338,7 +357,8 @@ class Value:
 
     def to_latex(self) -> str:
         """Return a LaTeX math mode string representation of the unit."""
-        return rf"{self.value}\,{self.units.to_latex()}"
+        spacing = r"\," if not isinstance(self.units.units[0], E) else ""
+        return rf"{self.value}{spacing}{self.units.to_latex()}"
 
     @staticmethod
     def to_si(number: int | float) -> Value:
@@ -384,4 +404,5 @@ class Value:
 
     def __repr__(self) -> str:
         """Return a string representation of the value."""
-        return f"{self.value} {self.units}"
+        spacing = " " if not isinstance(self.units.units[0], E) else ""
+        return f"{self.value}{spacing}{self.units}"
