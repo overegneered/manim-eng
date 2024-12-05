@@ -207,7 +207,6 @@ class Component(Markable, metaclass=abc.ABCMeta):
         --------
         units.Value
         """
-        label = label if isinstance(label, str) else label.to_latex()
         self._set_mark(self._label, label)
         return self
 
@@ -229,9 +228,6 @@ class Component(Markable, metaclass=abc.ABCMeta):
         --------
         units.Value
         """
-        annotation = (
-            annotation if isinstance(annotation, str) else annotation.to_latex()
-        )
         self._set_mark(self._annotation, annotation)
         return self
 
@@ -473,7 +469,6 @@ class Component(Markable, metaclass=abc.ABCMeta):
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
-        label = label if isinstance(label, str) else label.to_latex()
         return self.animate(**anim_args)._set_mark(self._label, label).build()
 
     @mn.override_animate(clear_label)
@@ -490,9 +485,6 @@ class Component(Markable, metaclass=abc.ABCMeta):
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
-        annotation = (
-            annotation if isinstance(annotation, str) else annotation.to_latex()
-        )
         return self.animate(**anim_args)._set_mark(self._annotation, annotation).build()
 
     @mn.override_animate(clear_annotation)
