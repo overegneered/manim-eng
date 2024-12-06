@@ -15,6 +15,7 @@ from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
 from manim_eng.circuit.voltage import Voltage
 from manim_eng.components.base.terminal import Terminal
+from manim_eng.units import Value
 
 if TYPE_CHECKING:
     from manim_eng.components.base.monopole import Monopole
@@ -32,19 +33,19 @@ class Component(Markable, metaclass=abc.ABCMeta):
         The terminals of the component. Management of terminal visibility is handled by
         the constructor; terminals should not be added before or after they are passed
         to this constructor.
-    label : str | None
-        A label to set. Takes a TeX math mode string. No label is set if ``None`` is
-        passed.
-    annotation : str | None
-        An annotation to set. Takes a TeX math mode string. No annotation is set if
-        ``None`` is passed.
+    label : str | Value | None, optional
+        A label to set. Takes a TeX math mode string, or a ``Value`` to be typeset as a
+        math mode string.
+    annotation : str | Value | None, optional
+        An annotation to set. Takes a TeX math mode string, or a ``Value`` to be typeset
+         as a math mode string.
     """
 
     def __init__(
         self,
         terminals: list[Terminal],
-        label: str | None = None,
-        annotation: str | None = None,
+        label: str | Value | None = None,
+        annotation: str | Value | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(
@@ -193,13 +194,18 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self.shift(target_position - self_terminal.end)
         return self
 
-    def set_label(self, label: str) -> Self:
+    def set_label(self, label: str | Value) -> Self:
         """Set the label of the component.
 
         Parameters
         ----------
-        label : str
-            The label to set. Takes a TeX math mode string.
+        label : str | Value
+            The label to set. Takes a TeX math mode string, or a ``Value`` to be typeset
+            as a math mode string.
+
+        See Also
+        --------
+        units.Value
         """
         self._set_mark(self._label, label)
         return self
@@ -209,13 +215,18 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self._clear_mark(self._label)
         return self
 
-    def set_annotation(self, annotation: str) -> Self:
+    def set_annotation(self, annotation: str | Value) -> Self:
         """Set the annotation of the component.
 
         Parameters
         ----------
-        annotation : str
-            The annotation to set. Takes a TeX math mode string.
+        annotation : str | Value
+            The annotation to set. Takes a TeX math mode string, or a ``Value`` to be
+            typeset as a math mode string.
+
+        See Also
+        --------
+        units.Value
         """
         self._set_mark(self._annotation, annotation)
         return self
@@ -226,14 +237,15 @@ class Component(Markable, metaclass=abc.ABCMeta):
         return self
 
     def set_current(
-        self, label: str, terminal: Terminal | str | None = None, **kwargs: Any
+        self, label: str | Value, terminal: Terminal | str | None = None, **kwargs: Any
     ) -> Self:
         """Set the current label on one of the terminals of the component.
 
         Parameters
         ----------
-        label : str | None
-            The current label to set. Takes a TeX math mode string.
+        label : str | Value
+            The current label to set. Takes a TeX math mode string, or a ``Value`` to be
+            typeset as a math mode string.
         terminal : Terminal | str | None
             Either a ``Terminal`` belonging to this component, or a string representing
             an attribute of this component that returns a component (e.g. ``"right"``).
@@ -265,7 +277,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
         return self
 
     def reset_current(
-        self, label: str, terminal: Terminal | str | None = None, **kwargs: Any
+        self, label: str | Value, terminal: Terminal | str | None = None, **kwargs: Any
     ) -> Self:
         """Reset the current label on one of the terminals of the component.
 
@@ -275,8 +287,9 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        label : str | None
-            The current label to set. Takes a TeX math mode string.
+        label : str | Value
+            The current label to set. Takes a TeX math mode string, or a ``Value`` to be
+            typeset as a math mode string.
         terminal : Terminal | str | None
             Either a ``Terminal`` belonging to this component, or a string representing
             an attribute of this component that returns a component (e.g. ``"right"``).
@@ -444,7 +457,9 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self._annotation_anchor.shift(self._body.get_bottom() + 0.01 * mn.DOWN)
         self.add(self._centre_anchor, self._label_anchor, self._annotation_anchor)
 
-    def __initialise_marks(self, label: str | None, annotation: str | None) -> None:
+    def __initialise_marks(
+        self, label: str | Value | None, annotation: str | Value | None
+    ) -> None:
         if label is not None:
             self.set_label(label)
         if annotation is not None:
@@ -452,7 +467,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
     @mn.override_animate(set_label)
     def __animate_set_label(
-        self, label: str, anim_args: dict[str, Any] | None = None
+        self, label: str | Value, anim_args: dict[str, Any] | None = None
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
@@ -468,11 +483,11 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
     @mn.override_animate(set_annotation)
     def __animate_set_annotation(
-        self, label: str, anim_args: dict[str, Any] | None = None
+        self, annotation: str | Value, anim_args: dict[str, Any] | None = None
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
-        return self.animate(**anim_args)._set_mark(self._annotation, label).build()
+        return self.animate(**anim_args)._set_mark(self._annotation, annotation).build()
 
     @mn.override_animate(clear_annotation)
     def __animate_clear_annotation(

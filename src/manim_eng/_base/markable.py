@@ -11,6 +11,7 @@ from typing import Any, Self
 import manim as mn
 
 from manim_eng._base.mark import Mark
+from manim_eng.units import Value
 
 __all__ = ["Markable"]
 
@@ -66,8 +67,9 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
                 self.__rotate.remove(*mobjects)
         return self
 
-    def _set_mark(self, mark_to_set: Mark, mark_text: str) -> None:
+    def _set_mark(self, mark_to_set: Mark, mark_text: str | Value) -> None:
         """Set a mark's label, adding the mark if necessary."""
+        mark_text = mark_text if isinstance(mark_text, str) else mark_text.to_latex()
         if mark_to_set not in self.__marks.submobjects:
             self.__marks.add(mark_to_set)
         mark_to_set.set_text(mark_text)
@@ -79,11 +81,15 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
 
     @mn.override_animate(_set_mark)
     def __animate_set_mark(
-        self, mark_to_set: Mark, mark_text: str, anim_args: dict[str, Any] | None = None
+        self,
+        mark_to_set: Mark,
+        mark_text: str | Value,
+        anim_args: dict[str, Any] | None = None,
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
 
+        mark_text = mark_text if isinstance(mark_text, str) else mark_text.to_latex()
         if mark_to_set not in self.__marks.submobjects:
             self.__marks.add(mark_to_set)
             return mn.Create(mark_to_set.set_text(mark_text))

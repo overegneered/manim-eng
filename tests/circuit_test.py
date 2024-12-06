@@ -1,7 +1,7 @@
 import pytest
 from manim_eng import Circuit
 
-from .test_utils.dummy_component import DummyComponent
+from .utils.dummy_component import DummyComponent
 
 
 def test_connect() -> None:

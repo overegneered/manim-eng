@@ -4,6 +4,7 @@ import manim as mn
 import pytest
 from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
+from manim_eng.units import HOUR, KILO, VOLT
 
 
 class SubclassesMarkable(Markable):
@@ -38,6 +39,16 @@ def test_set_mark_already_added(markable_dummy: SubclassesMarkable) -> None:
     markable_dummy.mark.set_text.assert_has_calls(
         [mock.call(label_old), mock.call(label_new)]
     )
+
+
+def test_set_mark_with_value(markable_dummy: SubclassesMarkable) -> None:
+    value = 4.5 * KILO * VOLT / HOUR
+
+    with mock.patch.object(mn.VGroup, "add") as patched_add:
+        markable_dummy._set_mark(markable_dummy.mark, value)
+
+        patched_add.assert_called_once()
+    markable_dummy.mark.set_text.assert_called_once_with(value.to_latex())
 
 
 def test_clear_mark_mark_present(markable_dummy: SubclassesMarkable) -> None:
