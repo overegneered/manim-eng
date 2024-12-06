@@ -883,13 +883,13 @@ files = [
 
 [[package]]
 name = "pyglet"
-version = "2.0.19"
+version = "2.0.20"
 description = "pyglet is a cross-platform games and multimedia package."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pyglet-2.0.19-py3-none-any.whl", hash = "sha256:dde10fea9fe6faabf10c21191265c158c34184b085042aa2efff7f682e0ae9e1"},
-    {file = "pyglet-2.0.19.tar.gz", hash = "sha256:9f865a7befe43a1f5ae55079ef1e3fc27b13630a25b2707343170e2b3f0f0c14"},
+    {file = "pyglet-2.0.20-py3-none-any.whl", hash = "sha256:341cdc506fe97c4d8c4fb35aac89cefcb0ca6bf59eddcf2d1078c327dde1f02e"},
+    {file = "pyglet-2.0.20.tar.gz", hash = "sha256:702ea52b1fc1b6447904d2edd579212b29f1b3475e098ac49b57647a064accb7"},
 ]
 
 [[package]]

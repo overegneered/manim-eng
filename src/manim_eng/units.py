@@ -24,40 +24,76 @@ __all__ = [
     "Unit",
     "Value",
     "E",
-    "VOLT",
-    "AMP",
-    "OHM",
-    "FARAD",
-    "HENRY",
-    "COULOMB",
+    "QUETTA",
+    "RONNA",
+    "YOTTA",
+    "ZETTA",
+    "EXA",
+    "PETA",
+    "TERA",
+    "GIGA",
+    "MEGA",
+    "KILO",
+    "HECTO",
+    "DECA",
+    "DECI",
+    "CENTI",
+    "MILLI",
+    "MICRO",
+    "NANO",
+    "PICO",
+    "FEMTO",
+    "ATTO",
+    "ZEPTO",
+    "YOCTO",
+    "RONTO",
+    "QUECTO",
+    "YOBI",
+    "ZEBI",
+    "EXBI",
+    "PEBI",
+    "TEBI",
+    "GIBI",
+    "MEBI",
+    "KIBI",
+    "METRE",
+    "METER",
+    "ANGSTROM",
+    "MICRON",
+    "LITRE",
+    "LITER",
+    "GRAM",
     "SECOND",
     "MINUTE",
     "HOUR",
     "HERTZ",
+    "AMP",
+    "VOLT",
+    "OHM",
+    "SIEMENS",
+    "FARAD",
+    "HENRY",
+    "COULOMB",
+    "KELVIN",
+    "CELSIUS",
+    "CANDELA",
+    "LUMEN",
+    "LUX",
+    "MOLE",
+    "DEGREE",
     "RADIAN",
+    "STERADIAN",
     "JOULE",
+    "ELECTRONVOLT",
     "WATT",
     "DECIBEL",
-    "QUECTO",
-    "RONTO",
-    "YOCTO",
-    "ZEPTO",
-    "ATTO",
-    "FEMTO",
-    "PICO",
-    "NANO",
-    "MICRO",
-    "MILLI",
-    "KILO",
-    "MEGA",
-    "GIGA",
-    "TERA",
-    "PETA",
-    "EXA",
-    "ZETTA",
-    "YOTTA",
-    "RONNA",
-    "QUETTA",
+    "NEWTON",
+    "PASCAL",
+    "BAR",
+    "WEBER",
+    "TESLA",
+    "BIT",
+    "BYTE",
 ]
 
 
@@ -266,23 +302,7 @@ class UnitSequence:
         return to_return.rstrip()
 
 
-VOLT = Unit("V")
-AMP = Unit("A")
-OHM = Unit("Ω", r"\Omega")
-FARAD = Unit("F")
-HENRY = Unit("H")
-COULOMB = Unit("C")
-
-SECOND = Unit("s")
-MINUTE = Unit("min")
-HOUR = Unit("hr")
-HERTZ = Unit("Hz")
-RADIAN = Unit("rad")
-
-JOULE = Unit("J")
-WATT = Unit("W")
-DECIBEL = Unit("dB")
-
+# Prefixes
 QUETTA = Unit("Q", prefix=True)
 RONNA = Unit("R", prefix=True)
 YOTTA = Unit("Y", prefix=True)
@@ -293,6 +313,10 @@ TERA = Unit("T", prefix=True)
 GIGA = Unit("G", prefix=True)
 MEGA = Unit("M", prefix=True)
 KILO = Unit("k", prefix=True)
+HECTO = Unit("h", prefix=True)
+DECA = Unit("da", prefix=True)
+DECI = Unit("d", prefix=True)
+CENTI = Unit("c", prefix=True)
 MILLI = Unit("m", prefix=True)
 MICRO = Unit("µ", prefix=True)
 NANO = Unit("n", prefix=True)
@@ -303,6 +327,78 @@ ZEPTO = Unit("z", prefix=True)
 YOCTO = Unit("y", prefix=True)
 RONTO = Unit("r", prefix=True)
 QUECTO = Unit("q", prefix=True)
+
+YOBI = Unit("Yi", prefix=True)
+ZEBI = Unit("Zi", prefix=True)
+EXBI = Unit("Ei", prefix=True)
+PEBI = Unit("Pi", prefix=True)
+TEBI = Unit("Ti", prefix=True)
+GIBI = Unit("Gi", prefix=True)
+MEBI = Unit("Mi", prefix=True)
+KIBI = Unit("Ki", prefix=True)
+
+# Length/area/volume
+METRE = Unit("m")
+METER = METRE
+ANGSTROM = Unit("", latex=r"\mathring{A}")
+MICRON = MICRO * METRE
+
+LITRE = Unit("L")
+LITER = LITRE
+
+# Mass
+GRAM = Unit("g")
+
+# Time/frequency
+SECOND = Unit("s")
+MINUTE = Unit("min")
+HOUR = Unit("hr")
+HERTZ = Unit("Hz")
+
+# Electricity
+AMP = Unit("A")
+VOLT = Unit("V")
+OHM = Unit("Ω", r"\Omega")
+SIEMENS = Unit("S")
+FARAD = Unit("F")
+HENRY = Unit("H")
+COULOMB = Unit("C")
+
+# Temperature
+KELVIN = Unit("K")
+CELSIUS = Unit("ºC", latex=r"^\circ C")
+
+# Illumination
+CANDELA = Unit("cd")
+LUMEN = Unit("lm")
+LUX = Unit("lx")
+
+# Quantity
+MOLE = Unit("mol")
+
+# Angles
+DEGREE = Unit("º", latex=r"^\circ")
+RADIAN = Unit("rad")
+STERADIAN = Unit("sr")
+
+# Energy and power
+JOULE = Unit("J")
+ELECTRONVOLT = Unit("eV")
+WATT = Unit("W")
+DECIBEL = Unit("dB")
+
+# Force and pressure
+NEWTON = Unit("N")
+PASCAL = Unit("Pa")
+BAR = Unit("bar")
+
+# Magnetism
+WEBER = Unit("Wb")
+TESLA = Unit("T")
+
+# Digital storage
+BIT = Unit("b")
+BYTE = Unit("B")
 
 standard_engineering_prefixes = [
     QUECTO,
