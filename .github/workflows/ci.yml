@@ -13,6 +13,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      # This is required for the Poetry lockfile check to pass (as it checks the Python version and the default is 3.10)
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "poetry"
       - name: pre-commit
         uses: pre-commit/action@v3.0.1
 
