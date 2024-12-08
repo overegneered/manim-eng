@@ -35,6 +35,12 @@ jobs:
         with:
           packages: libpango1.0-dev
           version: 1.0
+      # This step taken entirely from Manim's CI workflow, https://github.com/ManimCommunity/manim/blob/main/.github/workflows/ci.yml
+      - name: Install dependencies (LaTeX)
+        uses: teatimeguest/setup-texlive-action@v3
+        with:
+          cache: true
+          packages: scheme-basic fontspec inputenc fontenc tipa mathrsfs calligra xcolor standalone preview doublestroke ms everysel setspace rsfs relsize ragged2e fundus-calligra microtype wasysym physics dvisvgm jknapltx wasy cm-super babel-english gnu-freefont mathastext cbfonts-fd xetex
       - name: Install dependencies (Poetry)
         run: poetry install
       - name: Run tests
