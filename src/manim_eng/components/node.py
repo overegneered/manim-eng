@@ -96,13 +96,13 @@ class Node(Component):
     def set_annotation(self, annotation: str | Value) -> Self:
         """Fails for nodes, as they do not have annotations."""
         raise NotImplementedError(
-            "Monopoles have no annotation. Please use `.set_label()`."
+            "Nodes have no annotation. Please use `.set_label()`."
         )
 
     def clear_annotation(self) -> Self:
         """Fails for nodes, as they do not have annotations."""
         raise NotImplementedError(
-            "Monopoles have no annotation. Please use `.clear_label()`."
+            "Nodes have no annotation. Please use `.clear_label()`."
         )
 
     def get(self, direction: mnt.Vector3D | float) -> Terminal:
