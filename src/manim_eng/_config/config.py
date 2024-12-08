@@ -253,7 +253,7 @@ class ComponentSymbolConfig(ConfigBase):
     """The stroke width to use for wires."""
     mark_font_size: float = 36.0
     """The default font size to use for marks (e.g. labels and annotations)."""
-    mark_cardinal_alignment_margin: float = 5 * (mn.PI / 180)
+    mark_cardinal_alignment_margin: float = 5 * mn.DEGREES
     """The maximum angle a component can be from one of horizontal or vertical whilst
     still being considered horizontal or vertical for the purpose of mark alignment."""
     arrow_stroke_width: float = wire_stroke_width
