@@ -1,0 +1,54 @@
+name: CI (code style and tests)
+
+on:
+  push:
+    branches: [ trunk ]
+  pull_request:
+    branches: [ trunk ]
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    name: pre-commit checks
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      # This is required for the Poetry lockfile check to pass (as it checks the Python version and the default is 3.10)
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: pre-commit
+        uses: pre-commit/action@v3.0.1
+
+  test:
+    strategy:
+      matrix:
+        python: ["3.11", "3.12"]
+    runs-on: ubuntu-latest
+    name: Tests (Python ${{ matrix.python }})
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: "poetry"
+      - name: Install dependencies (system)
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libpango1.0-dev
+          version: 1.0
+      # This step taken entirely from Manim's CI workflow, https://github.com/ManimCommunity/manim/blob/main/.github/workflows/ci.yml
+      - name: Install dependencies (LaTeX)
+        uses: teatimeguest/setup-texlive-action@v3
+        with:
+          cache: true
+          packages: scheme-basic fontspec inputenc fontenc tipa mathrsfs calligra xcolor standalone preview doublestroke ms everysel setspace rsfs relsize ragged2e fundus-calligra microtype wasysym physics dvisvgm jknapltx wasy cm-super babel-english gnu-freefont mathastext cbfonts-fd xetex
+      - name: Install dependencies (Poetry)
+        run: poetry install
+      - name: Run tests
+        run: poetry run pytest

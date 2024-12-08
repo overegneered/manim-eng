@@ -9,7 +9,7 @@ from manim_eng.components.base.bipole import Bipole
 from manim_eng.components.base.modifiers import SensorModifier, VariableModifier
 from manim_eng.components.base.terminal import Terminal
 
-__all__ = ["Capacitor", "CapacitiveSensor", "VariableCapacitor"]
+__all__ = ["CapacitiveSensor", "Capacitor", "VariableCapacitor"]
 
 
 class Capacitor(Bipole):

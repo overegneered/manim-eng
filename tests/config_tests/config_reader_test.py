@@ -2,6 +2,7 @@ import os
 from unittest import mock
 
 import pytest
+
 from manim_eng._config.config_readers import (
     UnsupportedOsTypeError,
     get_project_config,

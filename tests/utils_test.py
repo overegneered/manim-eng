@@ -2,6 +2,7 @@ import copy
 
 import numpy as np
 import pytest
+
 from manim_eng._utils import utils
 
 STANDARD_MARGIN = np.deg2rad(5)

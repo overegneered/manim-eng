@@ -1,4 +1,5 @@
 import pytest
+
 from manim_eng import Circuit
 
 from .utils.dummy_component import DummyComponent

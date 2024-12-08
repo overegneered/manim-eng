@@ -1,6 +1,7 @@
 import os
 
 import pytest
+
 from manim_eng.components.base.component import Component
 
 from .utils.dummy_component import DummyComponent, DummyComponentMockedTerminals
@@ -12,11 +13,11 @@ from .utils.dummy_component import DummyComponent, DummyComponentMockedTerminals
 os.makedirs("media", exist_ok=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def dummy_component() -> Component:
     return DummyComponent()
 
 
-@pytest.fixture()
+@pytest.fixture
 def dummy_component_mocked_terminals() -> Component:
     return DummyComponentMockedTerminals()

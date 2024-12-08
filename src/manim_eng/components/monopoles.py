@@ -8,7 +8,7 @@ import numpy as np
 from manim_eng import config_eng
 from manim_eng.components.base.monopole import Monopole
 
-__all__ = ["BottomRail", "Earth", "Ground", "TopRail", "VDD", "VSS"]
+__all__ = ["VDD", "VSS", "BottomRail", "Earth", "Ground", "TopRail"]
 
 
 class Earth(Monopole):

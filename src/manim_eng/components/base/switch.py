@@ -22,7 +22,7 @@ class BipoleSwitchBase(Bipole, metaclass=abc.ABCMeta):
 
     def __init__(self, closed: bool = False, **kwargs: Any) -> None:
         half_width = config_eng.symbol.square_bipole_side_length / 2
-        self.closed = False
+        self.closed: bool = closed
         self.left_node = node._create_node_blob(self, open_=True).move_to(
             half_width * mn.LEFT
         )

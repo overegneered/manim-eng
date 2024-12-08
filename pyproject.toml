@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "manim_eng", from = "src"}]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
+python = ">=3.11,<3.13"
 manim = ">=0.18.1"
 
 [tool.poetry.group.dev.dependencies]
@@ -80,6 +80,7 @@ convention = "numpy"
 ]
 
 [tool.mypy]
+python_version = "3.11"
 pretty = true
 
 strict = true

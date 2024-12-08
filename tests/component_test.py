@@ -2,6 +2,7 @@ import manim as mn
 import manim.typing as mnt
 import numpy as np
 import pytest
+
 from manim_eng import config_eng
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.monopole import Monopole

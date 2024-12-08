@@ -2,6 +2,7 @@ from typing import Any, cast
 from unittest import mock
 
 import manim as mn
+
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.terminal import Terminal
 
