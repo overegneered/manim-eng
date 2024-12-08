@@ -80,6 +80,7 @@ convention = "numpy"
 ]
 
 [tool.mypy]
+python_version = "3.11"
 pretty = true
 
 strict = true
