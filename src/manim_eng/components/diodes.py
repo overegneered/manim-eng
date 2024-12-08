@@ -7,7 +7,7 @@ from manim_eng import config_eng
 from manim_eng.components.base.bipole import SquareBipole
 from manim_eng.components.base.terminal import Terminal
 
-__all__ = ["Diode", "LED", "Photodiode", "SchottkyDiode", "TunnelDiode", "ZenerDiode"]
+__all__ = ["LED", "Diode", "Photodiode", "SchottkyDiode", "TunnelDiode", "ZenerDiode"]
 
 
 class Diode(SquareBipole):

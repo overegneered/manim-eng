@@ -4,6 +4,7 @@ from typing import Any
 
 import manim as mn
 import pytest
+
 from manim_eng._config.config import ConfigBase
 
 
@@ -35,7 +36,7 @@ class TestConfigRoot(ConfigBase):
     table: TestConfigTable = dc.field(default_factory=lambda: TestConfigTable())
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_config() -> TestConfigRoot:
     return TestConfigRoot()
 

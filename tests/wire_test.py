@@ -1,5 +1,6 @@
 import manim as mn
 import pytest
+
 from manim_eng import ManualWire, Wire
 from manim_eng.components.base.terminal import Terminal
 

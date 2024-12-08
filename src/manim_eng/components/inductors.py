@@ -5,7 +5,7 @@ import manim as mn
 from manim_eng import config_eng
 from manim_eng.components.base.bipole import Bipole
 
-__all__ = ["Inductor", "InductiveSensor", "VariableInductor"]
+__all__ = ["InductiveSensor", "Inductor", "VariableInductor"]
 
 from manim_eng.components.base.modifiers import SensorModifier, VariableModifier
 

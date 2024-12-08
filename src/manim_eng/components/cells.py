@@ -8,7 +8,7 @@ from manim_eng import config_eng
 from manim_eng.components.base.source import VoltageSourceBase
 from manim_eng.components.base.terminal import Terminal
 
-__all__ = ["Cells", "Cell", "DoubleCell", "TripleCell", "QuadrupleCell", "Battery"]
+__all__ = ["Battery", "Cell", "Cells", "DoubleCell", "QuadrupleCell", "TripleCell"]
 
 
 class Cells(VoltageSourceBase):

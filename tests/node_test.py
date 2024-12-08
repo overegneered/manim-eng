@@ -4,6 +4,7 @@ import manim as mn
 import manim.typing as mnt
 import numpy as np
 import pytest
+
 from manim_eng import Node
 from manim_eng.components.base import Terminal
 

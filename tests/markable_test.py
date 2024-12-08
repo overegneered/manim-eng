@@ -2,6 +2,7 @@ from unittest import mock
 
 import manim as mn
 import pytest
+
 from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
 from manim_eng.units import HOUR, KILO, VOLT
@@ -13,7 +14,7 @@ class SubclassesMarkable(Markable):
         self.mark = mock.MagicMock(Mark)
 
 
-@pytest.fixture()
+@pytest.fixture
 def markable_dummy() -> SubclassesMarkable:
     return SubclassesMarkable()
 

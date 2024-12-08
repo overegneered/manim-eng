@@ -2,6 +2,7 @@ from unittest import mock
 
 import numpy as np
 import pytest
+
 from manim_eng._base.anchor import Anchor
 from manim_eng._base.mark import Mark
 from manim_eng._config import config_eng
@@ -13,17 +14,17 @@ def mock_anchor(x: float, y: float, z: float) -> Anchor:
     return anchor_mock
 
 
-@pytest.fixture()
+@pytest.fixture
 def anchor_mock() -> Anchor:
     return mock_anchor(1, 0, 0)
 
 
-@pytest.fixture()
+@pytest.fixture
 def centre_reference_mock() -> Anchor:
     return mock_anchor(0, 0, 0)
 
 
-@pytest.fixture()
+@pytest.fixture
 def mark_mocked_anchors(anchor_mock: Anchor, centre_reference_mock: Anchor) -> Mark:
     return Mark(anchor_mock, centre_reference_mock)
 

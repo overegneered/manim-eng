@@ -7,10 +7,10 @@ from manim_eng.components.base.source import (
 )
 
 __all__ = [
-    "VoltageSource",
+    "ControlledCurrentSource",
     "ControlledVoltageSource",
     "CurrentSource",
-    "ControlledCurrentSource",
+    "VoltageSource",
 ]
 
 
