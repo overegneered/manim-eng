@@ -7,8 +7,9 @@ on:
     branches: [ trunk ]
 
 jobs:
-  code-style:
+  pre-commit:
     runs-on: ubuntu-latest
+    name: pre-commit checks
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,6 +21,7 @@ jobs:
       matrix:
         python: ["3.11", "3.12"]
     runs-on: ubuntu-latest
+    name: Tests (Python ${{ matrix.python }})
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
