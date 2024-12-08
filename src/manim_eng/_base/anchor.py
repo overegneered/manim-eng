@@ -9,7 +9,6 @@ import abc
 
 import manim as mn
 import manim.typing as mnt
-import numpy as np
 
 from manim_eng._config import config_eng
 
@@ -36,7 +35,7 @@ class Anchor(mn.Arc, metaclass=abc.ABCMeta):
 
     @property
     def pos(self) -> mnt.Point3D:
-        return np.array(self.get_center())
+        return self.get_center()
 
 
 class AnnotationAnchor(Anchor):

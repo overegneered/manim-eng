@@ -85,6 +85,8 @@ class Circuit(mn.VMobject):
         """
         self.__check_terminals_all_belong_to_this_circuit([start, end])
         self.wires.add(Wire(start, end).attach())
+        # Nodes will potentially change their appearance on wire attachment using an
+        # updater, but it needs kicking into gear
         self.nodes.update()
         return self
 
@@ -119,6 +121,8 @@ class Circuit(mn.VMobject):
         self.wires.remove(*to_remove)
         for wire in to_remove:
             wire.detach()
+        # Nodes will potentially change their appearance on wire detachment using an
+        # updater, but it needs kicking into gear
         self.nodes.update()
         return self
 
@@ -150,6 +154,8 @@ class Circuit(mn.VMobject):
             terminals, lambda start, end: start or end
         )
         self.wires.remove(*to_remove)
+        # Nodes will potentially change their appearance on wire detachment using an
+        # updater, but it needs kicking into gear
         self.nodes.update()
         return self
 

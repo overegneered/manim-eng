@@ -41,7 +41,7 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
         return self
 
     def add(self, *mobjects: mn.Mobject) -> Self:
-        for mobject in [*mobjects]:
+        for mobject in mobjects:
             if isinstance(mobject, Markable):
                 self.__rotate.add(mobject.__rotate)
                 self.__marks.add(mobject.__marks)
@@ -50,7 +50,7 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
         return self
 
     def add_to_back(self, *mobjects: mn.Mobject) -> Self:
-        for mobject in [*mobjects]:
+        for mobject in mobjects:
             if isinstance(mobject, Markable):
                 self.__rotate.add_to_back(mobject.__rotate)
                 self.__marks.add_to_back(mobject.__marks)
@@ -59,7 +59,7 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
         return self
 
     def remove(self, *mobjects: mn.Mobject) -> Self:
-        for mobject in [*mobjects]:
+        for mobject in mobjects:
             if isinstance(mobject, Markable):
                 self.__rotate.remove(mobject.__rotate)
                 self.__marks.remove(mobject.__marks)
@@ -70,14 +70,12 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
     def _set_mark(self, mark_to_set: Mark, mark_text: str | Value) -> None:
         """Set a mark's label, adding the mark if necessary."""
         mark_text = mark_text if isinstance(mark_text, str) else mark_text.to_latex()
-        if mark_to_set not in self.__marks.submobjects:
-            self.__marks.add(mark_to_set)
+        self.__marks.add(mark_to_set)
         mark_to_set.set_text(mark_text)
 
     def _clear_mark(self, mark: Mark) -> None:
         """Clear a mark from the object."""
-        if mark in self.__marks.submobjects:
-            self.__marks.remove(mark)
+        self.__marks.remove(mark)
 
     @mn.override_animate(_set_mark)
     def __animate_set_mark(
