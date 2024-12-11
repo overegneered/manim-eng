@@ -27,6 +27,7 @@ build-backend = "poetry.core.masonry.api"
 fix = true
 extend-exclude = [
     "media",
+    "docs/source",
 ]
 
 [tool.ruff.lint]
@@ -88,6 +89,8 @@ strict = true
 disallow_subclassing_any = false
 disallow_untyped_decorators = false
 disallow_any_generics = false
+
+exclude = ['^docs/source/conf\.py$']
 
 [[tool.mypy.overrides]]
 # Manim does not yet have full type declarations
