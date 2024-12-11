@@ -1,4 +1,4 @@
-![manim-eng logo](docs/images/manim_eng_logo.png)
+![manim-eng logo](docs/source/_static/logo.png)
 
 ---
 

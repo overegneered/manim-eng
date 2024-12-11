@@ -14,7 +14,10 @@ release = "0.1.0"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []  # type: ignore[var-annotated]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.duration",
+]
 
 templates_path = ["_templates"]
 exclude_patterns = []  # type: ignore[var-annotated]
@@ -23,5 +26,10 @@ exclude_patterns = []  # type: ignore[var-annotated]
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "alabaster"
 html_static_path = ["_static"]
+html_theme = "furo"
+html_theme_options = {
+    "dark_logo": "logo.png",
+    "light_logo": "logo_light.png",
+}
+html_title = f"{project} {release}"

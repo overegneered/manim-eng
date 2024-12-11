@@ -15,6 +15,7 @@ ruff = "^0.5.5"
 pre-commit = "^3.8.0"
 pytest = "^8.3.2"
 mypy = "^1.11.1"
+furo = "^2024.8.6"
 
 [tool.poetry.plugins."manim.plugins"]
 "manim_eng" = "manim_eng"

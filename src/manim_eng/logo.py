@@ -29,14 +29,23 @@ class ManimEngLogoComponentArrangement(mn.VGroup):
 
 
 class ManimEngLogo(ManimEngLogoComponentArrangement):
-    """manim-eng logo."""
+    """manim-eng logo.
 
-    def __init__(self) -> None:
+    Parameters
+    ----------
+    dark_theme : bool, optional
+        Whether to adapt the logo for a dark theme (default) or a light theme.
+    """
+
+    def __init__(self, dark_theme: bool = True) -> None:
         super().__init__()
 
-        text = mn.Tex(r"\textsf{manim-\textbf{eng}}", font_size=80, z_index=1).align_to(
-            0.55 * mn.LEFT + 0.05 * mn.UP, mn.DR
-        )
+        text = mn.Tex(
+            r"\textsf{manim-\textbf{eng}}",
+            font_size=80,
+            z_index=1,
+            color=mn.LOGO_WHITE if dark_theme else mn.LOGO_BLACK,
+        ).align_to(0.55 * mn.LEFT + 0.05 * mn.UP, mn.DR)
 
         self.add(text)
         self.shift(-self.get_center())
