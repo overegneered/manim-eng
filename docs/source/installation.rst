@@ -1,12 +1,9 @@
-Quickstart
+Installation
 ==========
 
-Installation
-------------
-
 First of all, you'll need to install Manim itself — check out the
-`installation guide <https://docs.manim.community/en/stable/installation.html>`_ in the
-Manim docs for that. Then, simply
+:external+manim:doc:`installation guide <installation>` in the Manim docs for that.
+Then, simply
 
 .. code-block:: shell
 
@@ -24,12 +21,13 @@ Usage
 -----
 
 Set up your project however you please (see
-`Manim's guide <https://docs.manim.community/en/stable/tutorials/quickstart.html>`_ if
-you're unsure), and then simply add
+:external+manim:doc:`Manim's guide <tutorials/quickstart>` if you're unsure), and then simply
+add
 
 .. code-block:: python
 
     from manim_eng import *
 
 
-to the top of your file. This brings all of manim-eng's Mobjects into scope. That's it!
+to the top of your file. This brings all of manim-eng's
+:external:class:`Mobjects <manim.mobject.mobject.Mobject>` into scope. That's it!
