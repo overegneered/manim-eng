@@ -146,10 +146,10 @@ class Component(Markable, metaclass=abc.ABCMeta):
         ``self_terminal`` is at the intersection of the lines that
 
         - Have direction vector perpendicular to ``direction`` and go through the
-          current position of the end of ``self_terminal``; and
+            current position of the end of ``self_terminal``; and
         - Have direction vector ``direction`` and go through the end of
-          ``other`` (in the case that it is a ``Terminal``) or through ``other`` (in the
-           case that it is a point).
+            ``other`` (in the case that it is a ``Terminal``) or through ``other`` (in
+            the case that it is a point).
         """
         from manim_eng.components.base.monopole import Monopole
         from manim_eng.components.node import Node

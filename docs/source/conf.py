@@ -16,12 +16,14 @@ release = "0.1.0"
 
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.duration",
+    "sphinx.ext.doctest",
+    "sphinx.ext.napoleon",
 ]
 
 templates_path = ["_templates"]
 exclude_patterns = []  # type: ignore[var-annotated]
-
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

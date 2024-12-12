@@ -23,6 +23,28 @@ config_eng = (
 
 @contextlib.contextmanager
 def tempconfig_eng(temp_config: dict[str, Any]) -> Generator:
+    """Context manager for temporary configuration.
+
+    .. note::
+
+        This does not change Manim's configuration, only that of manim-eng.
+
+    Parameters
+    ----------
+    temp_config: dict[str, Any]
+        Key-value pairs to use to temporary update the manim-eng configuration.
+
+    Examples
+    --------
+    >>> config_eng.debug
+    False
+    >>> with tempconfig_eng({"debug": True}):
+    ...     print(config_eng.debug)
+    ...
+    True
+    >>> config_eng.debug
+    False
+    """
     global config_eng  # noqa: PLW0602
     original = copy.deepcopy(config_eng).as_dict()
 
