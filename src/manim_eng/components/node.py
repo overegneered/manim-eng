@@ -59,6 +59,7 @@ class Node(Component):
 
         if self.autoblob:
             self.add_updater(self.__blob_updater)
+            self.update()
 
         self.remove(self._annotation_anchor)
 
