@@ -52,7 +52,7 @@ class Voltage(Markable):
         clockwise: bool = False,
         buff: float = mn.SMALL_BUFF,
         avoid: mn.VMobject | None = None,
-        component_buff: float = mn.SMALL_BUFF,
+        component_buff: float = 0.15,
     ) -> None:
         super().__init__()
 
