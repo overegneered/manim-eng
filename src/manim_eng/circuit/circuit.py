@@ -259,8 +259,11 @@ class Circuit(mn.VMobject):
         self.__check_terminals_all_belong_to_this_circuit([start, end])
         new_wire = Wire(start, end)
         self.wires.add(new_wire)
-        self.nodes.update()
-        return mn.Create(new_wire, **anim_args)
+        animation = mn.Create(new_wire, **anim_args)
+        # This call has to be here so that the wire is properly attached when the update
+        # is done
+        n = self.nodes.update()
+        return animation
 
     @mn.override_animate(disconnect)
     def __animate_disconnect(
