@@ -17,7 +17,15 @@ __all__ = ["Voltage"]
 
 
 class Voltage(Markable):
-    """Voltage arrow between two terminal endpoints.
+    r"""Voltage arrow between two terminal endpoints.
+
+    .. warning::
+        manim-eng currently uses arcs of up to $\pi$ (180º) to build voltage arrows, so
+        any label or annotation that requires an arc of more than a semicircle to get
+        round it will result in overflow into an arc that is too small.
+
+        This is a known issue and should be fixed in the 0.2 release by using polynomial
+        arrow forms.
 
     Parameters
     ----------

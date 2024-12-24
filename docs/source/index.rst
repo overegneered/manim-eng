@@ -11,10 +11,25 @@ but the goal is to extend this to other types of diagrams in the future.
     version-to-version. (Though minor versions will always maintain the same API, as
     per semantic versioning good practice.)
 
+(Very rough) roadmap
+--------------------
+
+v0.2
+^^^^
+- Multi-terminal components (transistors, logic gates, latches, etc.)
+- Better, more ergonomic wire routing for circuits
+- Polynomial-based voltage arrows
+
+v0.3
+^^^^
+- Pin-jointed structure mobjects
+
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    installation
+   first_circuit_diagram/index
    reference

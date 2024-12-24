@@ -21,6 +21,7 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
+    "manim.utils.docbuild.manim_directive",
 ]
 
 templates_path = ["_templates"]

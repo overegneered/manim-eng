@@ -1,5 +1,5 @@
 Installation
-==========
+============
 
 First of all, you'll need to install Manim itself — check out the
 :external+manim:doc:`installation guide <installation>` in the Manim docs for that.
