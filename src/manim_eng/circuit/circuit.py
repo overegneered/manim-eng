@@ -222,6 +222,30 @@ class Circuit(mn.VMobject):
                 f"{[tuple(terminal.end) for terminal in terminals_not_owned]}"
             )
 
+    @mn.override_animate(add)
+    def __animate_add(
+        self, *components: Component, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        self.add(*components)
+        return mn.AnimationGroup(
+            *[mn.Create(component, **anim_args) for component in components]
+        )
+
+    @mn.override_animate(remove)
+    def __animate_remove(
+        self, *components: Component, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        self.remove(*components)
+        return mn.AnimationGroup(
+            *[mn.Uncreate(component, **anim_args) for component in components]
+        )
+
     @mn.override_animate(connect)
     def __animate_connect(
         self,
