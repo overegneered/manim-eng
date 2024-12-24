@@ -1,5 +1,12 @@
-manim-eng
-=========
+.. image:: _static/logo.png
+    :align: center
+    :width: 100%
+    :class: only-dark
+
+.. image:: _static/logo_light.png
+    :align: center
+    :width: 100%
+    :class: only-light
 
 manim-eng is a plugin for `ManimCE <https://manim.community>`_ that introduces Mobjects
 for drawing engineering diagrams. Currently this is just limited to circuit diagrams,

@@ -36,7 +36,7 @@ intersphinx_mapping = {
 html_static_path = ["_static"]
 html_theme = "furo"
 html_theme_options = {
-    "dark_logo": "logo.png",
-    "light_logo": "logo_light.png",
+    "dark_logo": "logo_no_text.png",
+    "light_logo": "logo_light_no_text.png",
 }
 html_title = f"{project} {release}"
