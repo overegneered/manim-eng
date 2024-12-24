@@ -32,7 +32,7 @@ from .utils.dummy_component import DummyComponent, DummyComponentMockedTerminals
         ),
         pytest.param(
             np.array([1, 1, 0]),
-            np.array([0.75, 0.75, 0]),
+            np.array([0.7, 0.7, 0]),
             id="Aligning in the north-east direction",
         ),
     ],
