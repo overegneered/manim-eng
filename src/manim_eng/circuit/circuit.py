@@ -233,17 +233,10 @@ class Circuit(mn.VMobject):
             anim_args = {}
 
         self.__check_terminals_all_belong_to_this_circuit([start, end])
-        if start == end:
-            raise ValueError(
-                "`start` and `end` are identical. "
-                "`connect()` requires two different terminals."
-            )
         new_wire = Wire(start, end)
         self.wires.add(new_wire)
-        return mn.AnimationGroup(
-            mn.Create(new_wire, **anim_args),
-            self.nodes.animate(**anim_args).update().build(),
-        )
+        self.nodes.update()
+        return mn.Create(new_wire, **anim_args)
 
     @mn.override_animate(disconnect)
     def __animate_disconnect(
