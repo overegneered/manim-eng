@@ -262,7 +262,7 @@ class Circuit(mn.VMobject):
         animation = mn.Create(new_wire, **anim_args)
         # This call has to be here so that the wire is properly attached when the update
         # is done
-        n = self.nodes.update()
+        self.nodes.update()
         return animation
 
     @mn.override_animate(disconnect)
