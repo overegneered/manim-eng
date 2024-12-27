@@ -35,8 +35,9 @@ Contents
 --------
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   installation
-   first_circuit_diagram/index
-   reference
+    installation
+    first_circuit_diagram/index
+    guides/index
+    reference

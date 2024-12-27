@@ -607,51 +607,54 @@ files = [
 
 [[package]]
 name = "mapbox-earcut"
-version = "1.0.2"
-description = "Python bindings for the mapbox earcut C++ polygon             triangulation library."
+version = "1.0.3"
+description = "Python bindings for the mapbox earcut C++ polygon triangulation library"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "mapbox_earcut-1.0.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:97203bf92a654f430d6aed9fde363a8fe25f2124b030bbe1a53860ce33ebd7a3"},
-    {file = "mapbox_earcut-1.0.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:ae5241af655f0148657b9de6c83782cae0c8d34f114957e128556273fc875f55"},
-    {file = "mapbox_earcut-1.0.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8f87262025203f258230823a1614d6d9ab10f327b4aacc15029e76c127cf471c"},
-    {file = "mapbox_earcut-1.0.2-cp310-cp310-musllinux_1_2_x86_64.whl", hash = "sha256:af83d40e98729aefce4a9e4ab54af239856ae600de7384134df15534545bccad"},
-    {file = "mapbox_earcut-1.0.2-cp310-cp310-win32.whl", hash = "sha256:ae990d62be6d2ed305b33845d4553def84711655b70bed1d26b50dd7ff9679d2"},
-    {file = "mapbox_earcut-1.0.2-cp310-cp310-win_amd64.whl", hash = "sha256:df7451676d145f9157758ca44398eb9d385e844264113b84a4e0571946ad6253"},
-    {file = "mapbox_earcut-1.0.2-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:02d80b510e5ed078537bbb969eb852d7577d4053669546d71b376aa1ccd0296b"},
-    {file = "mapbox_earcut-1.0.2-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:606dd427c554e8ddfba69b3283442410451a27222cb774ec348c3a30c0089d66"},
-    {file = "mapbox_earcut-1.0.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f8945a66c511e01a5e3e5524351527e4c7c13a95c9c513db55420cdbbcffbcdc"},
-    {file = "mapbox_earcut-1.0.2-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:e5c6d9031ba3e72aa4431fff64a39e019948564cc0677f44a2a3949b4f19a466"},
-    {file = "mapbox_earcut-1.0.2-cp311-cp311-win32.whl", hash = "sha256:441f613ecafbed2608783f00584c89fa922c2cc954881204ed319a673d5dc762"},
-    {file = "mapbox_earcut-1.0.2-cp311-cp311-win_amd64.whl", hash = "sha256:6b3b1562da8545287097a8c5ddd8ee509350575e37e6185c047fe7710578fd80"},
-    {file = "mapbox_earcut-1.0.2-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:40c3d8d2ae66e184ef90874f26bf2678928587e8d6ec64388b226801c39dee8b"},
-    {file = "mapbox_earcut-1.0.2-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:c432668b46bf80c76cd03ea7ae3f8137c5de10dc78efd38197f4ce82a80f84b2"},
-    {file = "mapbox_earcut-1.0.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:17cb7dcadb09eb239c1b0c47c7853ca3aa82d8828d5cd826a72ce53d61c1240b"},
-    {file = "mapbox_earcut-1.0.2-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:fa187a1f18363fe6ecdbf46b1c5cca9b7fc4e4333fa95120ecd5f99cb6a3fb36"},
-    {file = "mapbox_earcut-1.0.2-cp312-cp312-win32.whl", hash = "sha256:c698c255f9e7f8b040fa5e886d44784db92617d4126851c484ac431065310af2"},
-    {file = "mapbox_earcut-1.0.2-cp312-cp312-win_amd64.whl", hash = "sha256:a1eb860bc40db2dd82d920835820cb5d5f488460dfef1dfc24f7a53f3c78bb59"},
-    {file = "mapbox_earcut-1.0.2-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:3ef8096385d46b07b80bdbe9311bef6f19e777d82b9ea47de50a7f10c2ce08f4"},
-    {file = "mapbox_earcut-1.0.2-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:3b0c83439dc69fadbd893886f49b952d27cb080745baeb1615ad5f0a0354e854"},
-    {file = "mapbox_earcut-1.0.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:72cfd7f6ff0d8dd19bd982661091e47d2878717584b390ec43e9f83dbfe60616"},
-    {file = "mapbox_earcut-1.0.2-cp39-cp39-musllinux_1_2_x86_64.whl", hash = "sha256:49432419ada8a6d74fd827df0331faad52b21cbd39ff91d701aec5e5db553c51"},
-    {file = "mapbox_earcut-1.0.2-cp39-cp39-win32.whl", hash = "sha256:464f2469dba2d852b735dc7be1ff9bc3559555d1d985ac3af22f14042beb16f8"},
-    {file = "mapbox_earcut-1.0.2-cp39-cp39-win_amd64.whl", hash = "sha256:0ba2b51d4f336db774d9874a08ca47313a09f22a8368c7f7021c0c2768827b81"},
-    {file = "mapbox_earcut-1.0.2-pp310-pypy310_pp73-macosx_10_15_x86_64.whl", hash = "sha256:dfc64fad3686a2ce2ea63a28c173580f489048a1cd36a4449959533bc5675788"},
-    {file = "mapbox_earcut-1.0.2-pp310-pypy310_pp73-macosx_11_0_arm64.whl", hash = "sha256:a62e46c55b5b5256052954d0eb20a0ba5cc7019adfdb0ff8cfba15ecf781b0c5"},
-    {file = "mapbox_earcut-1.0.2-pp310-pypy310_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f6e44d5f5dbe2dd26c94de9a24ace47c034f86cb96d68fe01561334e4f50d5dc"},
-    {file = "mapbox_earcut-1.0.2-pp310-pypy310_pp73-win_amd64.whl", hash = "sha256:1f96a52d8eaf041821d0aefaa53ea908fefede4f4826ab9384e0449314403478"},
-    {file = "mapbox_earcut-1.0.2-pp39-pypy39_pp73-macosx_10_15_x86_64.whl", hash = "sha256:7483171c540c1e91dd2c6d5ac864cbe98ad70a460907b863c3ffb25cb4493416"},
-    {file = "mapbox_earcut-1.0.2-pp39-pypy39_pp73-macosx_11_0_arm64.whl", hash = "sha256:8fc9597aa789d36d262a29b87432d6139def095ebd1499c035fa2123a393eacd"},
-    {file = "mapbox_earcut-1.0.2-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:37475996c833f3d95fbf721df0d88593f5a152b48a1a5603b7da3979911a6519"},
-    {file = "mapbox_earcut-1.0.2-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:5444d9af72d23e581d0eaf1be342193c1f4c2bd2c8b70cdf692a58185b3637c0"},
-    {file = "mapbox_earcut-1.0.2.tar.gz", hash = "sha256:83fa0468bcc23f300a1cbf9611bdc30c77aace9ab1d36821649f439490ee7d52"},
+    {file = "mapbox_earcut-1.0.3-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:5f999a8651bdb3ae8805c9a7cf91337bbb5e858d7724811f3b5baa79bfa3c61a"},
+    {file = "mapbox_earcut-1.0.3-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:a59cc707fc0d47f778f912ede6b21e8798e7d82829d772cf2ebaea216cb04828"},
+    {file = "mapbox_earcut-1.0.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:30923be0a1080a4d6815b3a0f9d43e2fcc2b2c3fabd4ce3b1fe858c676e449ff"},
+    {file = "mapbox_earcut-1.0.3-cp310-cp310-musllinux_1_2_x86_64.whl", hash = "sha256:d105c10a2b849191b4bc72debbc386595c42a2d65a39dbcda05497475066c1a4"},
+    {file = "mapbox_earcut-1.0.3-cp310-cp310-win32.whl", hash = "sha256:6906cfc9fe5778c8efcdae425df52a414de5e75cb0ebe31175fbfaa038dec0d9"},
+    {file = "mapbox_earcut-1.0.3-cp310-cp310-win_amd64.whl", hash = "sha256:624b99bb7bba37bcf889c84d338516cdbbfaa612a03e6bc48d2ebdfbadddddfc"},
+    {file = "mapbox_earcut-1.0.3-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:bbf24029e7447eb0351000f4fd3185327a00dac5ed756b07330b0bdaed6932db"},
+    {file = "mapbox_earcut-1.0.3-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:998e2f1e3769538f7656a34296d08a37cb71ce57aa8cf4387572bc00029b52ce"},
+    {file = "mapbox_earcut-1.0.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:df2382d84d6d168f73479673d297753e37440772f233cc03ebb54d150e37b174"},
+    {file = "mapbox_earcut-1.0.3-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:3ccddb4bb04f11beab62943eb5a1bcd52c5a71d236bfce0ecc03e45e97fdb24b"},
+    {file = "mapbox_earcut-1.0.3-cp311-cp311-win32.whl", hash = "sha256:f19b2bcf6475bc591f48437d3214691a6730f39b1f6dfd7505b69c4345485b0c"},
+    {file = "mapbox_earcut-1.0.3-cp311-cp311-win_amd64.whl", hash = "sha256:811a64ad5e6ecf09b96af533e5c169299ba173e53eb4ff0209de1adcfae314be"},
+    {file = "mapbox_earcut-1.0.3-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:5be71b7ec2180a27ce1178d53933430a3292b6ac3f94f2144513ee51d9034007"},
+    {file = "mapbox_earcut-1.0.3-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:eb874f7562a49ae0fb7bd47bcc9b4854cc53e3e4f7f26674f02f3cadb006ce16"},
+    {file = "mapbox_earcut-1.0.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:73b9f06f2f8a795d835342aa80e021cfceda78fdca7bc07dc1a0b4aca90239f3"},
+    {file = "mapbox_earcut-1.0.3-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:fdc55574ef7b613004874a459d2d59c07e1ef45cebb83f86c4958f7d3e2d6069"},
+    {file = "mapbox_earcut-1.0.3-cp312-cp312-win32.whl", hash = "sha256:790f52c67a0bd81032eaf61ebc181b1825b8b6daf01cb69e9eaa38521dd07aeb"},
+    {file = "mapbox_earcut-1.0.3-cp312-cp312-win_amd64.whl", hash = "sha256:cc1bbf35be0d9853dd448374330684ddbd0112497dee7d21b7417b0ab6236ac7"},
+    {file = "mapbox_earcut-1.0.3-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:22859490a83a614750dee24c08502fbe14f01a808c0f0f8626261b43ec186762"},
+    {file = "mapbox_earcut-1.0.3-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:ad9b97512b7e917cec9af399a344f8844b0ca6c074f354a5b06f58c393c4d9b0"},
+    {file = "mapbox_earcut-1.0.3-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:05de0accc70431c2270dbb13fd75b6f10b19624d42f26b377995b1fb46ac5844"},
+    {file = "mapbox_earcut-1.0.3-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:2d25c856a1ee6c69f51b82df5a06ea6cea66ce3a7c6043a602edfc5c2fe33e32"},
+    {file = "mapbox_earcut-1.0.3-cp313-cp313-win32.whl", hash = "sha256:9ec67d2dc733c7235114e5fa93baae4aa2de8c6210e01e8efd85e5b9cc0deb53"},
+    {file = "mapbox_earcut-1.0.3-cp313-cp313-win_amd64.whl", hash = "sha256:473012494fd7a51c424a6835fb03c9ee461c540df87492f0ee9bb2f56c456c0c"},
+    {file = "mapbox_earcut-1.0.3-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:177eecc8aef4a91171a0a862878a6e93e6aa28648501ef84df283646d7a15dff"},
+    {file = "mapbox_earcut-1.0.3-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:27f9d62be4586cba39022203adf13407f0c3ca06300ed9589feb0da3a9d075ed"},
+    {file = "mapbox_earcut-1.0.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1eb495cb897c1b52df7f1244b21798b815560845215a0d9d87db82a191aa2db2"},
+    {file = "mapbox_earcut-1.0.3-cp39-cp39-musllinux_1_2_x86_64.whl", hash = "sha256:6f22662c363128b8503f3ab1906e551b49f409b755db4cec32b68d50a563c669"},
+    {file = "mapbox_earcut-1.0.3-cp39-cp39-win32.whl", hash = "sha256:163146fd9ed252972625aabb56df91cc89f384e458f8819cf673f3f02885252e"},
+    {file = "mapbox_earcut-1.0.3-cp39-cp39-win_amd64.whl", hash = "sha256:2b531f4094c1643cab7ff96f296bb27277acac7204ff9415e099274299c56988"},
+    {file = "mapbox_earcut-1.0.3-pp310-pypy310_pp73-macosx_10_15_x86_64.whl", hash = "sha256:17cdd6f14d1161839eea67a0ce796a09bcb3183903dc7b213011f38907b71279"},
+    {file = "mapbox_earcut-1.0.3-pp310-pypy310_pp73-macosx_11_0_arm64.whl", hash = "sha256:ae5aab4b8b3e418c4690da17b3aa50e7fc540b08a0d0d43a4eff4fa21ecb51b3"},
+    {file = "mapbox_earcut-1.0.3-pp310-pypy310_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7ab51cd69c768c15114da8ba8f43bcda1dea681167e6eadd067fda34837a639d"},
+    {file = "mapbox_earcut-1.0.3-pp310-pypy310_pp73-win_amd64.whl", hash = "sha256:97f9bcbcd897db68b02228f20255d56b269248883d1ac51686e3de15a83bec7d"},
+    {file = "mapbox_earcut-1.0.3-pp39-pypy39_pp73-macosx_10_15_x86_64.whl", hash = "sha256:016b0cef0ab502291ae3dc498d182f2ec04c79e4362524f1c44a53cf0f8ed271"},
+    {file = "mapbox_earcut-1.0.3-pp39-pypy39_pp73-macosx_11_0_arm64.whl", hash = "sha256:911a661b245b63bbe0fb2c6432423c50173de35a20bbc9e5b4404d4f3cd4f1c0"},
+    {file = "mapbox_earcut-1.0.3-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:fbcadc28d68a3939b90eeab35193ae94b99296996b081fc3b22434740294e4f9"},
+    {file = "mapbox_earcut-1.0.3-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:032ef45e8278d092e875abd27615e66ef1573672bc63ae30ae00abbcf35b833f"},
+    {file = "mapbox_earcut-1.0.3.tar.gz", hash = "sha256:b6bac5d519d9947a6321a699c15d58e0b5740da61b9210ed229e05ad207c1c04"},
 ]
 
 [package.dependencies]
 numpy = "*"
-
-[package.extras]
-test = ["pytest"]
 
 [[package]]
 name = "markdown-it-py"
@@ -1833,13 +1836,13 @@ files = [
 
 [[package]]
 name = "starlette"
-version = "0.42.0"
+version = "0.43.0"
 description = "The little ASGI library that shines."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "starlette-0.42.0-py3-none-any.whl", hash = "sha256:02f877201a3d6d301714b5c72f15cac305ea5cc9e213c4b46a5af7eecad0d625"},
-    {file = "starlette-0.42.0.tar.gz", hash = "sha256:91f1fbd612f3e3d821a8a5f46bf381afe2a9722a7b8bbde1c07fb83384c2882a"},
+    {file = "starlette-0.43.0-py3-none-any.whl", hash = "sha256:0e0a91f33c57b30820cbe0828f993df67f890f1e4ae48ed8080f24793446450c"},
+    {file = "starlette-0.43.0.tar.gz", hash = "sha256:d4887cfd776f8f925c1b140829da9f4c9b8d0973aa66a7cb2bcc48e9b3a69660"},
 ]
 
 [package.dependencies]
