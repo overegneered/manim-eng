@@ -1,5 +1,5 @@
-Marks: labels, annotations, currents, and voltages
-==================================================
+Marks: labels, annotations, and current and voltage labels
+==========================================================
 
 '**Mark**' is the general umbrella term manim-eng uses to refer to any textual label
 applied to a component. That is, a 'mark' is
@@ -8,6 +8,9 @@ applied to a component. That is, a 'mark' is
 - An annotation;
 - A current label; or
 - A voltage label.
+
+It is worth mentioning that 'mark' refers *only* to the text (so in the case of a
+voltage arrow, it refers only to the label on the arrow and not the arrow itself).
 
 Marks remain upright
 --------------------
