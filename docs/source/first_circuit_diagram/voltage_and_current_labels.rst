@@ -176,6 +176,7 @@ types of buffer on a voltage arrow:
 We'll adjust the ``component_buff`` for our purposes.
 
 .. code-block:: python
+
     class CurrentShunt(Scene):
         def construct(self):
             r1 = Resistor().rotate(90 * DEGREES)
