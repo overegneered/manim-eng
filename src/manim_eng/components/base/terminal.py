@@ -99,7 +99,10 @@ class Terminal(Markable):
         return self._end_anchor.pos
 
     def set_current(
-        self, label: str | Value, out: bool | None = None, below: bool | None = None
+        self,
+        label: str | Value | None,
+        out: bool | None = None,
+        below: bool | None = None,
     ) -> Self:
         """Set the current label of the terminal.
 
@@ -108,15 +111,15 @@ class Terminal(Markable):
 
         Parameters
         ----------
-        label : str | Value
+        label : str | Value, optional
             The current label to set. Takes a TeX math mode string, or a ``Value`` to be
             typeset as a math mode string.
-        out : bool | None
+        out : bool, optional
             Whether the arrow accompanying the annotation should point out (away from
             the body of the component to which the terminal is attached), or in (towards
             the component). If unspecified, falls back to the previous setting, or if
             there is none, the default (``False``).
-        below : bool | None
+        below : bool, optional
             Whether the annotation should be placed below the current arrow, or above
             it. Note that 'below' here is defined as below the terminal when it is
             pointing right. If unspecified, falls back to the previous setting, or if
@@ -143,7 +146,9 @@ class Terminal(Markable):
             )
             self._current_mark_anchored_below = below
 
-        self._set_mark(self._current, label)
+        if label is not None:
+            self._set_mark(self._current, label)
+
         self.__update_terminal_visibility()
         return self
 
