@@ -6,3 +6,4 @@ In-depth guides
 
     components
     marks
+    voltages

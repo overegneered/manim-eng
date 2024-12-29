@@ -1,5 +1,5 @@
-Marks: labels, annotations, and current and voltage labels
-==========================================================
+Marks (labels, annotations, and current and voltage labels)
+===========================================================
 
 '**Mark**' is the general umbrella term manim-eng uses to refer to any textual label
 applied to a component. That is, a 'mark' is
