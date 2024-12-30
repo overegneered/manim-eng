@@ -104,7 +104,7 @@ class ConfigBase:
     def load_from_dict(
         self, dictionary: dict[str, Any], table_prefix: str = ""
     ) -> Self:
-        """Load configuration in from a ``dict`` representation.
+        r"""Load configuration in from a ``dict`` representation.
 
         Parameters
         ----------
@@ -120,7 +120,7 @@ class ConfigBase:
         This method is written as a strict intermediary between the configuration TOML
         file and the configuration classes. As such, an input of an empty dictionary
         ``{}`` will do nothing, as it is the equivalent of reading in an empty
-        configuration file. The same goes for empty ``dict``s as values for tables: no
+        configuration file. The same goes for empty ``dict``\ s as values for tables: no
         change will be made to the table in this case.
         """
         possible_keys = self.__dict__.keys()
