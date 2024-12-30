@@ -8,7 +8,7 @@ API reference
     :recursive:
 
     components
-    circuit
+    circuits
     units
     _config
     _base
