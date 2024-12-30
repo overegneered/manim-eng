@@ -7,7 +7,7 @@ import manim.typing as mnt
 import numpy as np
 
 from manim_eng._utils import utils
-from manim_eng.circuit.base.wire import WireBase
+from manim_eng.circuits.base.wire import WireBase
 from manim_eng.components.base.terminal import Terminal
 
 __all__ = ["ManualWire", "Wire"]

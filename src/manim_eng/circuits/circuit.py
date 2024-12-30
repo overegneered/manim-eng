@@ -6,7 +6,7 @@ import manim as mn
 
 __all__ = ["Circuit"]
 
-from manim_eng.circuit.wire import Wire
+from manim_eng.circuits.wire import Wire
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.terminal import Terminal
 from manim_eng.components.node import Node

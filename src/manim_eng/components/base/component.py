@@ -13,7 +13,7 @@ from manim_eng import config_eng
 from manim_eng._base.anchor import AnnotationAnchor, CentreAnchor, LabelAnchor
 from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
-from manim_eng.circuit.voltage import Voltage
+from manim_eng.circuits.voltage import Voltage
 from manim_eng.components.base.terminal import Terminal
 from manim_eng.units import Value
 
