@@ -24,6 +24,7 @@ but the goal is to extend this to other types of diagrams in the future.
 v0.2
 ^^^^
 - Multi-terminal components (transistors, logic gates, latches, etc.)
+- Different versions of components (European, American, etc.)
 - Better, more ergonomic wire routing for circuits
 - Polynomial-based voltage arrows
 
