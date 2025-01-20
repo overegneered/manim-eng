@@ -31,27 +31,33 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
         self.start = start
         self.end = end
 
+        self.attached = False
+
         self.__construct_wire()
 
         if updating:
             self.add_updater(lambda mob: mob.__construct_wire())
 
     def attach(self) -> Self:
-        """Attach the wire to the terminals it goes to and from.
+        """Attach the wire to its start and end terminals, if not already attached.
 
         This updates the terminals so that they know they have one more connection.
         """
-        self.start._increment_connection_count()
-        self.end._increment_connection_count()
+        if not self.attached:
+            self.start._increment_connection_count()
+            self.end._increment_connection_count()
+            self.attached = True
         return self
 
     def detach(self) -> Self:
-        """Detach the wire from the terminals it goes to and from.
+        """Detach the wire from its start and end terminals, if not already detached.
 
         This updates the terminals so that they know they have one fewer connection.
         """
-        self.start._decrement_connection_count()
-        self.end._decrement_connection_count()
+        if self.attached:
+            self.start._decrement_connection_count()
+            self.end._decrement_connection_count()
+            self.attached = False
         return self
 
     def __construct_wire(self) -> None:
