@@ -31,7 +31,7 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
         self.start = start
         self.end = end
 
-        self.attached = False
+        self._attached = False
 
         self.__construct_wire()
 
@@ -43,10 +43,10 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
 
         This updates the terminals so that they know they have one more connection.
         """
-        if not self.attached:
+        if not self._attached:
             self.start._increment_connection_count()
             self.end._increment_connection_count()
-            self.attached = True
+            self._attached = True
         return self
 
     def detach(self) -> Self:
@@ -54,10 +54,10 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
 
         This updates the terminals so that they know they have one fewer connection.
         """
-        if self.attached:
+        if self._attached:
             self.start._decrement_connection_count()
             self.end._decrement_connection_count()
-            self.attached = False
+            self._attached = False
         return self
 
     def __construct_wire(self) -> None:
@@ -104,12 +104,12 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
     def __override_create(self, **kwargs: Any) -> mn.Animation:
         return mn.AnimationGroup(
             self.animate(**kwargs).attach(),
-            mn.Create(self, use_override=False),
+            mn.Create(self, use_override=False, **kwargs),
         )
 
     @mn.override_animation(mn.Uncreate)
     def __override_uncreate(self, **kwargs: Any) -> mn.Animation:
         return mn.AnimationGroup(
             self.animate(**kwargs).detach(),
-            mn.Uncreate(self, use_override=False),
+            mn.Uncreate(self, use_override=False, **kwargs),
         )
