@@ -237,7 +237,8 @@ class Voltage(Markable):
         direction = -1 if self.clockwise else 1
 
         # Remove once https://github.com/ManimCommunity/manim/issues/4132 is resolved
-        # Manually calculates a buff so that a buff and path_arc don't occur simultaneously
+        # Manually calculates a buff so that a buff and path_arc don't occur
+        # simultaneously
         start_to_end = self.end.end - self.start.end
         length = np.linalg.norm(start_to_end)
         radius = length / (2 * np.sin(0.5 * angle))
@@ -260,7 +261,7 @@ class Voltage(Markable):
             path_arc=path_arc * direction,
             stroke_width=config_eng.symbol.arrow_stroke_width,
             tip_length=config_eng.symbol.arrow_tip_length,
-            # buff=self.buff,
+            # buff=self.buff, noqa: ERA001
             buff=0,
         )
         self._arrow.become(new_arrow)
