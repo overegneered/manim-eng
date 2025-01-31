@@ -102,14 +102,10 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
 
     @mn.override_animation(mn.Create)
     def __override_create(self, **kwargs: Any) -> mn.Animation:
-        return mn.AnimationGroup(
-            self.animate(**kwargs).attach(),
-            mn.Create(self, use_override=False, **kwargs),
-        )
+        self.animate(**kwargs).attach()
+        return mn.Create(self, use_override=False, **kwargs)
 
     @mn.override_animation(mn.Uncreate)
     def __override_uncreate(self, **kwargs: Any) -> mn.Animation:
-        return mn.AnimationGroup(
-            self.animate(**kwargs).detach(),
-            mn.Uncreate(self, use_override=False, **kwargs),
-        )
+        self.animate(**kwargs).detach()
+        return mn.Uncreate(self, use_override=False, **kwargs)
