@@ -8,4 +8,5 @@ In-depth guides
     marks
     voltages
     wiring
+    circuits
     configuration
