@@ -64,9 +64,9 @@ cardinal and sub-cardinal alignment regions, respectively.
     class CardinalSector(LinedSector):
         def __init__(self):
             super().__init__(
-                outer_radius=2,
-                start_angle=-5*DEGREES,
-                angle=10*DEGREES,
+                radius=2,
+                start_angle=-5 * DEGREES,
+                angle=10 * DEGREES,
                 color=BLUE,
                 fill_color=BLUE,
                 fill_opacity=0.3,
@@ -75,9 +75,9 @@ cardinal and sub-cardinal alignment regions, respectively.
     class SubCardinalSector(LinedSector):
         def __init__(self):
             super().__init__(
-                outer_radius=2,
-                start_angle=5*DEGREES,
-                angle=80*DEGREES,
+                radius=2,
+                start_angle=5 * DEGREES,
+                angle=80 * DEGREES,
                 color=RED,
                 fill_color=RED,
                 fill_opacity=0.3,
@@ -87,12 +87,12 @@ cardinal and sub-cardinal alignment regions, respectively.
         def construct(self):
             right = CardinalSector()
             ur = SubCardinalSector()
-            up = CardinalSector().rotate(0.5*PI, about_point=ORIGIN)
-            ul = SubCardinalSector().rotate(0.5*PI, about_point=ORIGIN)
+            up = CardinalSector().rotate(0.5 * PI, about_point=ORIGIN)
+            ul = SubCardinalSector().rotate(0.5 * PI, about_point=ORIGIN)
             left = CardinalSector().rotate(PI, about_point=ORIGIN)
             dl = SubCardinalSector().rotate(PI, about_point=ORIGIN)
-            down = CardinalSector().rotate(-0.5*PI, about_point=ORIGIN)
-            dr = SubCardinalSector().rotate(-0.5*PI, about_point=ORIGIN)
+            down = CardinalSector().rotate(-0.5 * PI, about_point=ORIGIN)
+            dr = SubCardinalSector().rotate(-0.5 * PI, about_point=ORIGIN)
             sectors = [up, ul, left, dl, down, dr, right, ur]
 
             self.add(*sectors)
@@ -106,6 +106,7 @@ cardinal and sub-cardinal alignment regions, respectively.
                 Rotating(r, run_time=10),
                 Rotating(dot, run_time=10, about_point=ORIGIN),
             )
+
 
 Setting mark texts
 ------------------

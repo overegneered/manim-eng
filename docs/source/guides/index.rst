@@ -7,4 +7,5 @@ In-depth guides
     components
     marks
     voltages
+    wiring
     configuration

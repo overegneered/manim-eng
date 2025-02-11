@@ -1,6 +1,6 @@
 """Wire and related implementation classes."""
 
-from typing import Sequence, cast
+from typing import Self, Sequence, cast
 
 import manim as mn
 import manim.typing as mnt
@@ -22,11 +22,12 @@ class ManualWire(WireBase):
         The terminal the wire starts at.
     end : Terminal
         The terminal the wire ends at.
-    corner_points : Sequence[Point3D]
-        The vertices the line should have between the two terminals. Should not include
+    corner_points : Sequence[Point3D], optional
+        The vertices the wire should have between the two terminals. Should not include
         the positions of the two terminals, as these are inserted automatically when the
-        wire is drawn. These should be in order from ``start`` to
-        ``end``.
+        wire is drawn. These should be in order from ``start`` to ``end``. If left
+        unspecified, this is taken to be ``[]`` and the wire will directly connect the
+        start and end terminals.
     updating : bool
         Whether the ends of the wire should update automatically to keep connected to
         the terminals. This is disabled by default. If this is enabled, it is
@@ -43,12 +44,11 @@ class ManualWire(WireBase):
         self,
         start: Terminal,
         end: Terminal,
-        corner_points: Sequence[mnt.Point3D],
+        corner_points: Sequence[mnt.Point3D] | None = None,
         updating: bool = False,
     ):
+        self._corner_points = list(corner_points) if corner_points is not None else []
         super().__init__(start, end, updating)
-
-        self.corner_points = list(corner_points)
 
     def get_corner_points(self) -> list[mnt.Point3D]:
         """Get the corner points of the wire.
@@ -56,7 +56,21 @@ class ManualWire(WireBase):
         Returns the vertices of the wire, not including the end points (i.e. at the
         start and end terminals).
         """
-        return self.corner_points
+        return self._corner_points
+
+    def set_corner_points(self, points: Sequence[mnt.Point3D]) -> Self:
+        """Set the corner points of the wire.
+
+        Parameters
+        ----------
+        points : Sequence[Point3D]
+            The vertices the wire should have between the two terminals. Should not
+            include the positions of the two terminals, as these are inserted
+            automatically when the wire is drawn. These should be in order from
+            ``start`` to ``end``.
+        """
+        self._corner_points = list(points)
+        return self
 
 
 class Wire(WireBase):
