@@ -279,20 +279,21 @@ class AnchorDisplayConfig(ConfigBase):
     """Anchor debug display configuration."""
 
     annotation_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.BLUE)
-    """The colour to use for annotation anchors' debug visuals."""
+    """The colour to use for annotation anchors' debug visuals. Defaults to blue."""
     centre_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.PURPLE)
-    """The colour to use for centre anchors' debug visuals."""
+    """The colour to use for centre anchors' debug visuals. Defaults to purple."""
     current_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.ORANGE)
-    """The colour to use for current anchors' debug visuals."""
+    """The colour to use for current anchors' debug visuals. Defaults to orange."""
     label_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.RED)
-    """The colour to use for label anchors' debug visuals."""
+    """The colour to use for label anchors' debug visuals. Defaults to red."""
     radius: float = 0.06
     """The radius of anchor visualisation rings."""
     stroke_width: float = 2.0
     """The stroke width of anchor visualisation rings."""
     terminal_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.GREEN)
-    """The colour to use for terminal anchors' debug visuals."""
+    """The colour to use for terminal anchors' debug visuals. Defaults to green."""
     voltage_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.YELLOW)
+    """The colour to use for voltage anchors' debug visuals. Defaults to yellow."""
 
 
 @dc.dataclass

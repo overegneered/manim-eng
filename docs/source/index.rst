@@ -43,3 +43,4 @@ Contents
     guides/index
     reference
     licencing_and_citation
+    extending_manim-eng/index
