@@ -253,9 +253,11 @@ __all__ = [
     "PEBI",
     "PETA",
     "PICO",
+    "QUEBI",
     "QUECTO",
     "QUETTA",
     "RADIAN",
+    "ROBI",
     "RONNA",
     "RONTO",
     "SECOND",
@@ -510,6 +512,8 @@ YOCTO = Unit("y", prefix=True)
 RONTO = Unit("r", prefix=True)
 QUECTO = Unit("q", prefix=True)
 
+QUEBI = Unit("Qi", prefix=True)
+ROBI = Unit("Ri", prefix=True)
 YOBI = Unit("Yi", prefix=True)
 ZEBI = Unit("Zi", prefix=True)
 EXBI = Unit("Ei", prefix=True)

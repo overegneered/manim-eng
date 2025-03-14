@@ -14,3 +14,4 @@ get access, add the following to your file.
     :caption: Contents
 
     debug_mode
+    units
