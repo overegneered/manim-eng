@@ -26,7 +26,7 @@ one argument: a string with the unicode representation of the unit.
     ERLANG = Unit("E")
 
 manim-eng uses a
-:external+manim:class:`MathTex< manim.mobject.text.tex_mobject.MathTex>` to display
+:external+manim:class:`MathTex <manim.mobject.text.tex_mobject.MathTex>` to display
 units. By default, it assumes that the string you passed before when wrapped in
 ``\mathrm{}`` is the correct LaTeX math mode string to represent the unit symbol. If
 this is not the case, you can use the ``latex`` parameter to specify a custom string (it

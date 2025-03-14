@@ -17,6 +17,8 @@ __all__ = ["Markable"]
 
 
 class RotateMarkable(mn.Rotate):
+    """Override for the Rotate animation that keeps attached marks upright."""
+
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.current_rotation = 0.0

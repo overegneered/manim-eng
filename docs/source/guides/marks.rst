@@ -12,6 +12,8 @@ applied to a component. That is, a 'mark' is
 It is worth mentioning that 'mark' refers *only* to the text (so in the case of a
 voltage arrow, it refers only to the label on the arrow and not the arrow itself).
 
+.. _marks_remain_upright:
+
 Marks remain upright
 --------------------
 

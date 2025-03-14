@@ -13,5 +13,6 @@ get access, add the following to your file.
 .. toctree::
     :caption: Contents
 
+    how_manim-eng_works
     debug_mode
     units
