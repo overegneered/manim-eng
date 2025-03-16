@@ -186,8 +186,9 @@ Some things handle attaching for you
 
 There are some ways of getting around having to worry about this. The
 :class:`~.WireBase` class (the base class of all other wires) overrides the
-:external+manim:class:`~.Create` and :external+manim:class:`~.Uncreate` animations to
-call :meth:`~.WireBase.attach` or :meth:`~.WireBase.detach`, respectively. The
+:external+manim:class:`Create <manim.animation.creation.Create>` and
+:external+manim:class:`Uncreate <manim.animation.creation.Uncreate>` animations to call
+:meth:`~.WireBase.attach` or :meth:`~.WireBase.detach`, respectively. The
 :class:`~.Circuit` class also handles this itself.
 
 If you're using a mix of these automatic solutions and manual handling, or you're not
@@ -579,7 +580,7 @@ As can be seen above, the wires now go directly from one terminal to another.
 
 With that, you should now have a decent idea of the ways you can use and customise
 manim-eng's various wire types. Those of you who have gone through the
-:doc:`tutorial <first_circuit_diagram/index>` will note that we are yet to touch on one
+:doc:`tutorial <../first_circuit_diagram/index>` will note that we are yet to touch on one
 other class that can perform wiring: the :class:`~.Circuit`. This deserved to be handled
 separately, and so is outlined in the next guide.
 

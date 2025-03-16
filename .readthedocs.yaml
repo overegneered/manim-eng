@@ -2,6 +2,9 @@ version: 2
 
 build:
   os: "ubuntu-22.04"
+  apt_packages:
+    - libpango1.0-dev
+    - graphviz
   tools:
     python: "3.12"
 
