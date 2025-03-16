@@ -259,13 +259,13 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "cloup"
-version = "3.0.6"
+version = "3.0.7"
 description = "Adds features to Click: option groups, constraints, subcommand sections and help themes."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "cloup-3.0.6-py2.py3-none-any.whl", hash = "sha256:ce46566204318e32b3e02d97d5e89bcaa9d9c3d0b8f94d1d060bc8b7a6be9179"},
-    {file = "cloup-3.0.6.tar.gz", hash = "sha256:7a43e1b611b9f1e9cb3e1e0e02247154cb530df3d909fa184e377cdee6834b98"},
+    {file = "cloup-3.0.7-py2.py3-none-any.whl", hash = "sha256:d3a431cf1e14d8835fe85608e02cc6ff7216f0a39e30d5e28618aa938003ddb4"},
+    {file = "cloup-3.0.7.tar.gz", hash = "sha256:c852e0a0541aa433c6ab31a9b8b503f63d9881e91ddaf0384d6927965f2b421c"},
 ]
 
 [package.dependencies]
@@ -390,13 +390,13 @@ files = [
 
 [[package]]
 name = "filelock"
-version = "3.17.0"
+version = "3.18.0"
 description = "A platform independent file lock."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "filelock-3.17.0-py3-none-any.whl", hash = "sha256:533dc2f7ba78dc2f0f531fc6c4940addf7b70a481e269a5a3b93be94ffbe8338"},
-    {file = "filelock-3.17.0.tar.gz", hash = "sha256:ee4e77401ef576ebb38cd7f13b9b28893194acc20a8e68e18730ba9c0e54660e"},
+    {file = "filelock-3.18.0-py3-none-any.whl", hash = "sha256:c401f4f8377c4464e6db25fff06205fd89bdd83b65eb0488ed1b160f780e21de"},
+    {file = "filelock-3.18.0.tar.gz", hash = "sha256:adbc88eabb99d2fec8c9c1b229b171f18afa655400173ddc653d5d01501fb9f2"},
 ]
 
 [package.extras]
