@@ -16,6 +16,20 @@ from manim_eng.units import Value
 __all__ = ["Markable"]
 
 
+class RotateMarkable(mn.Rotate):
+    """Override for the Rotate animation that keeps attached marks upright."""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.current_rotation = 0.0
+
+    def interpolate_mobject(self, alpha: float) -> None:
+        target_angle = self.angle * alpha
+        delta_angle = target_angle - self.current_rotation
+        self.mobject.rotate(delta_angle, axis=self.axis, about_point=self.about_point)
+        self.current_rotation += delta_angle
+
+
 class Markable(mn.VMobject, metaclass=abc.ABCMeta):
     """Base class for objects that can have marks attached.
 
@@ -38,6 +52,7 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
         **kwargs: Any,
     ) -> Self:
         self.__rotate.rotate(*args, **kwargs)
+        self.__reposition_marks()
         return self
 
     def add(self, *mobjects: mn.Mobject) -> Self:
@@ -77,6 +92,11 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
         """Clear a mark from the object."""
         self.__marks.remove(mark)
 
+    def __reposition_marks(self) -> None:
+        """Force marks to update their positions even if updating is disabled."""
+        for mark in self.__marks.submobjects:
+            mark._reposition()
+
     @mn.override_animate(_set_mark)
     def __animate_set_mark(
         self,
@@ -105,3 +125,7 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
         anim = mn.Uncreate(mark_to_clear, remover=False, **anim_args)
         self.__marks.remove(mark_to_clear)
         return anim
+
+    @mn.override_animation(mn.Rotate)
+    def __animate_rotate(self, **kwargs: Any) -> mn.Animation:
+        return RotateMarkable(self, **kwargs)

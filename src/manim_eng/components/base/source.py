@@ -187,6 +187,7 @@ class EuropeanVoltageSourceBase(VoltageSourceBase, metaclass=abc.ABCMeta):
             mn.Line(
                 start=mn.LEFT * half_width,
                 end=mn.RIGHT * half_width,
+                z_index=self.z_index + 0.1,
             ).match_style(self)
         )
 
@@ -222,5 +223,6 @@ class EuropeanCurrentSourceBase(CurrentSourceBase, metaclass=abc.ABCMeta):
             mn.Line(
                 start=mn.UP * half_width,
                 end=mn.DOWN * half_width,
+                z_index=self.z_index + 0.1,
             ).match_style(self)
         )

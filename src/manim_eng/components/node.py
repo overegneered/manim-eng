@@ -59,6 +59,7 @@ class Node(Component):
 
         if self.autoblob:
             self.add_updater(self.__blob_updater)
+            self.update()
 
         self.remove(self._annotation_anchor)
 
@@ -251,7 +252,6 @@ class Node(Component):
             self.update()
         else:
             self.remove_updater(self.__blob_updater)
-        self._autoblob_if_autoblobbing()
         return self
 
     def enable_autoblobbing(self) -> Self:

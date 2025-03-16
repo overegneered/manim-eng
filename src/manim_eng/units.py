@@ -12,6 +12,188 @@ True
 
 This is because the system stores units as they would be *written*, and you would write
 :math:`\mathrm{1 / kV = 1 kV^{-1}}` and not :math:`\mathrm{1 k^{-1} V^{-1}}`.
+
+Available prefixes
+------------------
+
+=============== ============
+Prefix variable Displayed as
+=============== ============
+``QUETTA``      Q
+``RONNA``       R
+``YOTTA``       Y
+``ZETTA``       Z
+``EXA``         E
+``PETA``        P
+``TERA``        T
+``GIGA``        G
+``MEGA``        M
+``KILO``        k
+``HECTO``       h
+``DECA``        da
+``DECI``        d
+``CENTI``       c
+``MILLI``       m
+``MICRO``       µ
+``NANO``        n
+``PICO``        p
+``FEMTO``       f
+``ATTO``        a
+``ZEPTO``       z
+``YOCTO``       y
+``RONTO``       r
+``QUECTO``      q
+``YOBI``        Yi
+``ZEBI``        Zi
+``EXBI``        Ei
+``PEBI``        Pi
+``TEBI``        Ti
+``GIBI``        Gi
+``MEBI``        Mi
+``KIBI``        Ki
+=============== ============
+
+Available units
+---------------
+
+Length/area/volume
+^^^^^^^^^^^^^^^^^^
+
++---------------+--------------+
+| Unit variable | Displayed as |
++===============+==============+
+| ``METRE``     | m            |
++---------------+              |
+| ``METER``     |              |
++---------------+--------------+
+| ``ANGSTROM``  | Å            |
++---------------+--------------+
+| ``MICRON``    | μm           |
++---------------+--------------+
+| ``LITRE``     | L            |
++---------------+              |
+| ``LITER``     |              |
++---------------+--------------+
+
+Mass
+^^^^
+
+============= ============
+Unit variable Displayed as
+============= ============
+``GRAM``      g
+============= ============
+
+Time/frequency
+^^^^^^^^^^^^^^
+
+============= ============
+Unit variable Displayed as
+============= ============
+``SECOND``    s
+``MINUTE``    min
+``HOUR``      hr
+``HERTZ``     Hz
+============= ============
+
+Electricity
+^^^^^^^^^^^
+
+============= ============
+Unit variable Displayed as
+============= ============
+AMP           A
+VOLT          V
+OHM           Ω
+SIEMENS       S
+FARAD         F
+HENRY         H
+COULOMB       C
+============= ============
+
+Temperature
+^^^^^^^^^^^
+
+============= ============
+Unit variable Displayed as
+============= ============
+``KELVIN``    K
+``CELSIUS``   °C
+============= ============
+
+Illumination
+^^^^^^^^^^^^
+
+============= ============
+Unit variable Displayed as
+============= ============
+``CANDELA``   cd
+``LUMEN``     lm
+``LUX``       lx
+============= ============
+
+Quantity
+^^^^^^^^
+============= ============
+Unit variable Displayed as
+============= ============
+``MOLE``      mol
+============= ============
+
+
+Angles
+^^^^^^
+
+============= ============
+Unit variable Displayed as
+============= ============
+``DEGREE``    °
+``RADIAN``    rad
+``STERADIAN`` sr
+============= ============
+
+Energy and power
+^^^^^^^^^^^^^^^^
+
+================ ============
+Unit variable    Displayed as
+================ ============
+``JOULE``        J
+``ELECTRONVOLT`` eV
+``WATT``         W
+``DECIBEL``      dB
+================ ============
+
+Force and pressure
+^^^^^^^^^^^^^^^^^^
+
+============= ============
+Unit variable Displayed as
+============= ============
+``NEWTON``    N
+``PASCAL``    Pa
+``BAR``       bar
+============= ============
+
+Magnetism
+^^^^^^^^^
+
+============= ============
+Unit variable Displayed as
+============= ============
+``WEBER``     Wb
+``TESLA``     T
+============= ============
+
+Digital storage
+^^^^^^^^^^^^^^^
+
+============= ============
+Unit variable Displayed as
+============= ============
+``BIT``       b
+``BYTE``      B
+============= ============
 """
 
 from __future__ import annotations
@@ -71,9 +253,11 @@ __all__ = [
     "PEBI",
     "PETA",
     "PICO",
+    "QUEBI",
     "QUECTO",
     "QUETTA",
     "RADIAN",
+    "ROBI",
     "RONNA",
     "RONTO",
     "SECOND",
@@ -328,6 +512,8 @@ YOCTO = Unit("y", prefix=True)
 RONTO = Unit("r", prefix=True)
 QUECTO = Unit("q", prefix=True)
 
+QUEBI = Unit("Qi", prefix=True)
+ROBI = Unit("Ri", prefix=True)
 YOBI = Unit("Yi", prefix=True)
 ZEBI = Unit("Zi", prefix=True)
 EXBI = Unit("Ei", prefix=True)
@@ -340,7 +526,7 @@ KIBI = Unit("Ki", prefix=True)
 # Length/area/volume
 METRE = Unit("m")
 METER = METRE
-ANGSTROM = Unit("", latex=r"\mathring{A}")
+ANGSTROM = Unit("Å", latex=r"\mathring{A}")
 MICRON = MICRO * METRE
 
 LITRE = Unit("L")
@@ -366,7 +552,7 @@ COULOMB = Unit("C")
 
 # Temperature
 KELVIN = Unit("K")
-CELSIUS = Unit("ºC", latex=r"^\circ C")
+CELSIUS = Unit("°C", latex=r"^\circ C")
 
 # Illumination
 CANDELA = Unit("cd")
@@ -377,7 +563,7 @@ LUX = Unit("lx")
 MOLE = Unit("mol")
 
 # Angles
-DEGREE = Unit("º", latex=r"^\circ")
+DEGREE = Unit("°", latex=r"^\circ")
 RADIAN = Unit("rad")
 STERADIAN = Unit("sr")
 

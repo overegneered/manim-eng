@@ -6,7 +6,7 @@ import manim as mn
 
 __all__ = ["Circuit"]
 
-from manim_eng.circuit.wire import Wire
+from manim_eng.circuits.wire import Wire
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.terminal import Terminal
 from manim_eng.components.node import Node
@@ -222,6 +222,30 @@ class Circuit(mn.VMobject):
                 f"{[tuple(terminal.end) for terminal in terminals_not_owned]}"
             )
 
+    @mn.override_animate(add)
+    def __animate_add(
+        self, *components: Component, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        self.add(*components)
+        return mn.AnimationGroup(
+            *[mn.Create(component, **anim_args) for component in components]
+        )
+
+    @mn.override_animate(remove)
+    def __animate_remove(
+        self, *components: Component, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        self.remove(*components)
+        return mn.AnimationGroup(
+            *[mn.Uncreate(component, **anim_args) for component in components]
+        )
+
     @mn.override_animate(connect)
     def __animate_connect(
         self,
@@ -233,17 +257,13 @@ class Circuit(mn.VMobject):
             anim_args = {}
 
         self.__check_terminals_all_belong_to_this_circuit([start, end])
-        if start == end:
-            raise ValueError(
-                "`start` and `end` are identical. "
-                "`connect()` requires two different terminals."
-            )
         new_wire = Wire(start, end)
         self.wires.add(new_wire)
-        return mn.AnimationGroup(
-            mn.Create(new_wire, **anim_args),
-            self.nodes.animate(**anim_args).update().build(),
-        )
+        animation = mn.Create(new_wire, **anim_args)
+        # This call has to be here so that the wire is properly attached when the update
+        # is done
+        self.nodes.update()
+        return animation
 
     @mn.override_animate(disconnect)
     def __animate_disconnect(

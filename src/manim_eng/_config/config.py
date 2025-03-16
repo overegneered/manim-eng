@@ -104,7 +104,7 @@ class ConfigBase:
     def load_from_dict(
         self, dictionary: dict[str, Any], table_prefix: str = ""
     ) -> Self:
-        """Load configuration in from a ``dict`` representation.
+        r"""Load configuration in from a ``dict`` representation.
 
         Parameters
         ----------
@@ -120,7 +120,7 @@ class ConfigBase:
         This method is written as a strict intermediary between the configuration TOML
         file and the configuration classes. As such, an input of an empty dictionary
         ``{}`` will do nothing, as it is the equivalent of reading in an empty
-        configuration file. The same goes for empty ``dict``s as values for tables: no
+        configuration file. The same goes for empty ``dict``\ s as values for tables: no
         change will be made to the table in this case.
         """
         possible_keys = self.__dict__.keys()
@@ -247,7 +247,7 @@ class ComponentSymbolConfig(ConfigBase):
     current_arrow_radius: float = (2 / np.sqrt(3)) * 0.2 * bipole_height
     """The length from the centre of the current arrow triangle from its centre to one
     of its vertices."""
-    terminal_length: float = 0.5 * bipole_width
+    terminal_length: float = 0.4 * bipole_width
     """The length of the terminal of a component."""
     wire_stroke_width: float = 0.625 * component_stroke_width
     """The stroke width to use for wires."""
@@ -279,20 +279,21 @@ class AnchorDisplayConfig(ConfigBase):
     """Anchor debug display configuration."""
 
     annotation_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.BLUE)
-    """The colour to use for annotation anchors' debug visuals."""
+    """The colour to use for annotation anchors' debug visuals. Defaults to blue."""
     centre_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.PURPLE)
-    """The colour to use for centre anchors' debug visuals."""
+    """The colour to use for centre anchors' debug visuals. Defaults to purple."""
     current_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.ORANGE)
-    """The colour to use for current anchors' debug visuals."""
+    """The colour to use for current anchors' debug visuals. Defaults to orange."""
     label_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.RED)
-    """The colour to use for label anchors' debug visuals."""
+    """The colour to use for label anchors' debug visuals. Defaults to red."""
     radius: float = 0.06
     """The radius of anchor visualisation rings."""
     stroke_width: float = 2.0
     """The stroke width of anchor visualisation rings."""
     terminal_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.GREEN)
-    """The colour to use for terminal anchors' debug visuals."""
+    """The colour to use for terminal anchors' debug visuals. Defaults to green."""
     voltage_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.YELLOW)
+    """The colour to use for voltage anchors' debug visuals. Defaults to yellow."""
 
 
 @dc.dataclass

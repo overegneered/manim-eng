@@ -77,10 +77,10 @@ class Monopole(Component, metaclass=abc.ABCMeta):
         this monopole's terminal is at the intersection of the lines that
 
         - Have direction vector perpendicular to ``direction`` and go through the
-          current position of the end of this monopole's terminal; and
+            current position of the end of this monopole's terminal; and
         - Have direction vector ``direction`` and go through the end of
-          ``other`` (in the case that it is a ``Terminal``) or through ``other`` (in the
-           case that it is a point).
+            ``other`` (in the case that it is a ``Terminal``) or through ``other`` (in
+            the case that it is a point).
         """
         return super().align_terminal(self.terminal, other, direction)
 

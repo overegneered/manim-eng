@@ -5,5 +5,5 @@ helper classes that manim-eng uses to build the public-facing component library.
 """
 
 from ._base import *
-from .circuit.base import *
+from .circuits.base import *
 from .components.base import *

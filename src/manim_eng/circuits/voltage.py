@@ -17,7 +17,15 @@ __all__ = ["Voltage"]
 
 
 class Voltage(Markable):
-    """Voltage arrow between two terminal endpoints.
+    r"""Voltage arrow between two terminal endpoints.
+
+    .. warning::
+        manim-eng currently uses arcs of up to $\pi$ (180º) to build voltage arrows, so
+        any label or annotation that requires an arc of more than a semicircle to get
+        round it will result in overflow into an arc that is too small.
+
+        This is a known issue and should be fixed in the 0.2 release by using polynomial
+        arrow forms.
 
     Parameters
     ----------
@@ -52,7 +60,7 @@ class Voltage(Markable):
         clockwise: bool = False,
         buff: float = mn.SMALL_BUFF,
         avoid: mn.VMobject | None = None,
-        component_buff: float = mn.SMALL_BUFF,
+        component_buff: float = 0.15,
     ) -> None:
         super().__init__()
 
@@ -222,20 +230,39 @@ class Voltage(Markable):
             middle_point = self._introduce_buffer_to_point(
                 middle_point, self.component_to_avoid.get_center(), self.component_buff
             )
-            angle = self._get_arc_details_for_middle_point(middle_point)
+            angle = self._get_angle_from_middle_point(middle_point)
         else:
             angle = config_eng.symbol.voltage_default_angle
 
-        if self.clockwise:
-            angle *= -1
+        direction = -1 if self.clockwise else 1
+
+        # Remove once https://github.com/ManimCommunity/manim/issues/4132 is resolved
+        # Manually calculates a buff so that a buff and path_arc don't occur
+        # simultaneously
+        start_to_end = self.end.end - self.start.end
+        length = np.linalg.norm(start_to_end)
+        radius = length / (2 * np.sin(0.5 * angle))
+        angle_for_buff = self.buff / radius
+        perp_bisector = np.cross(start_to_end, mn.IN) / length
+        center = 0.5 * (self.start.end + self.end.end) + perp_bisector * np.sqrt(
+            radius**2 - 0.25 * length**2
+        )
+        buffed_start = center + mn.rotate_vector(
+            self.start.end - center, angle_for_buff * direction
+        )
+        buffed_end = center + mn.rotate_vector(
+            self.end.end - center, angle_for_buff * -direction
+        )
+        path_arc = angle - 2 * angle_for_buff
 
         new_arrow = mn.Arrow(
-            start=self.start.end,
-            end=self.end.end,
-            path_arc=angle,
+            start=buffed_start,
+            end=buffed_end,
+            path_arc=path_arc * direction,
             stroke_width=config_eng.symbol.arrow_stroke_width,
             tip_length=config_eng.symbol.arrow_tip_length,
-            buff=self.buff,
+            # buff=self.buff, noqa: ERA001
+            buff=0,
         )
         self._arrow.become(new_arrow)
 
@@ -307,7 +334,7 @@ class Voltage(Markable):
         length = np.linalg.norm(relative_to_reference)
         return relative_to + direction * (length + buff)
 
-    def _get_arc_details_for_middle_point(self, middle_point: mnt.Point3D) -> float:
+    def _get_angle_from_middle_point(self, middle_point: mnt.Point3D) -> float:
         """Calculate the voltage arrow's arc to pass through ``middle_point``.
 
         Calculates the necessary angle to be swept by the voltage arrow's arc for it to
@@ -326,9 +353,9 @@ class Voltage(Markable):
 
         Returns
         -------
-        tuple[float, float]
-            A tuple consisting of the radius and angle necessary to make the arrow pass
-            through ``middle_point``.
+        float
+            The angle necessary for the arc to sweep to make the arrow pass through
+            ``middle_point``.
 
         Notes
         -----

@@ -32,7 +32,7 @@ from .utils.dummy_component import DummyComponent, DummyComponentMockedTerminals
         ),
         pytest.param(
             np.array([1, 1, 0]),
-            np.array([0.75, 0.75, 0]),
+            np.array([0.7, 0.7, 0]),
             id="Aligning in the north-east direction",
         ),
     ],
@@ -202,7 +202,7 @@ def test_set_current_no_terminal_specified(
 
     dummy_component_mocked_terminals.cast_terminals[
         0
-    ].set_current.assert_called_once_with(current_label)
+    ].set_current.assert_called_once_with(label=current_label)
     dummy_component_mocked_terminals.cast_terminals[1].set_current.assert_not_called()
 
 
@@ -214,7 +214,7 @@ def test_set_current_string_terminal_specified(
     dummy_component_mocked_terminals.set_current(current_label, terminal="right")
 
     dummy_component_mocked_terminals.right.set_current.assert_called_once_with(
-        current_label
+        label=current_label
     )
     dummy_component_mocked_terminals.left.set_current.assert_not_called()
 
@@ -229,7 +229,7 @@ def test_set_current_actual_terminal_specified(
     )
 
     dummy_component_mocked_terminals.right.set_current.assert_called_once_with(
-        current_label
+        label=current_label
     )
     dummy_component_mocked_terminals.left.set_current.assert_not_called()
 
@@ -243,7 +243,7 @@ def test_set_current_passes_kwargs_on_to_set_current_on_terminal(
 
     dummy_component_mocked_terminals.cast_terminals[
         0
-    ].set_current.assert_called_once_with(current_label, out=True, below=True)
+    ].set_current.assert_called_once_with(label=current_label, out=True, below=True)
 
 
 def test_reset_current_no_terminal_specified(
