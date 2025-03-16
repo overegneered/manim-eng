@@ -37,6 +37,7 @@ intersphinx_mapping = {
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_static_path = ["_static"]
+html_extra_path = ["robots.txt"]
 html_theme = "furo"
 html_theme_options = {
     "dark_logo": "logo_no_text.png",

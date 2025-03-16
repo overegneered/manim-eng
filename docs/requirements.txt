@@ -1,2 +1,3 @@
 furo
 sphinx>=7.3
+manim==0.19
