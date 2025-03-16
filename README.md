@@ -16,6 +16,10 @@ Quite simply, because the other options available just don't cut it for me. The 
 
 Those who know CircuiTikZ will know that it can't actually do all of the above, but why not make something better than your inspiration? On top of these features, I wanted a clean, intuitive, Pythonic interface to the library. No available option that I could find had all of this. Making my own was also an excellent way to get familiar with Manim, and a fun project.
 
+## Getting started
+
+Head over to the [documentation](https://docs.manim-eng.egneer.ing) to get started with your first circuit diagrams!
+
 ## Development
 
 ### Environment setup
