@@ -2,7 +2,7 @@
 #
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
-
+import datetime
 import sys
 from pathlib import Path
 
@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path("..", "..", "src").resolve()))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "manim-eng"
-copyright = "2024, overegneered"
+copyright = f"overegneered 2024–{datetime.datetime.now().year}"
 author = "overegneered"
 release = "0.1.0"
 
