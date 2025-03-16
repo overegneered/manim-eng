@@ -26,6 +26,7 @@ should take.
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class SimpleVoltageArrow(Scene):
         def construct(self):
@@ -60,6 +61,7 @@ through movements of the components, including animated movements.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class SimpleVoltageArrow(Scene):
         def construct(self):
@@ -101,6 +103,7 @@ terminals of the resistors.
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class VoltageArrowClockwise(Scene):
         def construct(self):
@@ -137,6 +140,7 @@ this to the test.
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class VoltageArrowClockwise(Scene):
         def construct(self):
@@ -167,6 +171,7 @@ course use your own arbitrary values as well).
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     config.frame_width = 4
     config.pixel_width = 500
@@ -189,6 +194,7 @@ course use your own arbitrary values as well).
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     config.frame_width = 4
     config.pixel_width = 500
@@ -211,6 +217,7 @@ course use your own arbitrary values as well).
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     config.frame_width = 4
     config.pixel_width = 500
@@ -233,6 +240,7 @@ course use your own arbitrary values as well).
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     config.frame_width = 4
     config.pixel_width = 500
@@ -275,6 +283,7 @@ Let's take a look at what this means with a single, unlabelled resistor.
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class VoltageArrowAvoid(Scene):
         def construct(self):
@@ -301,6 +310,7 @@ That doesn't seem all that special, but what if we add a label to the resistor?
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class VoltageArrowAvoid(Scene):
         def construct(self):

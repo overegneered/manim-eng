@@ -8,6 +8,7 @@ shown below (fans of CircuiTikZ may recognise this example!)
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CurrentShunt(Scene):
         def construct(self):

@@ -417,6 +417,7 @@ should hopefully illuminate.
     config.frame_width = 5
     config.pixel_width = 1000
     config.pixel_height = 600
+    config_eng.debug = False
 
     class OutlineModifierExample(Scene):
         def construct(self):

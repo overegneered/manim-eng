@@ -24,6 +24,7 @@ look at what this means with a label on a resistor.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class RotatingResistor(Scene):
         def construct(self):
@@ -52,6 +53,7 @@ cardinal and sub-cardinal alignment regions, respectively.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class LinedSector(Sector):
         def __init__(self, **kwargs):
@@ -141,6 +143,7 @@ Wrapping this in the necessary Manim boilerplate, we see the below.
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class LabelledResistor(Scene):
         def construct(self):
@@ -176,6 +179,7 @@ best demonstrated through the use of an example.
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class UnitExpressionLabel(Scene):
         def construct(self):
@@ -193,6 +197,7 @@ units.
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class UnitExpressionLabel(Scene):
         def construct(self):
@@ -226,6 +231,7 @@ notation. The following example demonstrates this.
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class UnitExpressionLabel(Scene):
         def construct(self):
