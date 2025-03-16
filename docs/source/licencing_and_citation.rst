@@ -1,10 +1,12 @@
 Licencing and citation
 ======================
 
-The manim-eng *code* is licenced under the MIT Licence, like Manim itself. However, I
-reserve all rights over the *documentation* and I specifically revoke any right or
-permissions to use the code or documentation to train AI models without my prior written
-approval.
+- I release the manim-eng source code under the MIT Licence with the specific
+  modification that the code may not be used to train AI models without my prior
+  approval.
+- I reserve all rights over the documentation. Though this is implicitly included in the
+  previous statement, I explicitly state that this means that it may not be used to
+  train AI models without my prior approval.
 
 Citation
 --------
