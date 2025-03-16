@@ -25,6 +25,7 @@ symbols.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CurrentShunt(Scene):
         def construct(self) -> None:
@@ -47,6 +48,7 @@ In our target circuit, the resistor is vertical, so let's quickly fix that.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CurrentShunt(Scene):
         def construct(self) -> None:
@@ -77,6 +79,7 @@ also add in the second resistor.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CurrentShunt(Scene):
         def construct(self):
@@ -114,6 +117,7 @@ Let's add some labels to our components. This is done using the
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CurrentShunt(Scene):
         def construct(self):

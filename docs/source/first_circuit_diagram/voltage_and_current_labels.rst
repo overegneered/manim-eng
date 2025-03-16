@@ -51,6 +51,7 @@ This gives us a beautiful voltage arrow as below.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CurrentShunt(Scene):
         def construct(self):
@@ -133,6 +134,7 @@ This gives us the result below.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CurrentShunt(Scene):
         def construct(self):
@@ -208,6 +210,7 @@ We'll adjust the ``component_buff`` for our purposes.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CurrentShunt(Scene):
         def construct(self):

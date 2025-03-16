@@ -58,6 +58,7 @@ shown below.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CurrentShunt(Scene):
         def construct(self):
@@ -142,6 +143,7 @@ We can do the same for everything else as well! Let's take a look.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CurrentShunt(Scene):
         def construct(self):

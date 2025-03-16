@@ -48,6 +48,7 @@ result is as below.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CurrentShunt(Scene):
         def construct(self):

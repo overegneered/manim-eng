@@ -33,6 +33,7 @@ attached are moved, the wire will plan a new path seamlessly.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class WireBasics(Scene):
         def construct(self):
@@ -84,6 +85,7 @@ demonstrated in the example below.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class StrangeAutomaticWiring(Scene):
         def construct(self):
@@ -142,6 +144,7 @@ then the terminals of ``node 1`` and ``node 2`` would be updated to display *bef
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class WhyNotAttachAutomatically(Scene):
         def construct(self):
@@ -166,6 +169,7 @@ is. As an aside, if we actually run the code above, we see the below...
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class WhyNotAttachAutomatically(Scene):
         def construct(self):
@@ -227,6 +231,7 @@ manim-eng calls **autoblobbing**. Let's take a look at an example.
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class AutoblobbingExample(Scene):
         def construct(self):
@@ -269,6 +274,7 @@ we see the below.
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class AutoblobbingExample(Scene):
         def construct(self):
@@ -326,6 +332,7 @@ Let's examine the simple example of a potential divider.
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class PotentialDivider(Scene):
         def construct(self):
@@ -353,6 +360,7 @@ put that right with an animation. We'll add the following lines to our scene.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class PotentialDivider(Scene):
         def construct(self):
@@ -389,6 +397,7 @@ with one another. Using this updater gives us the below.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class PotentialDivider(Scene):
         def construct(self):
@@ -454,6 +463,7 @@ the below displays a two-port network low-pass filter.
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class LowPassFilter(Scene):
         def construct(self):
@@ -520,6 +530,7 @@ it facilitates diagonal wires.
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class Switchboard(Scene):
         def construct(self):
@@ -560,6 +571,7 @@ switchboard example.
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class Switchboard(Scene):
         def construct(self):

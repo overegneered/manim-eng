@@ -32,6 +32,7 @@ All components have two ways for setting labels and annotations: the
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class SettingLabelsAndAnnotations(Scene):
         def construct(self):
@@ -70,6 +71,7 @@ in action together.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class SettingLabelsAndAnnotations(Scene):
         def construct(self):
@@ -156,6 +158,7 @@ Let's take a look at an example to see what this means in practice.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class SetVsReset(Scene):
         def construct(self):
@@ -261,6 +264,7 @@ another component's terminal. Let's take a look at an example.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class AlignTerminal(Scene):
         def construct(self):
@@ -290,6 +294,7 @@ but without requiring the terminal to be specified.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class AlignMonopole(Scene):
         def construct(self):

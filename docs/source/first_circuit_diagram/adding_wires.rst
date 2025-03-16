@@ -34,6 +34,7 @@ does the rest.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CurrentShunt(Scene):
         def construct(self):
@@ -80,6 +81,7 @@ We can then connect the rest together in the same way.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CurrentShunt(Scene):
         def construct(self):
@@ -150,6 +152,7 @@ the terminals that something is attached to them! This gives us the below.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CurrentShunt(Scene):
         def construct(self):
@@ -195,6 +198,7 @@ Let's add in the third connection to the top node.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CurrentShunt(Scene):
         def construct(self):
@@ -250,6 +254,7 @@ any of those, so we just pass ``0``. Our result is then what we expected.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CurrentShunt(Scene):
         def construct(self):
@@ -313,6 +318,7 @@ Speaking of adding the second node, let's do just that!
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CurrentShunt(Scene):
         def construct(self):

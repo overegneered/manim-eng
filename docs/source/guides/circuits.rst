@@ -57,6 +57,7 @@ been :ref:`added <add_components_to_circuits>` first.
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CircuitExample(Scene):
         def construct(self):
@@ -116,6 +117,7 @@ end of the wire are passed as arguments. In the example below, we disconnect |R1
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CircuitExample(Scene):
         def construct(self):
@@ -159,6 +161,7 @@ To drive the point about needing to pass both ends home, if we just one end spec
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CircuitExample(Scene):
         def construct(self):
@@ -208,6 +211,7 @@ removed.
     :save_last_frame:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CircuitExample(Scene):
         def construct(self):
@@ -269,6 +273,7 @@ capabilities outlined on this page is below.
     :hide_source:
 
     from manim_eng import *
+    config_eng.debug = False
 
     class CircuitExample(Scene):
         def construct(self):
