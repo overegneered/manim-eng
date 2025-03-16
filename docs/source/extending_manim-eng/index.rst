@@ -14,5 +14,6 @@ get access, add the following to your file.
     :caption: Contents
 
     how_manim-eng_works
+    custom_components
     debug_mode
     units

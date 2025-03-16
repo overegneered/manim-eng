@@ -74,10 +74,12 @@ class Component(Markable, metaclass=abc.ABCMeta):
     def _construct(self) -> None:
         """Construct the shape of the component.
 
-        Code to build the component's symbol goes in here (contrary to Manim's
-        standard) and *not* ``__init__()``. This is because the base ``Component`` class
+        Code to build the component's symbol goes in here  and *not* in ``__init__()``
+        (contrary to Manim's standard). This is because the base ``Component`` class
         has to perform initialisation both before (to set up the groups etc.) and after
         (to set the anchor positions for annotations) the component's shape setup.
+
+        :meta public:
         """
 
     @property

@@ -19,6 +19,8 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.duration",
     "sphinx.ext.doctest",
+    "sphinx.ext.graphviz",
+    "sphinx.ext.inheritance_diagram",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "manim.utils.docbuild.manim_directive",
@@ -26,6 +28,7 @@ extensions = [
 
 templates_path = ["_templates"]
 exclude_patterns = []  # type: ignore[var-annotated]
+graphviz_output_format = "svg"
 intersphinx_mapping = {
     "manim": ("https://docs.manim.community/en/stable", None)
 }
