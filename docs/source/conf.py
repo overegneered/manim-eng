@@ -38,6 +38,7 @@ intersphinx_mapping = {
 
 html_static_path = ["_static"]
 html_extra_path = ["robots.txt"]
+html_favicon = "_static/favicon.png"
 html_theme = "furo"
 html_theme_options = {
     "dark_logo": "logo_no_text.png",
