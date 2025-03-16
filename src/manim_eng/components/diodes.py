@@ -41,10 +41,14 @@ class Diode(SquareBipole):
         self._body.add(triangle)
 
         if draw_line:
-            line = mn.Line(
-                start=line_start + half_height * mn.DOWN,
-                end=line_start + half_height * mn.UP,
-            ).match_style(self)
+            line = (
+                mn.Line(
+                    start=line_start + half_height * mn.DOWN,
+                    end=line_start + half_height * mn.UP,
+                )
+                .match_style(self)
+                .set_fill(opacity=0)
+            )
             self._body.add(line)
 
     @property
@@ -150,6 +154,7 @@ class SchottkyDiode(Diode):
         line = (
             mn.VMobject()
             .match_style(self)
+            .set_fill(opacity=0)
             .set_points_as_corners(
                 [
                     top + side_length * mn.DR,
@@ -178,6 +183,7 @@ class TunnelDiode(Diode):
         line = (
             mn.VMobject()
             .match_style(self)
+            .set_fill(opacity=0)
             .set_points_as_corners(
                 [
                     top + side_length * mn.LEFT,
@@ -204,6 +210,7 @@ class ZenerDiode(Diode):
         line = (
             mn.VMobject()
             .match_style(self)
+            .set_fill(opacity=0)
             .set_points_as_corners(
                 [
                     bottom - offset,

@@ -45,3 +45,5 @@ User-agent: VelenPublicWebCrawler
 User-agent: Webzio-Extended
 User-agent: YouBot
 Disallow: /
+
+Sitemap: https://docs.manim-eng.egneer.ing/sitemap.xml
