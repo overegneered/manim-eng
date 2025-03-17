@@ -366,7 +366,7 @@ class Node(Component):
     ) -> list[float]:
         largest_gap = 0.0
         midangles: list[float] = []
-        for start_angle, end_angle in zip(np.roll(angles, 1), angles):
+        for start_angle, end_angle in zip(np.roll(angles, 1), angles, strict=False):
             if end_angle <= start_angle:
                 # This comparison occurs over the 'break' at ±pi, or there is only one
                 # element in `angles`. Either way, we get the behaviour we want by
