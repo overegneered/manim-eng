@@ -1,14 +1,53 @@
-[tool.poetry]
+[project]
 name = "manim-eng"
 version = "0.1.0"
-description = "A Manim CE plugin for drawing engineering diagrams such as circuits."
-authors = ["overegneered <git@egneer.ing>"]
+description = "A Manim CE plugin for drawing circuit diagrams (and other engineering diagrams in the future)."
+license = { text = "MIT" }
+license-files = ["LICEN[CS]E*"]
 readme = "README.md"
-packages = [{include = "manim_eng", from = "src"}]
+requires-python = ">=3.11,<3.13"
+authors = [
+    { name = "overegneered", email = "overegneered@egneer.ing" }
+]
+keywords = [
+    "manim", "animation", "engineering", "physics", "circuits"
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Typing :: Typed",
+]
+dependencies = [
+    "manim~=0.19",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.11,<3.13"
-manim = "^0.19"
+[project.urls]
+repository = "https://github.com/overegneered/manim-eng"
+documentation = "https://docs.manim-eng.egneer.ing"
+"Bug tracker" = "https://github.com/overegneered/manim-eng/issues"
+
+[project.entry-points."manim.plugins"]
+"manim_eng" = "manim_eng"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry]
+packages = [
+    { include = "manim_eng", from = "src" }
+]
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.5.5"
@@ -18,12 +57,6 @@ mypy = "^1.11.1"
 furo = "^2024.8.6"
 sphinx-autobuild = "^2024.10.3"
 
-[tool.poetry.plugins."manim.plugins"]
-"manim_eng" = "manim_eng"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 fix = true
@@ -93,6 +126,7 @@ disallow_untyped_decorators = false
 disallow_any_generics = false
 
 exclude = ['^docs/source/conf\.py$']
+
 
 [[tool.mypy.overrides]]
 # Manim does not yet have full type declarations

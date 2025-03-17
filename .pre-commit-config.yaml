@@ -23,7 +23,7 @@ repos:
         name: Ensure files end in a single blank line
         exclude_types: [ python ] # No use checking Python as Ruff has already done it
   - repo: https://github.com/python-poetry/poetry
-    rev: 1.8.3
+    rev: 2.1.1
     hooks:
       - id: poetry-check
         name: Check Poetry configuration
