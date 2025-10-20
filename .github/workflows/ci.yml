@@ -30,25 +30,36 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Install Poetry
-        run: pipx install poetry
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-          cache: "poetry"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      # These steps taken entirely from Manim's CI workflow, https://github.com/ManimCommunity/manim/blob/main/.github/workflows/ci.yml
       - name: Install dependencies (system)
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
-          packages: libpango1.0-dev
+          packages: python3-opengl libpango1.0-dev xvfb freeglut3-dev
           version: 1.0
-      # This step taken entirely from Manim's CI workflow, https://github.com/ManimCommunity/manim/blob/main/.github/workflows/ci.yml
       - name: Install dependencies (LaTeX)
-        uses: teatimeguest/setup-texlive-action@v3
+        uses: zauguin/install-texlive@v4
         with:
-          cache: true
-          packages: scheme-basic fontspec inputenc fontenc tipa mathrsfs calligra xcolor standalone preview doublestroke ms everysel setspace rsfs relsize ragged2e fundus-calligra microtype wasysym physics dvisvgm jknapltx wasy cm-super babel-english gnu-freefont mathastext cbfonts-fd xetex
-      - name: Install dependencies (Poetry)
-        run: poetry install
+          packages: >
+            scheme-basic latex fontspec tipa calligra xcolor
+            standalone preview doublestroke setspace rsfs relsize
+            ragged2e fundus-calligra microtype wasysym physics dvisvgm jknapltx
+            wasy cm-super babel-english gnu-freefont mathastext cbfonts-fd xetex
+      - name: Start virtual display (xvfb)
+        run: sudo /usr/bin/Xvfb $DISPLAY -screen 0 1280x1024x24 &
+
+      - name: Install dependencies (uv)
+        run: uv sync --all-extras --locked
+
       - name: Run tests
-        run: poetry run pytest
+        run: uv run python -m pytest

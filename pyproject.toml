@@ -2,7 +2,7 @@
 name = "manim-eng"
 version = "0.1.0"
 description = "A Manim CE plugin for drawing circuit diagrams (and other engineering diagrams in the future)."
-license = { text = "MIT" }
+license = "MIT"
 license-files = ["LICEN[CS]E*"]
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
@@ -26,8 +26,21 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Visualization",
     "Typing :: Typed",
 ]
+
 dependencies = [
-    "manim~=0.19",
+    "manim >=0.19.0,<0.20.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff >=0.5.5, <0.6.0",
+    "pre-commit >=3.8.0, <4.0.0",
+    "pytest >=8.3.2, <9.0.0",
+    "mypy >=1.11.1, <2.0.0",
+]
+docs = [
+    "furo >=2024.8.6, <2025.0.0",
+    "sphinx-autobuild >=2024.10.3, <2025.0.0",
 ]
 
 [project.urls]
@@ -38,24 +51,9 @@ documentation = "https://docs.manim-eng.egneer.ing"
 [project.entry-points."manim.plugins"]
 "manim_eng" = "manim_eng"
 
-
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-
-[tool.poetry]
-packages = [
-    { include = "manim_eng", from = "src" }
-]
-
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.5.5"
-pre-commit = "^3.8.0"
-pytest = "^8.3.2"
-mypy = "^1.11.1"
-furo = "^2024.8.6"
-sphinx-autobuild = "^2024.10.3"
+requires = ["uv-build >=0.9.4, <0.10.0"]
+build-backend = "uv_build"
 
 
 [tool.ruff]
