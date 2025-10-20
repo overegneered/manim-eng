@@ -27,3 +27,4 @@ repos:
     rev: 0.9.4
     hooks:
       - id: uv-lock
+        name: Ensure uv lockfile is up to date
