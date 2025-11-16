@@ -24,23 +24,23 @@ Head over to the [documentation](https://docs.manim-eng.egneer.ing) to get start
 
 ### Environment setup
 
-manim-eng, like Manim itself, uses [Poetry](https://python-poetry.org/) as a build system. You will need Poetry
+manim-eng, like Manim itself, uses [uv](https://docs.astral.sh/uv/) as a package manager and build system. You will need uv
 installed before proceeding. First, clone the repository with Git:
 
 ```shell
 git clone https://github.com/overegneered/manim-eng.git
 ```
 
-Then install dependencies with Poetry:
+Then install dependencies with uv:
 
 ```shell
-poetry install
+uv sync --extra dev
 ```
 
 Finally, install the pre-commit hooks:
 
 ```shell
-pre-commit install
+uv run pre-commit install
 ```
 
 ### Testing
@@ -48,7 +48,7 @@ pre-commit install
 manim-eng uses [pytest](https://pytest.org) as a testing framework. To run the test suite, you can use
 
 ```shell
-poetry run pytest
+uv run pytest
 ```
 
 though using an IDE integration, such as PyCharm's pytest runner, may be easier!
