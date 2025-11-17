@@ -4,12 +4,51 @@ import abc
 from typing import Any, Self
 
 import manim as mn
+import numpy as np
 from manim import typing as mnt
 
 from manim_eng import config_eng
+from manim_eng._base import Markable
+from manim_eng._base.anchor import AnnotationAnchor, CentreAnchor, LabelAnchor
 from manim_eng.components.base import Terminal
 
 __all__ = ["WireBase"]
+
+
+class CurrentArrow(Markable):
+    def __init__(self, position: mnt.Vector3D, rotation: float = 0) -> None:
+        super().__init__()
+
+        self._triangle = mn.Triangle(
+            radius=config_eng.symbol.current_arrow_radius,
+            start_angle=0,
+            color=mn.WHITE,
+            fill_opacity=1.0,
+        )
+        self._centre_anchor = CentreAnchor()
+        self._label_anchor = LabelAnchor().move_to(self._triangle.get_top())
+        self._annotation_anchor = AnnotationAnchor().move_to(
+            self._triangle.get_bottom()
+        )
+
+        self.add(
+            self._triangle,
+            self._centre_anchor,
+            self._label_anchor,
+            self._annotation_anchor,
+        )
+        self.shift(position - self._centre_anchor.pos).rotate(
+            rotation, about_point=position
+        )
+
+    # TODO
+    def set_current(self) -> None: ...
+
+    # TODO
+    def reset_current(self) -> None: ...
+
+    # TODO
+    def clear_current(self) -> None: ...
 
 
 class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
@@ -58,6 +97,38 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
             self.start._decrement_connection_count()
             self.end._decrement_connection_count()
             self._attached = False
+        return self
+
+    def set_current(self, pos: float = 0.5, backwards: bool = False) -> Self:
+        """Draw a current arrow on the wire at the specified position.
+
+        The current arrow will be positioned by looking forward. This means that if you
+        place the arrow directly on an elbow bend, it will point in the direction of the
+        later segment.
+
+        Parameters
+        ----------
+        pos : float, optional
+            A number between 0 and 1. The proportion of the distance along the wire the
+            current arrow should be placed at.
+        backwards : bool, optional
+            Whether the arrow should be placed in the direction of the wire (``start``
+            to ``end``, ``False``, default) or in the opposite direction (``end`` to
+            ``start``, ``True``).
+        """
+        epsilon = 1e-6
+        centre = self.point_from_proportion(pos)
+        forward = self.point_from_proportion(pos + epsilon)
+        angle = mn.angle_of_vector(forward - centre)
+        if backwards:
+            angle += np.pi
+
+        self.add(
+            CurrentArrow(
+                position=centre,
+                rotation=angle,
+            )
+        )
         return self
 
     def __construct_wire(self) -> None:
