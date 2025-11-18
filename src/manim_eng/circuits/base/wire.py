@@ -8,15 +8,22 @@ import numpy as np
 from manim import typing as mnt
 
 from manim_eng import config_eng
-from manim_eng._base import Markable
+from manim_eng._base import Mark, Markable
 from manim_eng._base.anchor import AnnotationAnchor, CentreAnchor, LabelAnchor
 from manim_eng.components.base import Terminal
+from manim_eng.units import Value
 
 __all__ = ["WireBase"]
 
 
 class CurrentArrow(Markable):
-    def __init__(self, position: mnt.Vector3D, rotation: float = 0) -> None:
+    def __init__(
+        self,
+        position: mnt.Vector3D,
+        rotation: float = 0,
+        label: str | Value | None = None,
+        annotation: str | Value | None = None,
+    ) -> None:
         super().__init__()
 
         self._triangle = mn.Triangle(
@@ -25,11 +32,23 @@ class CurrentArrow(Markable):
             color=mn.WHITE,
             fill_opacity=1.0,
         )
-        self._centre_anchor = CentreAnchor()
+
         self._label_anchor = LabelAnchor().move_to(self._triangle.get_top())
         self._annotation_anchor = AnnotationAnchor().move_to(
             self._triangle.get_bottom()
         )
+        self._centre_anchor = CentreAnchor().move_to(
+            (self._label_anchor.pos + self._annotation_anchor.pos) / 2
+        )
+
+        self._label = Mark(self._label_anchor, self._centre_anchor)
+        self._annotation = Mark(self._annotation_anchor, self._centre_anchor)
+
+        if label is not None:
+            self._set_mark(self._label, label)
+
+        if annotation is not None:
+            self._set_mark(self._annotation, annotation)
 
         self.add(
             self._triangle,
@@ -99,7 +118,13 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
             self._attached = False
         return self
 
-    def set_current(self, pos: float = 0.5, backwards: bool = False) -> Self:
+    def set_current(
+        self,
+        pos: float = 0.5,
+        backwards: bool = False,
+        label: str | None = None,
+        annotation: str | None = None,
+    ) -> Self:
         """Draw a current arrow on the wire at the specified position.
 
         The current arrow will be positioned by looking forward. This means that if you
@@ -108,13 +133,19 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        pos : float, optional
+        pos : float
             A number between 0 and 1. The proportion of the distance along the wire the
             current arrow should be placed at.
-        backwards : bool, optional
+        backwards : bool
             Whether the arrow should be placed in the direction of the wire (``start``
             to ``end``, ``False``, default) or in the opposite direction (``end`` to
             ``start``, ``True``).
+        label : str, optional
+            The text to set as the label of the current arrow. Takes a TeX math mode
+            string or a :class:`~.Value` unit expression.
+        annotation : str, optional
+            The text to set as the annotation of the current arrow. Takes a TeX math
+            mode string or a :class:`~.Value` unit expression.
         """
         epsilon = 1e-6
         centre = self.point_from_proportion(pos)
@@ -127,6 +158,8 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
             CurrentArrow(
                 position=centre,
                 rotation=angle,
+                label=label,
+                annotation=annotation,
             )
         )
         return self
