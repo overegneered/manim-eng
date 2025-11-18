@@ -60,6 +60,8 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
             if isinstance(mobject, Markable):
                 self.__rotate.add(mobject.__rotate)
                 self.__marks.add(mobject.__marks)
+            elif isinstance(mobject, Mark):
+                self.__marks.add(mobject)
             else:
                 self.__rotate.add(*mobjects)
         return self
@@ -69,6 +71,8 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
             if isinstance(mobject, Markable):
                 self.__rotate.add_to_back(mobject.__rotate)
                 self.__marks.add_to_back(mobject.__marks)
+            elif isinstance(mobject, Mark):
+                self.__marks.add_to_back(mobject)
             else:
                 self.__rotate.add_to_back(*mobjects)
         return self
@@ -78,6 +82,8 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
             if isinstance(mobject, Markable):
                 self.__rotate.remove(mobject.__rotate)
                 self.__marks.remove(mobject.__marks)
+            elif isinstance(mobject, Mark):
+                self.__marks.remove(mobject)
             else:
                 self.__rotate.remove(*mobjects)
         return self
