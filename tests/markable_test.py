@@ -59,3 +59,41 @@ def test_clear_mark(markable_dummy: SubclassesMarkable) -> None:
         markable_dummy._clear_mark(markable_dummy.mark)
 
         patched_remove.assert_called_once_with(markable_dummy.mark)
+
+
+def test_add_with_mark(
+    markable_dummy: SubclassesMarkable, mark_mocked_anchors: Mark
+) -> None:
+    markable_dummy.add(mark_mocked_anchors)
+    assert markable_dummy._Markable__marks[0] == mark_mocked_anchors
+
+    with mock.patch.object(mn.VGroup, "add") as patched_add:
+        markable_dummy.add(mark_mocked_anchors)
+
+        patched_add.assert_called_once_with(mark_mocked_anchors)
+
+
+def test_add_to_back_with_mark(
+    markable_dummy: SubclassesMarkable, mark_mocked_anchors: Mark
+) -> None:
+    markable_dummy.add_to_back(mark_mocked_anchors)
+    assert markable_dummy._Markable__marks[0] == mark_mocked_anchors
+
+    with mock.patch.object(mn.VGroup, "add_to_back") as patched_add_to_back:
+        markable_dummy.add_to_back(mark_mocked_anchors)
+
+        patched_add_to_back.assert_called_once_with(mark_mocked_anchors)
+
+
+def test_remove_with_mark(
+    markable_dummy: SubclassesMarkable, mark_mocked_anchors: Mark
+) -> None:
+    markable_dummy.add(mark_mocked_anchors)
+
+    markable_dummy.remove(mark_mocked_anchors)
+    assert len(markable_dummy._Markable__marks) == 0
+
+    with mock.patch.object(mn.VGroup, "remove") as patched_remove:
+        markable_dummy.remove(mark_mocked_anchors)
+
+        patched_remove.assert_called_once_with(mark_mocked_anchors)
