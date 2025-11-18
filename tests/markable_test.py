@@ -7,6 +7,11 @@ from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
 from manim_eng.units import HOUR, KILO, VOLT
 
+from .mark_test import (
+    anchor_mock,  # noqa: F401
+    centre_reference_mock,  # noqa: F401
+)
+
 
 class SubclassesMarkable(Markable):
     def __init__(self) -> None:

@@ -75,6 +75,7 @@ select = [
     "A", # Builtin shadowing
     "COM", # Comma problems
     "C4", # Unnecessary complexity
+    "ICN", # Import conventions
     "ISC", # String concatenation
     "PIE", # Misc. lints
     "PT", # Pytest lints
