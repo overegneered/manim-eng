@@ -3,7 +3,7 @@
 import dataclasses as dc
 import re
 from collections import defaultdict
-from typing import Any, Self
+from typing import Any, Literal, Self
 
 import manim as mn
 import numpy as np
@@ -272,6 +272,8 @@ class ComponentSymbolConfig(ConfigBase):
     """The gap between plates of plated components (i.e. capacitors and cells)."""
     plate_height: float = 5 * plate_gap
     """The height of plates of plated components (i.e. capacitors and cells)."""
+    resistor_standard: Literal['ANSI', 'IEC'] = 'IEC'
+    """The standard to use for resistor symbols. Set to ``ANSI`` for the zigzag symbol, and ``IEC`` for the box symbol. Defaults to ``IEC``."""
 
 
 @dc.dataclass
