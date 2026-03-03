@@ -242,6 +242,12 @@ class ComponentSymbolConfig(ConfigBase):
     square_bipole_side_length: float = 1.5 * bipole_height
     """The standard height to use for bipoles with square bounding boxes, such as
     voltage sources and sensors."""
+    tripole_width: float = 1.0
+    """The standard width to use for tripoles, such as transistors and MOSFETs."""
+    tripole_height: float = tripole_width * np.sqrt(3) / 2
+    """The standard height to use for tripoles, such as transistors and MOSFETs.
+    By default, set to the height of an equilateral triangle with side length equal
+    to the tripole width, as many tripoles are drawn with triangular bodies."""
     component_stroke_width: float = mn.DEFAULT_STROKE_WIDTH
     """The stroke width to use for the component symbols."""
     current_arrow_radius: float = (2 / np.sqrt(3)) * 0.2 * bipole_height

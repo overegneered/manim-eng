@@ -1,0 +1,320 @@
+"""Component symbols for transistors."""
+
+from typing import Literal
+import manim as mn
+import numpy as np
+
+from manim_eng import config_eng
+from manim_eng.components.base.tripole import Tripole
+from manim_eng.components.base.terminal import Terminal
+
+class BaseBJT(Tripole):
+    """Circuit symbol for a bipolar junction transistor with unspecified type."""
+
+    def _construct(self, draw_emitter_line: bool = True):
+        """Construct a basic bipolar junction transistor.
+        
+        Parameters
+        ----------
+        draw_be_line : bool
+            Whether or not to draw the emitter line. Defaults to ``False``.
+        """
+        super()._construct()
+
+        width = config_eng.symbol.tripole_width
+        height = config_eng.symbol.tripole_height
+        # horizontal line
+        line_horizontal = (
+            mn.Line(np.array([-0.35 * width, 0.6 * height, 0.0]), np.array([0.35 * width, 0.6 * height, 0.0]))
+            .match_style(self)
+        )
+        # vertical line from the base
+        line_base = mn.Line(0.6 * height * mn.UP, height * mn.UP).match_style(self)
+        # diagonal line from the collector
+        line_collector = (
+            mn.Line(np.array([-0.5 * width, 0.0, 0.0]), np.array([-0.125 * width, 0.6 * height, 0.0]))
+            .match_style(self)
+        )
+        self._body.add(line_horizontal, line_base, line_collector)
+
+        # diagonal line from the emitter
+        if draw_emitter_line:
+            line_emitter = (
+                mn.Line(np.array([0.5 * width, 0.0, 0.0]), np.array([0.125 * width, 0.6 * height, 0.0]))
+                .match_style(self)
+            )
+            self._body.add(line_emitter)
+
+    @property
+    def base(self):
+        """Return the base terminal of the transistor."""
+        return self.top
+    
+    @property
+    def collector(self):
+        """Return the collector terminal of the transistor."""
+        return self.left
+    
+    @property
+    def emitter(self):
+        """Return the emitter terminal of the transistor."""
+        return self.right
+    
+class NPNTransistor(BaseBJT):
+    """Circuit symbol for an NPN bipolar junction transistor."""
+
+    def _construct(self) -> None:  # type: ignore[override]
+        super()._construct(draw_emitter_line=False)
+
+        width = config_eng.symbol.tripole_width
+        height = config_eng.symbol.tripole_height
+        # arrow
+        arrow = (
+            mn.Arrow(
+                start=np.array([0.125 * width, 0.6 * height, 0.0]),
+                end=np.array([0.5 * width, 0.0, 0.0]),
+                buff=0,
+            )
+            .match_style(self)
+            .set_fill(opacity=1.0)   # fill the arrow head
+        )
+        self._body.add(arrow)
+
+class PNPTransistor(BaseBJT):
+    """Circuit symbol for an NPN bipolar junction transistor."""
+
+    def _construct(self) -> None:  # type: ignore[override]
+        super()._construct(draw_emitter_line=False)
+
+        width = config_eng.symbol.tripole_width
+        height = config_eng.symbol.tripole_height
+        # arrow
+        arrow = (
+            mn.Arrow(
+                start=np.array([0.5 * width, 0.0, 0.0]),
+                end=np.array([0.125 * width, 0.6 * height, 0.0]),
+                buff=0,
+            )
+            .match_style(self)
+            .set_fill(opacity=1.0)   # fill the arrow head
+        )
+        self._body.add(arrow)
+
+class BaseJFET(Tripole):
+    """Circuit symbol for a junction field effect transistor with unspecified type."""
+
+    def _construct(self, draw_gate_line: bool = True):
+        super()._construct()
+
+        width = config_eng.symbol.tripole_width
+        height = config_eng.symbol.tripole_height
+        # horizontal line
+        line_horizontal = (
+            mn.Line(np.array([-0.35 * width, 0.6 * height, 0.0]), np.array([0.35 * width, 0.6 * height, 0.0]))
+            .match_style(self)
+        )
+        self._body.add(line_horizontal)
+        # vertical line from the gate
+        if draw_gate_line:
+            line_gate = mn.Line(0.6 * height * mn.UP, height * mn.UP).match_style(self)
+            self._body.add(line_gate)
+        # lines from the source
+        line_source = mn.VMobject()
+        line_source.start_new_path(0.5 * width * mn.LEFT)
+        line_source.add_line_to(0.25 * width * mn.LEFT)
+        line_source.add_line_to(np.array([-0.25 * width, 0.6 * height, 0.0]))
+        line_source.match_style(self)
+        self._body.add(line_source)
+
+        # lines from the drain
+        line_drain = mn.VMobject()
+        line_drain.start_new_path(0.5 * width * mn.RIGHT)
+        line_drain.add_line_to(0.25 * width * mn.RIGHT)
+        line_drain.add_line_to(np.array([0.25 * width, 0.6 * height, 0.0]))
+        line_drain.match_style(self)
+        self._body.add(line_drain)
+
+    @property
+    def gate(self):
+        """Return the gate terminal of the transistor."""
+        return self.top
+    
+    @property
+    def source(self):
+        """Return the source terminal of the transistor."""
+        return self.left
+    
+    @property
+    def drain(self):
+        """Return the drain terminal of the transistor."""
+        return self.right
+
+class NChannelJFET(BaseJFET):
+    """Circuit symbol for an N-channel junction field effect transistor."""
+
+    def _construct(self) -> None:  # type: ignore[override]
+        super()._construct(draw_gate_line=False)
+
+        height = config_eng.symbol.tripole_height
+        # arrow pointing into the channel
+        arrow = (
+            mn.Arrow(
+                start=height * mn.UP,
+                end=0.6 * height * mn.UP,
+                buff=0,
+            )
+            .match_style(self)
+            .set_fill(opacity=1.0)
+        )
+        self._body.add(arrow)
+
+
+class PChannelJFET(BaseJFET):
+    """Circuit symbol for a P-channel junction field effect transistor."""
+
+    def _construct(self) -> None:  # type: ignore[override]
+        super()._construct(draw_gate_line=False)
+
+        height = config_eng.symbol.tripole_height
+        # arrow pointing out of the channel
+        arrow = (
+            mn.Arrow(
+                start=0.6 * height * mn.UP,
+                end=height * mn.UP,
+                buff=0,
+            )
+            .match_style(self)
+            .set_fill(opacity=1.0)
+        )
+        self._body.add(arrow)
+
+class BaseMOSFET(Tripole):
+    """Circuit symbol for a metal oxide semiconductor field effect transistor (MOSFET) with unspecified type."""
+
+    def __init__(self, channel_type: Literal['enhancement', 'depletion'] = "enhancement", **kwargs):
+        """
+        Constructs a basic MOSFET object.
+
+        Parameters
+        ----------
+        channel_type : Literal['enhancement', 'depletion'], optional
+            The type of MOSFET channel. Determines whether the transistor operates
+            in enhancement or depletion mode. Defaults to "enhancement".
+        **kwargs
+            Additional keyword arguments passed to the parent class constructor.
+        """
+        width = config_eng.symbol.tripole_width
+        height = config_eng.symbol.tripole_height
+        # Add a bias to the top terminal
+        biased_top = Terminal(position=np.array([-0.35 * width, height, 0.0]), direction=mn.UP)
+        self.channel_type = channel_type
+        super().__init__(None, None, biased_top, **kwargs)
+
+    def _construct(self, draw_middle_line: bool = True):
+        super()._construct()
+        
+        width = config_eng.symbol.tripole_width
+        height = config_eng.symbol.tripole_height
+
+        # horizontal line
+        line_horizontal_1 = (
+            mn.Line(np.array([-0.35 * width, 0.625 * height, 0.0]), np.array([0.35 * width, 0.625 * height, 0.0]))
+            .match_style(self)
+        )
+        self._body.add(line_horizontal_1)
+
+        # horizontal line 2 (a single line for depletion type, 3 segments for enhancement type)
+        if self.channel_type == "depletion":
+            line_horizontal_2 = (
+                mn.Line(np.array([-0.4 * width, 0.5 * height, 0.0]), np.array([0.4 * width, 0.5 * height, 0.0]))
+                .match_style(self)
+            )
+            self._body.add(line_horizontal_2)
+        else:
+            for x in [-0.275, 0.0, 0.275]:
+                line_horizontal_2 = (
+                    mn.Line(np.array([(x - 0.075) * width, 0.5 * height, 0.0]), np.array([(x + 0.075) * width, 0.5 * height, 0.0]))
+                    .match_style(self)
+                )
+                self._body.add(line_horizontal_2)
+
+        # vertical line from the gate
+        line_gate = mn.Line(np.array([-0.35 * width, 0.625 * height, 0.0]), np.array([-0.35 * width, height, 0.0])).match_style(self)
+        self._body.add(line_gate)
+
+        # lines from the source
+        line_source = mn.VMobject()
+        line_source.start_new_path(0.5 * width * mn.LEFT)
+        line_source.add_line_to(0.275 * width * mn.LEFT)
+        line_source.add_line_to(np.array([-0.275 * width, 0.5 * height, 0.0]))
+        line_source.match_style(self)
+        self._body.add(line_source)
+
+        # lines from the drain
+        line_drain = mn.VMobject()
+        line_drain.start_new_path(0.5 * width * mn.RIGHT)
+        line_drain.add_line_to(0.275 * width * mn.RIGHT)
+        line_drain.add_line_to(np.array([0.275 * width, 0.5 * height, 0.0]))
+        line_drain.match_style(self)
+        self._body.add(line_drain)
+
+        # lines in the middle
+        line_middle_1 = mn.Line(0.275 * width * mn.LEFT, mn.ORIGIN).match_style(self)
+        self._body.add(line_middle_1)
+        if draw_middle_line:
+            line_middle_2 = mn.Line(mn.ORIGIN, 0.5 * height * mn.UP).match_style(self)
+            self._body.add(line_middle_2)
+
+    @property
+    def gate(self):
+        """Return the gate terminal of the transistor."""
+        return self.top
+    
+    @property
+    def source(self):
+        """Return the source terminal of the transistor."""
+        return self.left
+    
+    @property
+    def drain(self):
+        """Return the drain terminal of the transistor."""
+        return self.right
+
+class NChannelMOSFET(BaseMOSFET):
+    """Circuit symbol for an N-channel metal oxide semiconductor field effect transistor."""
+
+    def _construct(self) -> None:  # type: ignore[override]
+        super()._construct(draw_middle_line=False)
+
+        height = config_eng.symbol.tripole_height
+        # arrow pointing into the channel
+        arrow = (
+            mn.Arrow(
+                start=mn.ORIGIN,
+                end=0.5 * height * mn.UP,
+                buff=0,
+            )
+            .match_style(self)
+            .set_fill(opacity=1.0)
+        )
+        self._body.add(arrow)
+
+
+class PChannelMOSFET(BaseMOSFET):
+    """Circuit symbol for a P-channel metal oxide semiconductor field effect transistor."""
+
+    def _construct(self) -> None:  # type: ignore[override]
+        super()._construct(draw_middle_line=False)
+
+        height = config_eng.symbol.tripole_height
+        # arrow pointing out of the channel
+        arrow = (
+            mn.Arrow(
+                start=0.5 * height * mn.UP,
+                end=mn.ORIGIN,
+                buff=0,
+            )
+            .match_style(self)
+            .set_fill(opacity=1.0)
+        )
+        self._body.add(arrow)

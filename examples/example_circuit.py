@@ -15,7 +15,7 @@ class CurrentShunt(Scene):
         r2.right.set_current("I_2")
         isource.set_current("I_0")
 
-        c = (Circuit(r1, r2, isource, top_node, bottom_node)
+        circuit = (Circuit(r1, r2, isource, top_node, bottom_node)
              .connect(isource.right, top_node.left)
              .connect(r1.right, top_node.down)
              .connect(r2.right, top_node.right)
@@ -24,5 +24,5 @@ class CurrentShunt(Scene):
              .connect(r1.left, bottom_node.up)
              .connect(r2.left, bottom_node.right))
 
-        self.add(c)
+        self.add(circuit)
         self.add(r2.voltage("left", "right", "V", component_buff=0.35))

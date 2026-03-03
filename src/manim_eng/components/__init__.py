@@ -3,6 +3,7 @@
 from .capacitors import *
 from .cells import *
 from .diodes import *
+from .transistors import *
 from .inductors import *
 from .monopoles import *
 from .node import *
