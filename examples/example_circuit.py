@@ -1,8 +1,12 @@
-from manim import *
-from manim_eng import *
+from manim import DEGREES, DOWN, LEFT, RIGHT, UP, Scene
+
+from manim_eng import Circuit, CurrentSource, Node, Resistor
+
 
 class CurrentShunt(Scene):
-    def construct(self):
+    """Example circuit."""
+
+    def construct(self) -> None:
         r1 = Resistor().rotate(90 * DEGREES)
         r2 = Resistor().rotate(90 * DEGREES).shift(2 * RIGHT)
         isource = CurrentSource().rotate(90 * DEGREES).shift(2 * LEFT)
@@ -15,14 +19,16 @@ class CurrentShunt(Scene):
         r2.right.set_current("I_2")
         isource.set_current("I_0")
 
-        circuit = (Circuit(r1, r2, isource, top_node, bottom_node)
-             .connect(isource.right, top_node.left)
-             .connect(r1.right, top_node.down)
-             .connect(r2.right, top_node.right)
-             .connect(isource.left, bottom_node.left)
-             .connect(isource.left, bottom_node.left)
-             .connect(r1.left, bottom_node.up)
-             .connect(r2.left, bottom_node.right))
+        circuit = (
+            Circuit(r1, r2, isource, top_node, bottom_node)
+            .connect(isource.right, top_node.left)
+            .connect(r1.right, top_node.down)
+            .connect(r2.right, top_node.right)
+            .connect(isource.left, bottom_node.left)
+            .connect(isource.left, bottom_node.left)
+            .connect(r1.left, bottom_node.up)
+            .connect(r2.left, bottom_node.right)
+        )
 
         self.add(circuit)
         self.add(r2.voltage("left", "right", "V", component_buff=0.35))

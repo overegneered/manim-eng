@@ -248,6 +248,10 @@ class ComponentSymbolConfig(ConfigBase):
     """The standard height to use for tripoles, such as transistors and MOSFETs.
     By default, set to the height of an equilateral triangle with side length equal
     to the tripole width, as many tripoles are drawn with triangular bodies."""
+    opamp_width: float = 1.2
+    """The standard width of operational amplifiers."""
+    opamp_height: float = 1.0
+    """The standard height of operational amplifiers."""
     component_stroke_width: float = mn.DEFAULT_STROKE_WIDTH
     """The stroke width to use for the component symbols."""
     current_arrow_radius: float = (2 / np.sqrt(3)) * 0.2 * bipole_height
@@ -255,10 +259,18 @@ class ComponentSymbolConfig(ConfigBase):
     of its vertices."""
     terminal_length: float = 0.4 * bipole_width
     """The length of the terminal of a component."""
+    terminal_spacing: float = 0.4 * bipole_width
+    """The default spacing between parallel terminals."""
+    terminal_name_buff: float = 0.1 * bipole_width
+    """The spacing between terminal labels and their corresponding terminals, for
+    components with labeled terminals, e.g. op amps and labelled chips."""
     wire_stroke_width: float = 0.625 * component_stroke_width
     """The stroke width to use for wires."""
     mark_font_size: float = 36.0
     """The default font size to use for marks (e.g. labels and annotations)."""
+    terminal_name_font_size: float = 14.0
+    """The default font size for terminal labels within each component, for components
+    with labeled terminals."""
     mark_cardinal_alignment_margin: float = 5 * mn.DEGREES
     """The maximum angle a component can be from one of horizontal or vertical whilst
     still being considered horizontal or vertical for the purpose of mark alignment."""
@@ -278,8 +290,9 @@ class ComponentSymbolConfig(ConfigBase):
     """The gap between plates of plated components (i.e. capacitors and cells)."""
     plate_height: float = 5 * plate_gap
     """The height of plates of plated components (i.e. capacitors and cells)."""
-    resistor_standard: Literal['ANSI', 'IEC'] = 'IEC'
-    """The standard to use for resistor symbols. Set to ``ANSI`` for the zigzag symbol, and ``IEC`` for the box symbol. Defaults to ``IEC``."""
+    resistor_standard: Literal["ANSI", "IEC"] = "IEC"
+    """The standard to use for resistor symbols. Set to ``ANSI`` for the zigzag symbol,
+    and ``IEC`` for the box symbol. Defaults to ``IEC``."""
 
 
 @dc.dataclass
