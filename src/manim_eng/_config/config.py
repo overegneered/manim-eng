@@ -242,6 +242,10 @@ class ComponentSymbolConfig(ConfigBase):
     square_bipole_side_length: float = 1.5 * bipole_height
     """The standard height to use for bipoles with square bounding boxes, such as
     voltage sources and sensors."""
+    biased_bipole_width: float = square_bipole_side_length
+    """The standard width to use for biased bipoles, such as buzzers and speakers."""
+    biased_bipole_height: float = square_bipole_side_length * 0.8
+    """The standard height to use for biased bipoles, such as buzzers and speakers."""
     tripole_width: float = 1.0
     """The standard width to use for tripoles, such as transistors and MOSFETs."""
     tripole_height: float = tripole_width * np.sqrt(3) / 2
@@ -276,7 +280,7 @@ class ComponentSymbolConfig(ConfigBase):
     still being considered horizontal or vertical for the purpose of mark alignment."""
     arrow_stroke_width: float = wire_stroke_width
     """The stroke width to use for arrows in voltage marks and similar."""
-    arrow_tip_length: float = 0.2
+    arrow_tip_length: float = 0.4
     """The length of voltage arrow tips."""
     voltage_default_angle: float = 60 * mn.DEGREES
     """The angle a voltage arrow will sweep with no other reference provided."""
@@ -293,6 +297,14 @@ class ComponentSymbolConfig(ConfigBase):
     resistor_standard: Literal["ANSI", "IEC"] = "IEC"
     """The standard to use for resistor symbols. Set to ``ANSI`` for the zigzag symbol,
     and ``IEC`` for the box symbol. Defaults to ``IEC``."""
+    fuse_standard: Literal["ANSI", "IEC"] = "IEC"
+    """The standard to use for resistor symbols. Set to ``ANSI`` for the zigzag symbol,
+    and ``IEC`` for the box symbol. Defaults to ``IEC``."""
+    meter_diameter: float = 1.25 * square_bipole_side_length
+    """The diameter of meters. This should be slightly larger than the default length of
+    square bipolar components."""
+    meter_font: str = "sans-serif"
+    """The fonts for the letter in meters (i.e. 'V' in voltmeter and 'A' in ammeter)."""
 
 
 @dc.dataclass

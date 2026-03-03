@@ -109,3 +109,45 @@ class SquareBipole(Bipole, metaclass=abc.ABCMeta):
             else right,
             **kwargs,
         )
+
+
+class BiasedBipole(Bipole, metaclass=abc.ABCMeta):
+    """Base class for bipole components with biased bounding box.
+
+    For biased bipolar components, the left and right terminals are located at the
+    bottom of their bounding boxes, instead of aligning with its central axis.
+
+    Parameters
+    ----------
+    left : Terminal | None
+        The terminal to use as the left connection point for the component. If left
+        unspecified, the terminal will be in the default position for the left terminal
+        of a square bipole.
+    right : Terminal | None
+        The terminal to use as the right connection point for the component. If left
+        unspecified, the terminal will be in the default position for the right terminal
+        of a square bipole.
+    """
+
+    def __init__(
+        self,
+        left: Terminal | None = None,
+        right: Terminal | None = None,
+        **kwargs: Any,
+    ) -> None:
+        half_width = config_eng.symbol.biased_bipole_width / 2
+        super().__init__(
+            Terminal(
+                position=mn.LEFT * half_width,
+                direction=mn.LEFT,
+            )
+            if left is None
+            else left,
+            Terminal(
+                position=mn.RIGHT * half_width,
+                direction=mn.RIGHT,
+            )
+            if right is None
+            else right,
+            **kwargs,
+        )
