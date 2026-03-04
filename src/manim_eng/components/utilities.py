@@ -1,6 +1,6 @@
 """Utility components (buzzers, microphones, lamps, fuses, etc.)."""
 
-from typing import Any
+from typing import Any, Self
 
 import manim as mn
 import numpy as np
@@ -13,13 +13,36 @@ from manim_eng.components.base.terminal import Terminal
 
 
 class Lamp(SquareBipole):
-    """Circuit symbol for lamps."""
+    """Circuit symbol for lamps.
+
+    Parameters
+    ----------
+    lamp_color : manim.ManimColor
+        The color of the lamp.
+    opacity : float
+        The initial opacity of the lamp. Default to 0.0.
+    """
+
+    def __init__(
+        self,
+        lamp_color: mn.ManimColor = mn.YELLOW_E,
+        opacity: float = 0.0,
+        **kwargs: Any,
+    ) -> None:
+        self.lamp_color = lamp_color
+        self.opacity = opacity
+        self._light_bulb: mn.Circle | None = None
+        super().__init__(**kwargs)
 
     def _construct(self) -> None:
         super()._construct()
         inv_sqrt_2 = 1 / np.sqrt(2)
         half_width = 0.5 * config_eng.symbol.square_bipole_side_length
+
         circle = mn.Circle(half_width).match_style(self)
+        circle.set_fill(color=self.lamp_color, opacity=self.opacity)
+        self._light_bulb = circle
+
         line1 = mn.Line(
             half_width * inv_sqrt_2 * (mn.UP + mn.LEFT),
             half_width * inv_sqrt_2 * (mn.DOWN + mn.RIGHT),
@@ -29,6 +52,48 @@ class Lamp(SquareBipole):
             half_width * inv_sqrt_2 * (mn.DOWN + mn.LEFT),
         ).match_style(self)
         self._body.add(circle, line1, line2)
+
+    def light_up(self) -> Self:
+        """Light up the light bulb.
+
+        This method sets the light bulb's opacity to 1.0.
+        """
+        self.opacity = 1.0
+        if self._light_bulb is not None:
+            self._light_bulb.set_fill(opacity=1.0)
+        return self
+
+    def extinguish(self) -> Self:
+        """Extinguish the light bulb, if it hasn't.
+
+        This method sets the light bulb's opacity to 0.0.
+        """
+        self.opacity = 0.0
+        if self._light_bulb is not None:
+            self._light_bulb.set_fill(opacity=0.0)
+        return self
+
+    @mn.override_animate(light_up)
+    def __animate_light_up(
+        self, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation | None:
+        if anim_args is None:
+            anim_args = {}
+        self.opacity = 1.0
+        if self._light_bulb is None:
+            return None
+        return self._light_bulb.animate.set_fill(opacity=1.0, **anim_args).build()
+
+    @mn.override_animate(extinguish)
+    def __animate_extinguish(
+        self, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation | None:
+        if anim_args is None:
+            anim_args = {}
+        self.opacity = 0.0
+        if self._light_bulb is None:
+            return None
+        return self._light_bulb.animate.set_fill(opacity=0.0, **anim_args).build()
 
 
 class Bell(BiasedBipole):

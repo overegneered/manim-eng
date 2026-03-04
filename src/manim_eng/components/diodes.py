@@ -1,5 +1,7 @@
 """Component symbols of diodes."""
 
+from typing import Any, Self
+
 import manim as mn
 import numpy as np
 
@@ -13,11 +15,22 @@ __all__ = ["LED", "Diode", "Photodiode", "SchottkyDiode", "TunnelDiode", "ZenerD
 class Diode(SquareBipole):
     """Circuit symbol for a diode."""
 
-    def _construct(self, draw_line: bool = True) -> None:
+    def __init__(self, **kwargs: Any) -> None:
+        self._diode_triangle: mn.Triangle | None = None
+        super().__init__(**kwargs)
+
+    def _construct(
+        self,
+        opacity: float = 0.0,
+        fill_color: mn.ManimColor | None = None,
+        draw_line: bool = True,
+    ) -> None:
         """Construct a basic diode.
 
         Parameters
         ----------
+        opacity: float
+            Opacity of the fill color in the diode's triangle. Defaults to ``0.0``.
         draw_line : bool
             Whether or not to draw the diode line. Defaults to ``True``. Set to
             ``False`` if you wish to draw the line yourself (i.e. if you're extending it
@@ -36,19 +49,17 @@ class Diode(SquareBipole):
                 radius=radius,
             )
             .match_style(self)
+            .set_fill(color=fill_color, opacity=opacity)
             .shift((1 / 12) * mn.LEFT)
         )
+        self._diode_triangle = triangle
         self._body.add(triangle)
 
         if draw_line:
-            line = (
-                mn.Line(
-                    start=line_start + half_height * mn.DOWN,
-                    end=line_start + half_height * mn.UP,
-                )
-                .match_style(self)
-                .set_fill(opacity=0)
-            )
+            line = mn.Line(
+                start=line_start + half_height * mn.DOWN,
+                end=line_start + half_height * mn.UP,
+            ).match_style(self)
             self._body.add(line)
 
     @property
@@ -73,10 +84,28 @@ class Diode(SquareBipole):
 
 
 class LED(Diode):
-    """Circuit symbol for an LED."""
+    """Circuit symbol for an LED.
+
+    Parameters
+    ----------
+    led_color : manim.ManimColor
+        The color of the lamp.
+    opacity : float
+        The initial opacity of the lamp. Default to 0.0.
+    """
+
+    def __init__(
+        self,
+        led_color: mn.ManimColor = mn.PURE_RED,
+        opacity: float = 0.0,
+        **kwargs: Any,
+    ) -> None:
+        self._led_color = led_color
+        self._opacity = opacity
+        super().__init__(**kwargs)
 
     def _construct(self) -> None:  # type: ignore[override]
-        super()._construct()
+        super()._construct(fill_color=self._led_color, opacity=self._opacity)
 
         top_left = self._body.get_corner(mn.UL)
         right = self._body.get_right()
@@ -104,6 +133,48 @@ class LED(Diode):
                     fill_opacity=self.stroke_opacity,
                 )
             )
+
+    def light_up(self) -> Self:
+        """Light up the LED.
+
+        This method sets the LED's opacity to 1.0.
+        """
+        self._opacity = 1.0
+        if self._diode_triangle is not None:
+            self._diode_triangle.set_fill(opacity=1.0)
+        return self
+
+    def extinguish(self) -> Self:
+        """Extinguish the LED, if it hasn't.
+
+        This method sets the LED's opacity to 0.0.
+        """
+        self._opacity = 0.0
+        if self._diode_triangle is not None:
+            self._diode_triangle.set_fill(opacity=0.0)
+        return self
+
+    @mn.override_animate(light_up)
+    def __animate_light_up(
+        self, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation | None:
+        if anim_args is None:
+            anim_args = {}
+        self._opacity = 1.0
+        if self._diode_triangle is None:
+            return None
+        return self._diode_triangle.animate.set_fill(opacity=1.0, **anim_args).build()
+
+    @mn.override_animate(extinguish)
+    def __animate_extinguish(
+        self, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation | None:
+        if anim_args is None:
+            anim_args = {}
+        self._opacity = 0.0
+        if self._diode_triangle is None:
+            return None
+        return self._diode_triangle.animate.set_fill(opacity=0.0, **anim_args).build()
 
 
 class Photodiode(Diode):

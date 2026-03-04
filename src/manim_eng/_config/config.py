@@ -252,9 +252,9 @@ class ComponentSymbolConfig(ConfigBase):
     """The standard height to use for tripoles, such as transistors and MOSFETs.
     By default, set to the height of an equilateral triangle with side length equal
     to the tripole width, as many tripoles are drawn with triangular bodies."""
-    opamp_width: float = 1.2
+    opamp_width: float = 1.5
     """The standard width of operational amplifiers."""
-    opamp_height: float = 1.0
+    opamp_height: float = 1.25
     """The standard height of operational amplifiers."""
     component_stroke_width: float = mn.DEFAULT_STROKE_WIDTH
     """The stroke width to use for the component symbols."""
@@ -300,9 +300,8 @@ class ComponentSymbolConfig(ConfigBase):
     fuse_standard: Literal["ANSI", "IEC"] = "IEC"
     """The standard to use for resistor symbols. Set to ``ANSI`` for the zigzag symbol,
     and ``IEC`` for the box symbol. Defaults to ``IEC``."""
-    meter_diameter: float = 1.25 * square_bipole_side_length
-    """The diameter of meters. This should be slightly larger than the default length of
-    square bipolar components."""
+    meter_diameter: float = square_bipole_side_length
+    """The diameter of meters."""
     meter_font: str = "sans-serif"
     """The fonts for the letter in meters (i.e. 'V' in voltmeter and 'A' in ammeter)."""
 
