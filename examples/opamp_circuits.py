@@ -13,6 +13,41 @@ from manim_eng import (
 )
 
 
+class VoltageFollower(Scene):
+    """Voltage follower circuit.
+
+    The output voltage always follows the input voltage.
+    """
+
+    def construct(self) -> None:
+        opamp = OpAmp()
+        node_vp = (
+            Node()
+            .next_to(opamp.vp, LEFT * 1.5)
+            .align_terminal("right", opamp.vp, RIGHT)
+        )
+        node_vout = (
+            Node()
+            .next_to(opamp.vout, RIGHT * 1.5)
+            .align_terminal("left", opamp.vout, LEFT)
+        )
+        node_vout_2 = Node().next_to(node_vout, RIGHT)
+        circuit = (
+            Circuit(opamp, node_vp, node_vout, node_vout_2)
+            .connect(opamp.vp, node_vp.right)
+            .connect(opamp.vout, node_vout.left)
+            .connect(node_vout.right, node_vout_2.left)
+            # Add a guiding point to ensure that the wire doesn't intersect with the
+            # opamp's body
+            .connect(node_vout.down, opamp.vn, guide=[node_vout.get_center() + DOWN])
+        )
+
+        node_vp.set_label(r"V_{\text{in}}")
+        node_vout.set_label(r"V_{\text{out}}")
+
+        self.add(circuit)
+
+
 class SineWaveGenerator(Scene):
     """A sine wave generator built with OP284 amplifier."""
 
@@ -25,10 +60,15 @@ class SineWaveGenerator(Scene):
         c1 = Capacitor().shift(UP * 2)
         r2 = Resistor().shift(UP * 2.4 + LEFT * 2)
         c2 = Capacitor().shift(UP * 1.6 + LEFT * 2)
-        gnd1 = Ground().rotate(-90 * DEGREES).shift(UP * 2.4 + LEFT * 4)
         node2 = Node().shift(UP * 2 + LEFT)
         node3 = Node().shift(UP * 1.6 + LEFT * 3.2)
         node4 = Node().shift(UP * 2.4 + LEFT * 3.2)
+        gnd1 = (
+            Ground()
+            .rotate(-90 * DEGREES)
+            .shift(LEFT * 4)
+            .align_terminal("terminal", node4.left, RIGHT)
+        )
         d1 = SchottkyDiode().shift(DOWN * 1.4 + RIGHT * 2)
         node5 = Node().shift(DOWN * 1.4 + RIGHT * 3.2)
         d2 = SchottkyDiode().rotate(180 * DEGREES).shift(DOWN * 2.6 + RIGHT * 2)
@@ -36,7 +76,12 @@ class SineWaveGenerator(Scene):
         ra = Resistor().shift(DOWN * 2)
         node7 = Node().shift(DOWN * 2 + LEFT)
         rb = Resistor().shift(DOWN * 2 + LEFT * 2)
-        gnd2 = Ground().rotate(-90 * DEGREES).shift(DOWN * 2 + LEFT * 4)
+        gnd2 = (
+            Ground()
+            .rotate(-90 * DEGREES)
+            .shift(LEFT * 4)
+            .align_terminal("terminal", rb.left, RIGHT)
+        )
         node_out = Node().shift(RIGHT * 4)
 
         opamp.set_label(r"\alpha")

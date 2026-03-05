@@ -3,10 +3,12 @@
 from typing import Any, Callable, Self, Sequence, cast
 
 import manim as mn
+import manim.typing as mnt
+import numpy as np
 
 __all__ = ["Circuit"]
 
-from manim_eng.circuits.wire import Wire
+from manim_eng.circuits.wire import ManualWire, Wire
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.terminal import Terminal
 from manim_eng.components.node import Node
@@ -66,7 +68,13 @@ class Circuit(mn.VMobject):
         self.components.remove(*components)
         return self
 
-    def connect(self, start: Terminal, end: Terminal) -> Self:
+    def connect(
+        self,
+        start: Terminal,
+        end: Terminal,
+        guide: Sequence[mnt.Point3D] | None = None,
+        enforce_hv: bool = True,
+    ) -> Self:
         """Connect two terminals together.
 
         Parameters
@@ -75,6 +83,22 @@ class Circuit(mn.VMobject):
             The terminal the connecting wire should start at.
         end : Terminal
             The terminal the connecting wire should end at.
+        guide : Sequence[mnt.Point3D] | None
+            If set to a sequence of points, the connection is drawn manually via the
+            ``ManualWire`` class, with the list of points as the corner points to go
+            through.
+            If set to ``None``, the connection is drawn automatically via the ``Wire``
+            class.
+        enforce_hv : bool
+            If the ``manual`` field is not None and ``enforce_hv`` is set to ``True``,
+            the function will  to enforce all wires to be either horizontal or vertical,
+            by shifting the given points. The function ensures that each segment of the
+            wire alternates between horizontal and vertical.
+            The direction of the starting and ending terminal determines the direction
+            of the first and the last wire. If the starting and ending conditions cannot
+            be met, the function will insert one extra point(s) to the list.
+            If ``enforce_hv`` is False, the function will connect the consecutive points
+            given in ``guide`` directly.
 
         Raises
         ------
@@ -84,7 +108,35 @@ class Circuit(mn.VMobject):
             If either terminal doesn't belong to a component in this circuit.
         """
         self.__check_terminals_all_belong_to_this_circuit([start, end])
-        self.wires.add(Wire(start, end).attach())
+        if guide is not None:
+            if enforce_hv:
+                # TODO: More elegant way to implement this?
+                # TODO: Probably integrate this function with functions used in wire.py?
+                guide = list(guide)
+                # Enforce that all segments are horizontal or vertical
+                start_vertical = abs(start.direction[0]) < abs(
+                    start.direction[1]
+                )  # False for horizontal, True for vertical
+                end_vertical = abs(start.direction[0]) < abs(start.direction[1])
+                current_vertical = start_vertical
+                last_point = start.end
+                if start_vertical ^ end_vertical != bool(len(guide) % 2):
+                    # guide is not long enough to enforce the requirement
+                    guide.append(np.zeros(3))
+                for point in guide:
+                    if current_vertical:
+                        point[0] = last_point[0]
+                    else:
+                        point[1] = last_point[1]
+                    current_vertical = not current_vertical
+                    last_point = point
+                if current_vertical:
+                    guide[-1][0] = end.end[0]
+                else:
+                    guide[-1][1] = end.end[1]
+            self.wires.add(ManualWire(start, end, corner_points=guide).attach())
+        else:
+            self.wires.add(Wire(start, end).attach())
         # Nodes will potentially change their appearance on wire attachment using an
         # updater, but it needs kicking into gear
         self.nodes.update()
@@ -251,13 +303,17 @@ class Circuit(mn.VMobject):
         self,
         start: Terminal,
         end: Terminal,
+        manual: Sequence[mnt.Point3D] | None = None,
         anim_args: dict[str, Any] | None = None,
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
 
         self.__check_terminals_all_belong_to_this_circuit([start, end])
-        new_wire = Wire(start, end)
+        if manual is not None:
+            new_wire = ManualWire(start, end, corner_points=manual)
+        else:
+            new_wire = Wire(start, end)
         self.wires.add(new_wire)
         animation = mn.Create(new_wire, **anim_args)
         # This call has to be here so that the wire is properly attached when the update
