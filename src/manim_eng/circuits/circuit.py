@@ -110,30 +110,7 @@ class Circuit(mn.VMobject):
         self.__check_terminals_all_belong_to_this_circuit([start, end])
         if guide is not None:
             if enforce_hv:
-                # TODO: More elegant way to implement this?
-                # TODO: Probably integrate this function with functions used in wire.py?
-                guide = list(guide)
-                # Enforce that all segments are horizontal or vertical
-                start_vertical = abs(start.direction[0]) < abs(
-                    start.direction[1]
-                )  # False for horizontal, True for vertical
-                end_vertical = abs(start.direction[0]) < abs(start.direction[1])
-                current_vertical = start_vertical
-                last_point = start.end
-                if start_vertical ^ end_vertical != bool(len(guide) % 2):
-                    # guide is not long enough to enforce the requirement
-                    guide.append(np.zeros(3))
-                for point in guide:
-                    if current_vertical:
-                        point[0] = last_point[0]
-                    else:
-                        point[1] = last_point[1]
-                    current_vertical = not current_vertical
-                    last_point = point
-                if current_vertical:
-                    guide[-1][0] = end.end[0]
-                else:
-                    guide[-1][1] = end.end[1]
+                guide = self.__enforce_wire_horizontal_and_vertical(start, end, guide)
             self.wires.add(ManualWire(start, end, corner_points=guide).attach())
         else:
             self.wires.add(Wire(start, end).attach())
@@ -274,6 +251,35 @@ class Circuit(mn.VMobject):
                 f"{[tuple(terminal.end) for terminal in terminals_not_owned]}"
             )
 
+    def __enforce_wire_horizontal_and_vertical(
+        self, start: Terminal, end: Terminal, guide: Sequence[mnt.Point3D]
+    ) -> list[mnt.Point3D]:
+        # TODO: More elegant way to implement this?
+        # TODO: Probably integrate this function with functions used in wire.py?
+        guide = list(guide)
+        # Enforce that all segments are horizontal or vertical
+        start_vertical = abs(start.direction[0]) < abs(
+            start.direction[1]
+        )  # False for horizontal, True for vertical
+        end_vertical = abs(start.direction[0]) < abs(start.direction[1])
+        current_vertical = start_vertical
+        last_point = start.end
+        if start_vertical ^ end_vertical != bool(len(guide) % 2):
+            # guide is not long enough to enforce the requirement
+            guide.append(np.zeros(3))
+        for point in guide:
+            if current_vertical:
+                point[0] = last_point[0]
+            else:
+                point[1] = last_point[1]
+            current_vertical = not current_vertical
+            last_point = point
+        if current_vertical:
+            guide[-1][0] = end.end[0]
+        else:
+            guide[-1][1] = end.end[1]
+        return guide
+
     @mn.override_animate(add)
     def __animate_add(
         self, *components: Component, anim_args: dict[str, Any] | None = None
@@ -303,17 +309,20 @@ class Circuit(mn.VMobject):
         self,
         start: Terminal,
         end: Terminal,
-        manual: Sequence[mnt.Point3D] | None = None,
+        guide: Sequence[mnt.Point3D] | None = None,
+        enforce_hv: bool = True,
         anim_args: dict[str, Any] | None = None,
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
 
         self.__check_terminals_all_belong_to_this_circuit([start, end])
-        if manual is not None:
-            new_wire = ManualWire(start, end, corner_points=manual)
+        if guide is not None:
+            if enforce_hv:
+                guide = self.__enforce_wire_horizontal_and_vertical(start, end, guide)
+            new_wire = ManualWire(start, end, corner_points=guide).attach()
         else:
-            new_wire = Wire(start, end)
+            new_wire = Wire(start, end).attach()
         self.wires.add(new_wire)
         animation = mn.Create(new_wire, **anim_args)
         # This call has to be here so that the wire is properly attached when the update
