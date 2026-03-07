@@ -59,10 +59,11 @@ class Terminal(Markable):
         self._line = mn.Line(
             start=position,
             end=end,
-            stroke_width=config_eng.symbol.wire_stroke_width,
+            stroke_width=0.0
+            if self.autovisibility
+            else config_eng.symbol.wire_stroke_width,
         )
-        if not self.autovisibility:
-            self.add(self._line)
+        self.add(self._line)
 
         self._centre_anchor = CentreAnchor().move_to(self._line.get_center())
         self._end_anchor = TerminalAnchor().move_to(end)
@@ -211,7 +212,9 @@ class Terminal(Markable):
         - The ``_family`` argument has no effect.
         """
         self._line.match_style(vmobject).set_stroke(
-            width=config_eng.symbol.wire_stroke_width
+            width=0.0
+            if (self.autovisibility and not self.is_visible())
+            else config_eng.symbol.wire_stroke_width
         )
         return self
 
@@ -248,9 +251,9 @@ class Terminal(Markable):
 
         should_be_visible = self._connection_count > 0 or self._current_arrow_showing
         if should_be_visible:
-            self.add(self._line)
+            self._line.set_stroke(width=config_eng.symbol.wire_stroke_width)
         else:
-            self.remove(self._line)
+            self._line.set_stroke(width=0.0)
 
     @mn.override_animate(set_current)
     def __animate_set_current(

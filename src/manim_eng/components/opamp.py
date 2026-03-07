@@ -83,6 +83,8 @@ class OpAmp(Component):
             return self._terminal_vdd
         # The terminal does not exist. Create it.
         quarter_height = config_eng.symbol.opamp_height * 0.25
+        # * Do not use autovisibility for VDD and VSS pins, or otherwise creating
+        # a model of 5-pin op-amp will be painful.
         vdd = Terminal(
             position=self.get_center() + quarter_height * mn.UP, direction=mn.UP
         )
