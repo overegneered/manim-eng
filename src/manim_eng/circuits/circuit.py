@@ -1,10 +1,11 @@
 """Contains the Circuit class."""
 
-from typing import Any, Callable, Self, Sequence, cast
+from typing import Any, Callable, Literal, Self, Sequence, cast
 
 import manim as mn
 import manim.typing as mnt
 import numpy as np
+from scipy.cluster.hierarchy import DisjointSet
 
 __all__ = ["Circuit"]
 
@@ -187,6 +188,109 @@ class Circuit(mn.VMobject):
         # updater, but it needs kicking into gear
         self.nodes.update()
         return self
+
+    def get_wires(
+        self,
+        *terminals: Terminal,
+        condition: Literal["start", "end", "both", "either"]
+        | Callable[[bool, bool], bool] = "either",
+    ) -> list[Wire]:
+        """Return a list of wires based on the given conditions.
+
+        This function iterates through all wires in the circuit and returns wires that
+        satisfies the following properties:
+
+        - If the condition is "start", the wire's start terminal is in the list of
+          terminals given to the function.
+        - If the condition is "end", the wire's end terminal is in the list of terminals
+          given to the function.
+        - If the condition is "either", then all wires with either start or end terminal
+          in the list will be returned.
+        - If the condition is "both", then only wires whose start and end terminals are
+          both in the list will be returned.
+
+        The condition can also be set as a function that takes in two variables,
+        ``start`` and ``end``, and returns a boolean value, representing whether the
+        wire should be selected.
+
+        Parameters
+        ----------
+        terminals : Sequence[Terminal]
+            The list of terminals to check against.
+        condition : str | Callable[[Terminal, Terminal], bool]
+            The condition to check against. If a string is given, it must be one of
+            "start", "end", "either", or "both". If a function is given, it must take
+            in two variables, ``start`` and ``end``, and return a boolean value.
+
+        Raises
+        ------
+        ValueError
+            If the condition is not a function, "start", "end", "either", or "both".
+        """
+        if isinstance(condition, str):
+            if condition == "start":
+                return self.__get_wires_from_terminal_condition(
+                    terminals, lambda start, _: start
+                )
+            if condition == "end":
+                return self.__get_wires_from_terminal_condition(
+                    terminals, lambda _, end: end
+                )
+            if condition == "either":
+                return self.__get_wires_from_terminal_condition(
+                    terminals, lambda start, end: start or end
+                )
+            if condition == "both":
+                return self.__get_wires_from_terminal_condition(
+                    terminals, lambda start, end: start and end
+                )
+            raise ValueError(f"Unrecognized condition in `get_wires`: {condition}")
+        return self.__get_wires_from_terminal_condition(terminals, condition)
+
+    def get_network(self, element: Terminal | Node | Wire) -> set[Wire | Node]:
+        """Get the network (wires and nodes) that contains the given element.
+
+        This function assumes that all wires are undirected, i.e. it does not
+        distinguish between the start and end of wires.
+
+        Parameters
+        ----------
+        element : Terminal | Node | Wire
+            The element to get the network of.
+
+        Returns
+        -------
+        set[Wire | Node]
+            The network components (wires and nodes) containing / originating from the
+            given element.
+
+        Raises
+        ------
+        ValueError
+            If the given element is not a terminal, node, or wire.
+        """
+        s: DisjointSet[Wire | Node] = DisjointSet()
+        for wire in self.wires.submobjects:
+            s.add(wire)
+        for node in self.nodes.submobjects:
+            # Merge all wires connecting to the same node
+            node = cast(Node, node)
+            s.add(node)
+            all_connected_wires = self.get_wires(*node.terminals)
+            for i in range(len(all_connected_wires)):
+                s.merge(node, all_connected_wires[i])
+        if isinstance(element, Wire | Node):
+            # Directly return the set containing this elemenet
+            return cast(set[Wire | Node], s.subset(element))
+        if isinstance(element, Terminal):
+            # s is a terminal. Return the union of all sets containing the wires
+            # connected to the terminal
+            wires = self.get_wires(element)
+            ans: set[Wire | Node] = set()
+            for wire in wires:
+                ans = ans.union(s.subset(wire))
+            return ans
+        raise ValueError(f'"{element}" must be either a terminal, a node, or a wire!')
 
     @staticmethod
     def _collapse_components_and_terminals_to_terminals(
