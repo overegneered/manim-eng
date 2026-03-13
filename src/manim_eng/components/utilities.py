@@ -246,3 +246,21 @@ class Antenna(Monopole):
         line2 = mn.Line(0.3 * height * mn.UP, half_width * mn.LEFT + height * mn.UP)
         line3 = mn.Line(0.3 * height * mn.UP, half_width * mn.RIGHT + height * mn.UP)
         self._body.add(line1, line2, line3)
+
+
+class CrystalOscillator(SquareBipole):
+    """Circuit symbol for crystal oscillators."""
+
+    def _construct(self) -> None:
+        super()._construct()
+        half_width = 0.5 * config_eng.symbol.square_bipole_side_length
+        line1 = mn.Line(
+            np.array([-1, 0.9, 0]) * half_width, np.array([-1, -0.9, 0]) * half_width
+        ).match_style(self)
+        line2 = mn.Line(
+            np.array([1, 0.9, 0]) * half_width, np.array([1, -0.9, 0]) * half_width
+        ).match_style(self)
+        rectangle = mn.Rectangle(
+            width=1.0 * half_width, height=2 * half_width
+        ).match_style(self)
+        self._body.add(line1, line2, rectangle)

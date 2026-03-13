@@ -44,7 +44,7 @@ class Switch(BipoleSwitchBase):
     def open(self) -> Self:
         """Open the switch, if not already open."""
         # For some reason Mypy can't work out the type of self.closed
-        if not bool(self.closed):
+        if not self.closed:
             return self
         self.wiper.rotate(
             self.__open_wiper_angle, about_point=self.left_node.get_center()

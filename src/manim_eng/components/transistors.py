@@ -72,14 +72,13 @@ class NPNTransistor(BaseBJT):
         width = config_eng.symbol.tripole_width
         height = config_eng.symbol.tripole_height
         # arrow
-        arrow = (
-            mn.Arrow(
-                start=np.array([0.125 * width, 0.6 * height, 0.0]),
-                end=np.array([0.5 * width, 0.0, 0.0]),
-                buff=0,
-            )
-            .match_style(self)
-            .set_fill(opacity=1.0)  # fill the arrow head
+        arrow = mn.Arrow(
+            start=np.array([0.125 * width, 0.6 * height, 0.0]),
+            end=np.array([0.5 * width, 0.0, 0.0]),
+            buff=0.0,
+            stroke_width=self.stroke_width,
+            fill_opacity=1.0,
+            max_tip_length_to_length_ratio=config_eng.symbol.max_tip_length_to_length_ratio,
         )
         self._body.add(arrow)
 
@@ -93,14 +92,13 @@ class PNPTransistor(BaseBJT):
         width = config_eng.symbol.tripole_width
         height = config_eng.symbol.tripole_height
         # arrow
-        arrow = (
-            mn.Arrow(
-                start=np.array([0.5 * width, 0.0, 0.0]),
-                end=np.array([0.125 * width, 0.6 * height, 0.0]),
-                buff=0,
-            )
-            .match_style(self)
-            .set_fill(opacity=1.0)  # fill the arrow head
+        arrow = mn.Arrow(
+            start=np.array([0.5 * width, 0.0, 0.0]),
+            end=np.array([0.125 * width, 0.6 * height, 0.0]),
+            buff=0,
+            stroke_width=self.stroke_width,
+            fill_opacity=1.0,
+            max_tip_length_to_length_ratio=config_eng.symbol.max_tip_length_to_length_ratio,
         )
         self._body.add(arrow)
 
@@ -115,19 +113,19 @@ class BaseJFET(Tripole):
         height = config_eng.symbol.tripole_height
         # horizontal line
         line_horizontal = mn.Line(
-            np.array([-0.35 * width, 0.6 * height, 0.0]),
-            np.array([0.35 * width, 0.6 * height, 0.0]),
+            np.array([-0.35 * width, 0.5 * height, 0.0]),
+            np.array([0.35 * width, 0.5 * height, 0.0]),
         ).match_style(self)
         self._body.add(line_horizontal)
         # vertical line from the gate
         if draw_gate_line:
-            line_gate = mn.Line(0.6 * height * mn.UP, height * mn.UP).match_style(self)
+            line_gate = mn.Line(0.5 * height * mn.UP, height * mn.UP).match_style(self)
             self._body.add(line_gate)
         # lines from the source
         line_source = mn.VMobject()
         line_source.start_new_path(0.5 * width * mn.LEFT)
         line_source.add_line_to(0.25 * width * mn.LEFT)
-        line_source.add_line_to(np.array([-0.25 * width, 0.6 * height, 0.0]))
+        line_source.add_line_to(np.array([-0.25 * width, 0.5 * height, 0.0]))
         line_source.match_style(self)
         self._body.add(line_source)
 
@@ -135,7 +133,7 @@ class BaseJFET(Tripole):
         line_drain = mn.VMobject()
         line_drain.start_new_path(0.5 * width * mn.RIGHT)
         line_drain.add_line_to(0.25 * width * mn.RIGHT)
-        line_drain.add_line_to(np.array([0.25 * width, 0.6 * height, 0.0]))
+        line_drain.add_line_to(np.array([0.25 * width, 0.5 * height, 0.0]))
         line_drain.match_style(self)
         self._body.add(line_drain)
 
@@ -163,14 +161,14 @@ class NChannelJFET(BaseJFET):
 
         height = config_eng.symbol.tripole_height
         # arrow pointing into the channel
-        arrow = (
-            mn.Arrow(
-                start=height * mn.UP,
-                end=0.6 * height * mn.UP,
-                buff=0,
-            )
-            .match_style(self)
-            .set_fill(opacity=1.0)
+        arrow = mn.Arrow(
+            start=height * mn.UP,
+            end=0.5 * height * mn.UP,
+            buff=0.0,
+            stroke_width=self.stroke_width,
+            fill_opacity=1.0,
+            max_tip_length_to_length_ratio=0.5,
+            max_stroke_width_to_length_ratio=10.0,
         )
         self._body.add(arrow)
 
@@ -183,14 +181,14 @@ class PChannelJFET(BaseJFET):
 
         height = config_eng.symbol.tripole_height
         # arrow pointing out of the channel
-        arrow = (
-            mn.Arrow(
-                start=0.6 * height * mn.UP,
-                end=height * mn.UP,
-                buff=0,
-            )
-            .match_style(self)
-            .set_fill(opacity=1.0)
+        arrow = mn.Arrow(
+            start=0.5 * height * mn.UP,
+            end=height * mn.UP,
+            buff=0,
+            stroke_width=self.stroke_width,
+            fill_opacity=1.0,
+            max_tip_length_to_length_ratio=0.5,
+            max_stroke_width_to_length_ratio=10.0,
         )
         self._body.add(arrow)
 
@@ -228,54 +226,48 @@ class BaseMOSFET(Tripole):
         width = config_eng.symbol.tripole_width
         height = config_eng.symbol.tripole_height
 
-        # horizontal line
-        line_horizontal_1 = mn.Line(
-            np.array([-0.35 * width, 0.625 * height, 0.0]),
-            np.array([0.35 * width, 0.625 * height, 0.0]),
-        ).match_style(self)
-        self._body.add(line_horizontal_1)
+        # lines from the gate
+        line_gate = mn.VMobject()
+        line_gate.start_new_path(np.array([-0.35 * width, height, 0.0]))
+        line_gate.add_line_to(np.array([-0.35 * width, 0.65 * height, 0.0]))
+        line_gate.add_line_to(np.array([0.35 * width, 0.65 * height, 0.0]))
+        line_gate.match_style(self)
+        self._body.add(line_gate)
 
         # horizontal line 2
         # (a single line for depletion type, 3 segments for enhancement type)
         if self.channel_type == "depletion":
             line_horizontal_2 = mn.Line(
-                np.array([-0.4 * width, 0.5 * height, 0.0]),
-                np.array([0.4 * width, 0.5 * height, 0.0]),
+                np.array([-0.42 * width, 0.5 * height, 0.0]),
+                np.array([0.42 * width, 0.5 * height, 0.0]),
             ).match_style(self)
             self._body.add(line_horizontal_2)
         else:
-            for x in [-0.275, 0.0, 0.275]:
+            for x in [-0.3, 0.0, 0.3]:
                 line_horizontal_2 = mn.Line(
-                    np.array([(x - 0.075) * width, 0.5 * height, 0.0]),
-                    np.array([(x + 0.075) * width, 0.5 * height, 0.0]),
+                    np.array([(x - 0.12) * width, 0.5 * height, 0.0]),
+                    np.array([(x + 0.12) * width, 0.5 * height, 0.0]),
                 ).match_style(self)
                 self._body.add(line_horizontal_2)
-
-        # vertical line from the gate
-        line_gate = mn.Line(
-            np.array([-0.35 * width, 0.625 * height, 0.0]),
-            np.array([-0.35 * width, height, 0.0]),
-        ).match_style(self)
-        self._body.add(line_gate)
 
         # lines from the source
         line_source = mn.VMobject()
         line_source.start_new_path(0.5 * width * mn.LEFT)
-        line_source.add_line_to(0.275 * width * mn.LEFT)
-        line_source.add_line_to(np.array([-0.275 * width, 0.5 * height, 0.0]))
+        line_source.add_line_to(0.3 * width * mn.LEFT)
+        line_source.add_line_to(np.array([-0.3 * width, 0.5 * height, 0.0]))
         line_source.match_style(self)
         self._body.add(line_source)
 
         # lines from the drain
         line_drain = mn.VMobject()
         line_drain.start_new_path(0.5 * width * mn.RIGHT)
-        line_drain.add_line_to(0.275 * width * mn.RIGHT)
-        line_drain.add_line_to(np.array([0.275 * width, 0.5 * height, 0.0]))
+        line_drain.add_line_to(0.3 * width * mn.RIGHT)
+        line_drain.add_line_to(np.array([0.3 * width, 0.5 * height, 0.0]))
         line_drain.match_style(self)
         self._body.add(line_drain)
 
         # lines in the middle
-        line_middle_1 = mn.Line(0.275 * width * mn.LEFT, mn.ORIGIN).match_style(self)
+        line_middle_1 = mn.Line(0.3 * width * mn.LEFT, mn.ORIGIN).match_style(self)
         self._body.add(line_middle_1)
         if draw_middle_line:
             line_middle_2 = mn.Line(mn.ORIGIN, 0.5 * height * mn.UP).match_style(self)
@@ -305,14 +297,14 @@ class NChannelMOSFET(BaseMOSFET):
 
         height = config_eng.symbol.tripole_height
         # arrow pointing into the channel
-        arrow = (
-            mn.Arrow(
-                start=mn.ORIGIN,
-                end=0.5 * height * mn.UP,
-                buff=0,
-            )
-            .match_style(self)
-            .set_fill(opacity=1.0)
+        arrow = mn.Arrow(
+            start=mn.ORIGIN,
+            end=0.5 * height * mn.UP,
+            buff=0,
+            stroke_width=self.stroke_width,
+            fill_opacity=1.0,
+            max_tip_length_to_length_ratio=0.5,
+            max_stroke_width_to_length_ratio=10.0,
         )
         self._body.add(arrow)
 
@@ -325,13 +317,13 @@ class PChannelMOSFET(BaseMOSFET):
 
         height = config_eng.symbol.tripole_height
         # arrow pointing out of the channel
-        arrow = (
-            mn.Arrow(
-                start=0.5 * height * mn.UP,
-                end=mn.ORIGIN,
-                buff=0,
-            )
-            .match_style(self)
-            .set_fill(opacity=1.0)
+        arrow = mn.Arrow(
+            start=0.5 * height * mn.UP,
+            end=mn.ORIGIN,
+            buff=0,
+            stroke_width=self.stroke_width,
+            fill_opacity=1.0,
+            max_tip_length_to_length_ratio=0.5,
+            max_stroke_width_to_length_ratio=10.0,
         )
         self._body.add(arrow)

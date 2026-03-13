@@ -72,12 +72,12 @@ class VariableModifier(Component, metaclass=abc.ABCMeta):
         )
 
         arrow_half_height = component_height * (
-            1.0 if component_width > component_height else 0.5
+            1.2 if component_width > component_height else 0.5
         )
         arrow_half_height = max(
             arrow_half_height, 0.5 * config_eng.symbol.square_bipole_side_length
         )
-        arrow_half_width = 0.8 * arrow_half_height
+        arrow_half_width = 0.9 * arrow_half_height
 
         arrow = mn.Arrow(
             start=np.array([-arrow_half_width, -arrow_half_height, 0])
@@ -86,6 +86,7 @@ class VariableModifier(Component, metaclass=abc.ABCMeta):
             + self._body.get_center(),
             buff=0,
             tip_length=config_eng.symbol.variability_arrow_tip_length,
+            max_tip_length_to_length_ratio=config_eng.symbol.max_tip_length_to_length_ratio,
             stroke_width=self.stroke_width,
             stroke_color=self.stroke_color,
             stroke_opacity=self.stroke_opacity,

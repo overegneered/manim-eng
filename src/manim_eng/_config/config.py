@@ -281,12 +281,15 @@ class ComponentSymbolConfig(ConfigBase):
     arrow_stroke_width: float = wire_stroke_width
     """The stroke width to use for arrows in voltage marks and similar."""
     arrow_tip_length: float = 0.4
-    """The length of voltage arrow tips."""
+    """The length of arrow tips."""
+    max_tip_length_to_length_ratio: float = 0.4
+    """The default maximum tip length to arrow length ratio. Might be overridden by
+    components demanding higher tip length to length ratio for better visuals."""
     voltage_default_angle: float = 60 * mn.DEGREES
     """The angle a voltage arrow will sweep with no other reference provided."""
     node_radius: float = 0.06
     """The radius of wire nodes."""
-    variability_arrow_tip_length: float = 0.125
+    variability_arrow_tip_length: float = 0.2
     """The length of arrow tips in arrows signifying variability in a component."""
     monopole_width: float = 0.5 * bipole_width
     """The width of monopole source/ground symbols."""

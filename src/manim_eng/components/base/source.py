@@ -192,6 +192,52 @@ class EuropeanVoltageSourceBase(VoltageSourceBase, metaclass=abc.ABCMeta):
         )
 
 
+class DCSourceBase(VoltageSourceBase):
+    """Circuit symbol for a US-style direct-current source."""
+
+    def __init__(self, voltage: str | None = None, **kwargs: Any) -> None:
+        super().__init__(arrow=True, voltage=voltage, **kwargs)
+
+    def _construct(self) -> None:
+        super()._construct()
+        plus = (
+            mn.Text("+", font_size=config_eng.symbol.terminal_name_font_size)
+            .match_style(self)
+            .next_to(self.left, mn.RIGHT, buff=config_eng.symbol.terminal_name_buff)
+        )
+        minus = (
+            mn.Text("-", font_size=config_eng.symbol.terminal_name_font_size)
+            .match_style(self)
+            .next_to(self.right, mn.LEFT, buff=config_eng.symbol.terminal_name_buff)
+        )
+        self._body.add(plus, minus)
+
+
+class ACSourceBase(VoltageSourceBase):
+    """Circuit symbol for a US-style alternating-current source."""
+
+    def __init__(self, voltage: str | None = None, **kwargs: Any) -> None:
+        super().__init__(arrow=True, voltage=voltage, **kwargs)
+
+    def _construct(self) -> None:
+        super()._construct()
+        half_width = config_eng.symbol.square_bipole_side_length * 0.5
+        half_size = 0.6 * half_width
+        # Sine curve plotting references this article:
+        # https://math.stackexchange.com/questions/4235124/getting-the-most-accurate-bezier-curve-that-plots-a-sine-wave
+        sine_curve_x = 23 / 500
+        sine_curve_y = 550 / 500
+        squiggle = mn.VMobject()
+        squiggle.start_new_path(half_size * mn.LEFT)
+        squiggle.add_cubic_bezier_curve_to(
+            (sine_curve_x * mn.LEFT + sine_curve_y * mn.UP) * half_size,
+            (sine_curve_x * mn.RIGHT + sine_curve_y * mn.DOWN) * half_size,
+            half_size * mn.RIGHT,
+        )
+        squiggle.match_style(self)
+        self._body.add(squiggle)
+
+
 class CurrentSourceBase(Source, metaclass=abc.ABCMeta):
     """Base class of all current sources."""
 
