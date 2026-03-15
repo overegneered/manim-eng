@@ -16,8 +16,10 @@ term *marks*. It is a thin wrapper around Manim's
 adds a few new capabilities.
 
 In particular, it allows the displayed mathematical text to be updated on the fly using
-its :meth:`~.Mark.set_text` method, and implements functionality for automatically
-positioning the mark relative two a set of two anchors.
+its :meth:`~.Mark.set` and :meth:`~.Mark.clear` methods, and implements functionality
+for automatically positioning the mark relative two a set of two anchors. These both
+have animation overrides to which other classes should delegate when animating changes
+in marks.
 
 Anchors
 ^^^^^^^
@@ -116,24 +118,10 @@ the rotating resistor above, and note that the *R* does not rotate, despite bein
 by the resistor mobject.
 
 To achieve this, each markable maintains two private
-:external+manim:class:`VGroup <manim.mobject.types.vectorized_mobject.VGroup>`\ s,
+:external+manim:class:`VGroup <manim.mobject.types.vectorized_mobject.VGroup>`\ s:
 ``__marks`` and ``__rotate``. All rotation operations are then overloaded to apply just
 to the ``__rotate`` group, and the standard operations of ``add()``, ``add_to_back()``,
 and ``remove()`` are then overloaded to automatically sort marks into the ``__marks``
 group and everything else into ``__rotate``.
-
-:class:`~.Markable` also provides protected methods for managing marks:
-:meth:`~.Markable._set_mark` and :meth:`~.Markable._clear_mark`. These take a reference
-to the mark to modify and, in the ``_set_mark()`` case, the mark text to set, and handle
-managing mark visibilities and updates. However, it is up to the implementing class to
-construct marks and the anchors they attach to.
-
-.. important::
-
-    The implementing class does not need to worry about ``add()``-ing or
-    ``remove()``-ing marks, as this is handled by :meth:`~._set_mark` and
-    :meth:`~._clear_mark`. It does however need to add anchors (though in most cases
-    manim-eng has handled this for you, as chances are you're subclassing
-    :class:`~.Component`, which sets anchors up automatically.
 
 There are also, of course, animation overrides for all added methods.
