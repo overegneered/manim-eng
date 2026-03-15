@@ -209,7 +209,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
         --------
         units.Value
         """
-        self._label.set(label)
+        self._label.set(label if isinstance(label, str) else label.to_latex())
         return self
 
     def clear_label(self) -> Self:
@@ -230,7 +230,9 @@ class Component(Markable, metaclass=abc.ABCMeta):
         --------
         units.Value
         """
-        self._annotation.set(annotation)
+        self._annotation.set(
+            annotation if isinstance(annotation, str) else annotation.to_latex()
+        )
         return self
 
     def clear_annotation(self) -> Self:

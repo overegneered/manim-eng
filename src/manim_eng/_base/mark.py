@@ -12,7 +12,6 @@ import manim as mn
 from manim_eng._base.anchor import Anchor
 from manim_eng._config import config_eng
 from manim_eng._utils import utils
-from manim_eng.units import Value
 
 __all__ = ["Mark"]
 
@@ -40,21 +39,80 @@ class Mark(mn.VMobject):
         self.updater: Callable[[mn.Mobject], None]
         self.change_anchors(anchor, centre_reference)
 
-    def set(self, text: str | Value) -> Self:
-        """Set the mark's text."""
-        tex_string = text if isinstance(text, str) else text.to_latex()
+    def set(
+        self,
+        *args: Any,
+        font_size: float = config_eng.symbol.mark_font_size,
+        **kwargs: Any,
+    ) -> Self:
+        """Set the mark's text.
+
+        Parameters
+        ----------
+        *args : Any
+            Positional arguments to be pass on to ``manim.MathTex``. The most important
+            of these is ``*tex_strings``, i.e. the actual TeX math mode strings to use
+            as the mark's text.
+        font_size : float
+            The font size to use for the mark. Leaving it empty adopts the default
+            (recommended).
+        **kwargs : Any
+            Keyword arguments to pass on to ``manim.MathTex``.
+
+        See Also
+        --------
+        :meth:`clear`
+        """
         self.remove(self.mathtex)
-        self.mathtex = mn.MathTex(
-            tex_string, font_size=config_eng.symbol.mark_font_size
-        )
+        self.mathtex = mn.MathTex(*args, font_size=font_size, **kwargs)
         self.add(self.mathtex)
         self._reposition()
         return self
 
+    @mn.override_animate(set)
+    def __animate_set(
+        self,
+        *args: Any,
+        font_size: float = config_eng.symbol.mark_font_size,
+        anim_args: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        new_mathtex = mn.MathTex(*args, font_size=font_size, **kwargs)
+        if self.mathtex in self.submobjects:
+            self.mathtex.target = new_mathtex
+            return mn.MoveToTarget(self.mathtex, **anim_args)
+        self.mathtex = new_mathtex
+        self.add(self.mathtex)
+        return mn.Create(self.mathtex, **anim_args)
+
     def clear(self) -> Self:
-        """Clear the mark's text."""
+        """Clear the mark's text.
+
+        Internally, this completely removes the ``MathTex`` object, and gives better
+        animations than just setting the text to an empty string.
+
+        See Also
+        --------
+        :meth:`set`
+        """
         self.remove(self.mathtex)
         return self
+
+    @mn.override_animate(clear)
+    def __animate_clear(
+        self, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation | None:
+        if anim_args is None:
+            anim_args = {}
+
+        if self.mathtex in self.submobjects:
+            anim = mn.Uncreate(self.mathtex, remover=False, **anim_args)
+            self.remove(self.mathtex)
+            return anim
+        return None
 
     def _set_text(
         self,
@@ -144,32 +202,3 @@ class Mark(mn.VMobject):
             )
 
         return updater
-
-    @mn.override_animate(set)
-    def __animate_set(
-        self, text: str | Value, anim_args: dict[str, Any] | None = None
-    ) -> mn.Animation:
-        if anim_args is None:
-            anim_args = {}
-
-        tex_string = text if isinstance(text, str) else text.to_latex()
-        new_mathtex = mn.MathTex(tex_string, font_size=config_eng.symbol.mark_font_size)
-        if self.mathtex in self.submobjects:
-            self.mathtex.target = new_mathtex
-            return mn.MoveToTarget(self.mathtex, **anim_args)
-        self.mathtex = new_mathtex
-        self.add(self.mathtex)
-        return mn.Create(self.mathtex, **anim_args)
-
-    @mn.override_animate(clear)
-    def __animate_clear(
-        self, anim_args: dict[str, Any] | None = None
-    ) -> mn.Animation | None:
-        if anim_args is None:
-            anim_args = {}
-
-        if self.mathtex in self.submobjects:
-            anim = mn.Uncreate(self.mathtex, remover=False, **anim_args)
-            self.remove(self.mathtex)
-            return anim
-        return None
