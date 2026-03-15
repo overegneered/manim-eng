@@ -4,7 +4,6 @@ import abc
 from typing import Any, Self
 
 import manim as mn
-import numpy as np
 from manim import typing as mnt
 
 from manim_eng import config_eng
@@ -19,12 +18,17 @@ __all__ = ["WireBase"]
 class CurrentArrow(Markable):
     def __init__(
         self,
-        position: mnt.Vector3D,
-        rotation: float = 0,
+        parent: mn.VMobject,
+        alpha: float = 0.5,
+        invert: bool = False,
         label: str | Value | None = None,
         annotation: str | Value | None = None,
     ) -> None:
         super().__init__()
+
+        self._parent = parent
+        self._alpha = alpha
+        self._invert = invert
 
         self._triangle = mn.Triangle(
             radius=config_eng.symbol.current_arrow_radius,
@@ -45,20 +49,25 @@ class CurrentArrow(Markable):
         self._annotation = Mark(self._annotation_anchor, self._centre_anchor)
 
         if label is not None:
-            self._set_mark(self._label, label)
+            label_tex = label if isinstance(label, str) else label.to_latex()
+            self._label.set(label_tex)
 
         if annotation is not None:
-            self._set_mark(self._annotation, annotation)
+            annotation_tex = (
+                annotation if isinstance(annotation, str) else annotation.to_latex()
+            )
+            self._annotation.set(annotation_tex)
 
         self.add(
             self._triangle,
             self._centre_anchor,
             self._label_anchor,
             self._annotation_anchor,
+            self._label,
+            self._annotation,
         )
-        self.shift(position - self._centre_anchor.pos).rotate(
-            rotation, about_point=position
-        )
+        self.__position_arrow()
+        self.add_updater(lambda mob: mob.__position_arrow())
 
     # TODO
     def set_current(self) -> None: ...
@@ -69,12 +78,35 @@ class CurrentArrow(Markable):
     # TODO
     def clear_current(self) -> None: ...
 
+    def __position_arrow(self) -> None:
+        new_pos, new_angle = self.__calculate_new_pose()
+        self.shift(new_pos - self._centre_anchor.pos)
+        self.rotate(new_angle - self.__current_angle())
+
+    def __calculate_new_pose(self) -> tuple[mnt.Point3D, float]:
+        epsilon = 1e-6
+        alpha = self._alpha
+
+        if self._invert:
+            alpha = 1 - alpha
+            epsilon *= -1
+
+        centre = self._parent.point_from_proportion(alpha)
+        forward = self._parent.point_from_proportion(alpha + epsilon)
+        angle = mn.angle_of_vector(forward - centre)
+        return centre, angle
+
+    def __current_angle(self) -> float:
+        up = self._label_anchor.pos - self._centre_anchor.pos
+        # Mypy can't work out that this is of type float
+        return mn.angle_of_vector(up) - mn.PI / 2.0  # type: ignore[no-any-return]
+
 
 class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
     """Base class for wire objects.
 
     Subclasses must implement the ``.get_corner_points()`` method to declare where the
-    wire should have corners.
+    wire corners should be.
     """
 
     def __init__(self, start: Terminal, end: Terminal, updating: bool):
@@ -89,12 +121,12 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
         self.start = start
         self.end = end
 
+        self.__update_points()
+
         self._attached = False
 
-        self.__construct_wire()
-
         if updating:
-            self.add_updater(lambda mob: mob.__construct_wire())
+            self.add_updater(lambda mob: mob.__update_points())
 
     def attach(self) -> Self:
         """Attach the wire to its start and end terminals, if not already attached.
@@ -147,24 +179,18 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
             The text to set as the annotation of the current arrow. Takes a TeX math
             mode string or a :class:`~.Value` unit expression.
         """
-        epsilon = 1e-6
-        centre = self.point_from_proportion(pos)
-        forward = self.point_from_proportion(pos + epsilon)
-        angle = mn.angle_of_vector(forward - centre)
-        if backwards:
-            angle += np.pi
-
         self.add(
             CurrentArrow(
-                position=centre,
-                rotation=angle,
+                parent=self,
+                alpha=pos,
+                invert=backwards,
                 label=label,
                 annotation=annotation,
             )
         )
         return self
 
-    def __construct_wire(self) -> None:
+    def __update_points(self) -> None:
         # The extra points involving the 0.001 factors extend the wire ever so slightly
         # into the terminals, producing a nice clean join between the terminals and the
         # wire
