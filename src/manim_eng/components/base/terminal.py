@@ -141,7 +141,7 @@ class Terminal(Markable):
             self._current_arrow_pointing_out = out
 
         if below is not None and below != self._current_mark_anchored_below:
-            self._current.change_anchors(
+            self._current._change_anchors(
                 self._bottom_anchor if below else self._top_anchor,
                 self._centre_anchor,
             )
@@ -191,7 +191,7 @@ class Terminal(Markable):
             animations.append(arrow_animation)
 
         if below is not None and below != self._current_mark_anchored_below:
-            self._current.change_anchors(
+            self._current._change_anchors(
                 self._bottom_anchor if below else self._top_anchor,
                 self._centre_anchor,
             )

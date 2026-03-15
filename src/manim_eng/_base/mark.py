@@ -37,7 +37,7 @@ class Mark(mn.VMobject):
         self.mathtex: mn.MathTex = mn.MathTex("")
 
         self.updater: Callable[[mn.Mobject], None]
-        self.change_anchors(anchor, centre_reference)
+        self._change_anchors(anchor, centre_reference)
 
     def set(
         self,
@@ -114,7 +114,7 @@ class Mark(mn.VMobject):
             return anim
         return None
 
-    def change_anchors(self, anchor: Anchor, centre_reference: Anchor) -> None:
+    def _change_anchors(self, anchor: Anchor, centre_reference: Anchor) -> None:
         """Change the anchors to which the mark is attached.
 
         Parameters

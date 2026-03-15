@@ -44,17 +44,13 @@ class Component(Markable, metaclass=abc.ABCMeta):
     def __init__(
         self,
         terminals: list[Terminal],
-        label: str | Value | None = None,
-        annotation: str | Value | None = None,
+        label: str | None = None,
+        annotation: str | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(
             stroke_width=config_eng.symbol.component_stroke_width, **kwargs
         )
-
-        self._centre_anchor = CentreAnchor()
-        self._label_anchor = LabelAnchor()
-        self._annotation_anchor = AnnotationAnchor()
 
         for terminal in terminals:
             terminal.match_style(self)
@@ -66,10 +62,19 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
         self._body.add(self._terminals)
 
+        self._centre_anchor = CentreAnchor()
+        self._label_anchor = LabelAnchor()
+        self._annotation_anchor = AnnotationAnchor()
         self.__set_up_anchors()
-        self._label = Mark(self._label_anchor, self._centre_anchor)
-        self._annotation = Mark(self._annotation_anchor, self._centre_anchor)
-        self.__initialise_marks(label, annotation)
+
+        self.label = Mark(self._label_anchor, self._centre_anchor)
+        self.annotation = Mark(self._annotation_anchor, self._centre_anchor)
+        self.add(self.label, self.annotation)
+
+        if label is not None:
+            self.label.set(label)
+        if annotation is not None:
+            self.annotation.set(annotation)
 
     def _construct(self) -> None:
         """Construct the shape of the component.
@@ -194,50 +199,6 @@ class Component(Markable, metaclass=abc.ABCMeta):
         )[0]
 
         self.shift(target_position - self_terminal.end)
-        return self
-
-    def set_label(self, label: str | Value) -> Self:
-        """Set the label of the component.
-
-        Parameters
-        ----------
-        label : str | Value
-            The label to set. Takes a TeX math mode string, or a ``Value`` to be typeset
-            as a math mode string.
-
-        See Also
-        --------
-        units.Value
-        """
-        self._label.set(label if isinstance(label, str) else label.to_latex())
-        return self
-
-    def clear_label(self) -> Self:
-        """Clear the label of the component."""
-        self._label.clear()
-        return self
-
-    def set_annotation(self, annotation: str | Value) -> Self:
-        """Set the annotation of the component.
-
-        Parameters
-        ----------
-        annotation : str | Value
-            The annotation to set. Takes a TeX math mode string, or a ``Value`` to be
-            typeset as a math mode string.
-
-        See Also
-        --------
-        units.Value
-        """
-        self._annotation.set(
-            annotation if isinstance(annotation, str) else annotation.to_latex()
-        )
-        return self
-
-    def clear_annotation(self) -> Self:
-        """Clear the annotation of the component."""
-        self._annotation.clear()
         return self
 
     def set_current(
@@ -463,47 +424,6 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self._label_anchor.shift(self._body.get_top() + 0.01 * mn.UP)
         self._annotation_anchor.shift(self._body.get_bottom() + 0.01 * mn.DOWN)
         self.add(self._centre_anchor, self._label_anchor, self._annotation_anchor)
-
-    def __initialise_marks(
-        self, label: str | Value | None, annotation: str | Value | None
-    ) -> None:
-        self.add(self._label, self._annotation)
-        if label is not None:
-            self.set_label(label)
-        if annotation is not None:
-            self.set_annotation(annotation)
-
-    @mn.override_animate(set_label)
-    def __animate_set_label(
-        self, label: str | Value, anim_args: dict[str, Any] | None = None
-    ) -> mn.Animation:
-        if anim_args is None:
-            anim_args = {}
-        return self._label.animate(**anim_args).set(label).build()
-
-    @mn.override_animate(clear_label)
-    def __animate_clear_label(
-        self, anim_args: dict[str, Any] | None = None
-    ) -> mn.Animation:
-        if anim_args is None:
-            anim_args = {}
-        return self._label.animate(**anim_args).clear().build()
-
-    @mn.override_animate(set_annotation)
-    def __animate_set_annotation(
-        self, annotation: str | Value, anim_args: dict[str, Any] | None = None
-    ) -> mn.Animation:
-        if anim_args is None:
-            anim_args = {}
-        return self._annotation.animate(**anim_args).set(annotation).build()
-
-    @mn.override_animate(clear_annotation)
-    def __animate_clear_annotation(
-        self, anim_args: dict[str, Any] | None = None
-    ) -> mn.Animation:
-        if anim_args is None:
-            anim_args = {}
-        return self._annotation.animate(**anim_args).clear().build()
 
     @mn.override_animate(set_current)
     def __animate_set_current(

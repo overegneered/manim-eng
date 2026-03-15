@@ -405,7 +405,7 @@ class Node(Component):
     def _update_label_positioning_using_vector(self, direction: mnt.Vector3D) -> None:
         position = self.get_center() + config_eng.symbol.node_radius * direction
         self._label_anchor.move_to(position)
-        self._label.update()
+        self.label.update()
 
     def _reposition_label_anchor(self, direction: mnt.Vector3D | float | None) -> None:
         if direction is None:
@@ -437,7 +437,7 @@ class Node(Component):
         anim_args: dict[str, Any] | None = None,
     ) -> mn.Animation:
         self._reposition_label_anchor(direction)
-        return self.animate(**anim_args)._set_mark(self._label, label).build()
+        return self.animate(**anim_args)._set_mark(self.label, label).build()
 
 
 class OpenNode(Node):
