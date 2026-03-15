@@ -24,23 +24,23 @@ Head over to the [documentation](https://docs.manim-eng.egneer.ing) to get start
 
 ### Environment setup
 
-manim-eng, like Manim itself, uses [Poetry](https://python-poetry.org/) as a build system. You will need Poetry
+manim-eng, like Manim itself, uses [uv](https://docs.astral.sh/uv/) as a package manager and build system. You will need uv
 installed before proceeding. First, clone the repository with Git:
 
 ```shell
 git clone https://github.com/overegneered/manim-eng.git
 ```
 
-Then install dependencies with Poetry:
+Then install dependencies with uv:
 
 ```shell
-poetry install
+uv sync --extra dev
 ```
 
 Finally, install the pre-commit hooks:
 
 ```shell
-pre-commit install
+uv run pre-commit install
 ```
 
 ### Testing
@@ -48,7 +48,7 @@ pre-commit install
 manim-eng uses [pytest](https://pytest.org) as a testing framework. To run the test suite, you can use
 
 ```shell
-poetry run pytest
+uv run pytest
 ```
 
 though using an IDE integration, such as PyCharm's pytest runner, may be easier!
@@ -57,4 +57,4 @@ though using an IDE integration, such as PyCharm's pytest runner, may be easier!
 
 If you use this project in your work, I ask that you cite it using the information contained in the [`CITATION.cff`](https://github.com/overegneered/manim-eng/blob/trunk/CITATION.cff) file. The easiest way to do this is to go to the [repository page](https://github.com/overegneered/manim-eng) on GitHub and click on 'Cite this repository'. For more info on `CITATION.cff` files, check out [this website](https://citation-file-format.github.io/).
 
-This project is mostly licenced under the MIT licence, like Manim itself. However, I specifically revoke any right or permissions to use the contents of this repository for the training of AI models without my prior written approval.
+This project is provided under the terms of the MIT licence.
