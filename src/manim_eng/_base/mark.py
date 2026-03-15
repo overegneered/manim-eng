@@ -114,33 +114,6 @@ class Mark(mn.VMobject):
             return anim
         return None
 
-    def _set_text(
-        self,
-        *args: Any,
-        font_size: float = config_eng.symbol.mark_font_size,
-        **kwargs: Any,
-    ) -> Self:
-        """Set the text of the mark.
-
-        Parameters
-        ----------
-        *args : Any
-            Positional arguments to be pass on to ``manim.MathTex``. The most important
-            of these is ``*tex_strings``, i.e. the actual TeX math mode strings to use
-            as the mark's text.
-        font_size : float
-            The font size to use for the mark. Leaving it empty adopts the default
-            (recommended).
-        **kwargs : Any
-            Keyword arguments to pass on to ``manim.MathTex``.
-        """
-        if self.mathtex in self.submobjects:
-            self.remove(self.mathtex)
-        self.mathtex = mn.MathTex(*args, font_size=font_size, **kwargs)
-        self.add(self.mathtex)
-        self._reposition()
-        return self
-
     def change_anchors(self, anchor: Anchor, centre_reference: Anchor) -> None:
         """Change the anchors to which the mark is attached.
 
