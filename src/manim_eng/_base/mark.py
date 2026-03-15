@@ -39,13 +39,13 @@ class Mark(mn.VMobject):
         self.updater: Callable[[mn.Mobject], None]
         self.change_anchors(anchor, centre_reference)
 
-    def set_text(
+    def set(
         self,
         *args: Any,
         font_size: float = config_eng.symbol.mark_font_size,
         **kwargs: Any,
     ) -> Self:
-        """Set the text of the mark.
+        """Set the mark's text.
 
         Parameters
         ----------
@@ -58,13 +58,61 @@ class Mark(mn.VMobject):
             (recommended).
         **kwargs : Any
             Keyword arguments to pass on to ``manim.MathTex``.
+
+        See Also
+        --------
+        :meth:`clear`
         """
-        if self.mathtex in self.submobjects:
-            self.remove(self.mathtex)
+        self.remove(self.mathtex)
         self.mathtex = mn.MathTex(*args, font_size=font_size, **kwargs)
         self.add(self.mathtex)
         self._reposition()
         return self
+
+    @mn.override_animate(set)
+    def __animate_set(
+        self,
+        *args: Any,
+        font_size: float = config_eng.symbol.mark_font_size,
+        anim_args: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        new_mathtex = mn.MathTex(*args, font_size=font_size, **kwargs)
+        if self.mathtex in self.submobjects:
+            self.mathtex.target = new_mathtex
+            return mn.MoveToTarget(self.mathtex, **anim_args)
+        self.mathtex = new_mathtex
+        self.add(self.mathtex)
+        return mn.Create(self.mathtex, **anim_args)
+
+    def clear(self) -> Self:
+        """Clear the mark's text.
+
+        Internally, this completely removes the ``MathTex`` object, and gives better
+        animations than just setting the text to an empty string.
+
+        See Also
+        --------
+        :meth:`set`
+        """
+        self.remove(self.mathtex)
+        return self
+
+    @mn.override_animate(clear)
+    def __animate_clear(
+        self, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation | None:
+        if anim_args is None:
+            anim_args = {}
+
+        if self.mathtex in self.submobjects:
+            anim = mn.Uncreate(self.mathtex, remover=False, **anim_args)
+            self.remove(self.mathtex)
+            return anim
+        return None
 
     def change_anchors(self, anchor: Anchor, centre_reference: Anchor) -> None:
         """Change the anchors to which the mark is attached.

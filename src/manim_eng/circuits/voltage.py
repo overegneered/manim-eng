@@ -83,8 +83,9 @@ class Voltage(Markable):
 
         self.add(self._arrow, self._centre_reference, self._anchor)
 
-        self._label = Mark(self._anchor, self._centre_reference)
-        self._set_mark(self._label, label)
+        label_tex = label if isinstance(label, str) else label.to_latex()
+        self._label = Mark(self._anchor, self._centre_reference).set(label_tex)
+        self.add(self._label)
 
     def set_label(self, label: str | Value, clockwise: bool | None = None) -> Self:
         """Set the voltage label.
@@ -103,10 +104,33 @@ class Voltage(Markable):
         reset_label: Set the voltage label, with the sense of the arrow being reset to
                      default if unspecified.
         """
-        self._set_mark(self._label, label)
+        label_tex = label if isinstance(label, str) else label.to_latex()
+        self._label.set(label_tex)
         if clockwise is not None:
             self.set_clockwise(clockwise=clockwise)
         return self
+
+    @mn.override_animate(set_label)
+    def __animate_set_label(
+        self,
+        label: str | Value,
+        clockwise: bool | None = None,
+        anim_args: dict[str, Any] | None = None,
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        label_tex = label if isinstance(label, str) else label.to_latex()
+        label_animation = self._label.animate(**anim_args).set(label_tex).build()
+        animations = [label_animation]
+
+        if clockwise is not None:
+            self._arrow.generate_target()
+            self._arrow.target.set_clockwise(clockwise)
+            arrow_animation = mn.MoveToTarget(self._arrow)
+            animations.append(arrow_animation)
+
+        return mn.AnimationGroup(*animations)
 
     def reset_label(self, label: str | Value, clockwise: bool = False) -> Self:
         """Set the voltage label, with the sense being reset to default if unspecified.
@@ -126,6 +150,21 @@ class Voltage(Markable):
                    if unspecified.
         """
         return self.set_label(label=label, clockwise=clockwise)
+
+    @mn.override_animate(reset_label)
+    def __animate_reset_label(
+        self,
+        label: str,
+        clockwise: bool = False,
+        anim_args: dict[str, Any] | None = None,
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+        return (
+            self.animate(**anim_args)
+            .set_label(label=label, clockwise=clockwise)
+            .build()
+        )
 
     def set_clockwise(self, clockwise: bool = True) -> Self:
         """Set the sense of the voltage arrow (clockwise or anticlockwise).
@@ -392,41 +431,3 @@ class Voltage(Markable):
         radius = np.linalg.norm(centre - middle_point)
         length = np.linalg.norm(self._direction)
         return 2 * cast(float, np.arcsin(length / (2 * radius)))
-
-    @mn.override_animate(set_label)
-    def __animate_set_label(
-        self,
-        label: str,
-        clockwise: bool | None = None,
-        anim_args: dict[str, Any] | None = None,
-    ) -> mn.Animation:
-        if anim_args is None:
-            anim_args = {}
-
-        label_animation = (
-            self.animate(**anim_args)._set_mark(self._label, label).build()
-        )
-        animations = [label_animation]
-
-        if clockwise is not None:
-            self._arrow.generate_target()
-            self._arrow.target.set_clockwise(clockwise)
-            arrow_animation = mn.MoveToTarget(self._arrow)
-            animations.append(arrow_animation)
-
-        return mn.AnimationGroup(*animations)
-
-    @mn.override_animate(reset_label)
-    def __animate_reset_label(
-        self,
-        label: str,
-        clockwise: bool = False,
-        anim_args: dict[str, Any] | None = None,
-    ) -> mn.Animation:
-        if anim_args is None:
-            anim_args = {}
-        return (
-            self.animate(**anim_args)
-            .set_label(label=label, clockwise=clockwise)
-            .build()
-        )
