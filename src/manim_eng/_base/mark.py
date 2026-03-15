@@ -26,18 +26,37 @@ class Mark(mn.VMobject):
     centre_reference : Anchor
         The anchor to use as a reference; the mark will be kept aligned to ``anchor``,
         attached to the side directly opposite the side ``centre_reference`` is on.
+    *args : Any
+        Positional arguments to pass to ``manim.MathTex`` for an initial value, if
+        desired. No initial value is processed if the first element of ``args`` is
+        ``None``.
+    font_size: float = config_eng.symbol.mark_font_size
+        The font size to use for the mark. Leaving it empty adopts the default
+        (recommended).
+    **kwargs : Any
+        Keyword args to pass to ``manim.MathTex`` for an initial value, if desired.
 
     See Also
     --------
     anchor.Anchor
     """
 
-    def __init__(self, anchor: Anchor, centre_reference: Anchor) -> None:
+    def __init__(
+        self,
+        anchor: Anchor,
+        centre_reference: Anchor,
+        *args: Any,
+        font_size: float = config_eng.symbol.mark_font_size,
+        **kwargs: Any,
+    ) -> None:
         super().__init__()
         self.mathtex: mn.MathTex = mn.MathTex("")
 
         self.updater: Callable[[mn.Mobject], None]
         self._change_anchors(anchor, centre_reference)
+
+        if (len(args) > 0 and args[0] is not None) or len(kwargs) > 0:
+            self.set(*args, font_size=font_size, **kwargs)
 
     def set(
         self,
@@ -50,9 +69,9 @@ class Mark(mn.VMobject):
         Parameters
         ----------
         *args : Any
-            Positional arguments to be pass on to ``manim.MathTex``. The most important
-            of these is ``*tex_strings``, i.e. the actual TeX math mode strings to use
-            as the mark's text.
+            Positional arguments to be passed on to ``manim.MathTex``. The most
+            important of these is ``*tex_strings``, i.e. the actual TeX math mode
+            strings to use as the mark's text.
         font_size : float
             The font size to use for the mark. Leaving it empty adopts the default
             (recommended).

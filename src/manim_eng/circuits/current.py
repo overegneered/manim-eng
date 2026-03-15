@@ -60,14 +60,8 @@ class CurrentArrow(Markable):
             (self._label_anchor.pos + self._annotation_anchor.pos) / 2
         )
 
-        self.label = Mark(self._label_anchor, self._centre_anchor)
-        self.annotation = Mark(self._annotation_anchor, self._centre_anchor)
-
-        if label is not None:
-            self.label.set(label)
-
-        if annotation is not None:
-            self.annotation.set(annotation)
+        self.label = Mark(self._label_anchor, self._centre_anchor, label)
+        self.annotation = Mark(self._annotation_anchor, self._centre_anchor, annotation)
 
         self.add(
             self._triangle,
@@ -77,8 +71,8 @@ class CurrentArrow(Markable):
             self.label,
             self.annotation,
         )
-        self.__position_arrow()
-        self.add_updater(lambda mob: mob.__position_arrow())
+        self.__reposition()
+        self.add_updater(lambda mob: mob.__reposition())
 
     def set(self, label: str) -> Self:
         """Set the label for the current arrow.
@@ -88,7 +82,7 @@ class CurrentArrow(Markable):
         self.label.set(label)
         return self
 
-    def __position_arrow(self) -> None:
+    def __reposition(self) -> None:
         new_pos, new_angle = self.__calculate_new_pose()
         self.shift(new_pos - self._centre_anchor.pos)
         self.rotate(new_angle - self.__current_angle())

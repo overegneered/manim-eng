@@ -67,14 +67,9 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self._annotation_anchor = AnnotationAnchor()
         self.__set_up_anchors()
 
-        self.label = Mark(self._label_anchor, self._centre_anchor)
-        self.annotation = Mark(self._annotation_anchor, self._centre_anchor)
+        self.label = Mark(self._label_anchor, self._centre_anchor, label)
+        self.annotation = Mark(self._annotation_anchor, self._centre_anchor, annotation)
         self.add(self.label, self.annotation)
-
-        if label is not None:
-            self.label.set(label)
-        if annotation is not None:
-            self.annotation.set(annotation)
 
     def _construct(self) -> None:
         """Construct the shape of the component.
