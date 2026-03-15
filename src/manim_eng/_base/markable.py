@@ -60,8 +60,10 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
             if isinstance(mobject, Markable):
                 self.__rotate.add(mobject.__rotate)
                 self.__marks.add(mobject.__marks)
+            elif isinstance(mobject, Mark):
+                self.__marks.add(mobject)
             else:
-                self.__rotate.add(*mobjects)
+                self.__rotate.add(mobject)
         return self
 
     def add_to_back(self, *mobjects: mn.Mobject) -> Self:
@@ -69,8 +71,10 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
             if isinstance(mobject, Markable):
                 self.__rotate.add_to_back(mobject.__rotate)
                 self.__marks.add_to_back(mobject.__marks)
+            elif isinstance(mobject, Mark):
+                self.__marks.add_to_back(mobject)
             else:
-                self.__rotate.add_to_back(*mobjects)
+                self.__rotate.add_to_back(mobject)
         return self
 
     def remove(self, *mobjects: mn.Mobject) -> Self:
@@ -78,15 +82,17 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
             if isinstance(mobject, Markable):
                 self.__rotate.remove(mobject.__rotate)
                 self.__marks.remove(mobject.__marks)
+            elif isinstance(mobject, Mark):
+                self.__marks.remove(mobject)
             else:
-                self.__rotate.remove(*mobjects)
+                self.__rotate.remove(mobject)
         return self
 
     def _set_mark(self, mark_to_set: Mark, mark_text: str | Value) -> None:
         """Set a mark's label, adding the mark if necessary."""
         mark_text = mark_text if isinstance(mark_text, str) else mark_text.to_latex()
         self.__marks.add(mark_to_set)
-        mark_to_set.set_text(mark_text)
+        mark_to_set._set_text(mark_text)
 
     def _clear_mark(self, mark: Mark) -> None:
         """Clear a mark from the object."""
