@@ -209,12 +209,12 @@ class Component(Markable, metaclass=abc.ABCMeta):
         --------
         units.Value
         """
-        self._set_mark(self._label, label)
+        self._label.set(label if isinstance(label, str) else label.to_latex())
         return self
 
     def clear_label(self) -> Self:
         """Clear the label of the component."""
-        self._clear_mark(self._label)
+        self._label.clear()
         return self
 
     def set_annotation(self, annotation: str | Value) -> Self:
@@ -230,12 +230,14 @@ class Component(Markable, metaclass=abc.ABCMeta):
         --------
         units.Value
         """
-        self._set_mark(self._annotation, annotation)
+        self._annotation.set(
+            annotation if isinstance(annotation, str) else annotation.to_latex()
+        )
         return self
 
     def clear_annotation(self) -> Self:
         """Clear the annotation of the component."""
-        self._clear_mark(self._annotation)
+        self._annotation.clear()
         return self
 
     def set_current(
@@ -465,6 +467,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
     def __initialise_marks(
         self, label: str | Value | None, annotation: str | Value | None
     ) -> None:
+        self.add(self._label, self._annotation)
         if label is not None:
             self.set_label(label)
         if annotation is not None:
@@ -476,7 +479,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
-        return self.animate(**anim_args)._set_mark(self._label, label).build()
+        return self._label.animate(**anim_args).set(label).build()
 
     @mn.override_animate(clear_label)
     def __animate_clear_label(
@@ -484,7 +487,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
-        return self.animate(**anim_args)._clear_mark(self._label).build()
+        return self._label.animate(**anim_args).clear().build()
 
     @mn.override_animate(set_annotation)
     def __animate_set_annotation(
@@ -492,7 +495,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
-        return self.animate(**anim_args)._set_mark(self._annotation, annotation).build()
+        return self._annotation.animate(**anim_args).set(annotation).build()
 
     @mn.override_animate(clear_annotation)
     def __animate_clear_annotation(
@@ -500,7 +503,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
-        return self.animate(**anim_args)._clear_mark(self._annotation).build()
+        return self._annotation.animate(**anim_args).clear().build()
 
     @mn.override_animate(set_current)
     def __animate_set_current(

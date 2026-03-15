@@ -87,6 +87,7 @@ class Terminal(Markable):
 
         self._current: Mark = Mark(self._top_anchor, self._centre_anchor)
         self._current_mark_anchored_below: bool = False
+        self.add(self._current)
 
     @property
     def direction(self) -> mnt.Vector3D:
@@ -147,110 +148,10 @@ class Terminal(Markable):
             self._current_mark_anchored_below = below
 
         if label is not None:
-            self._set_mark(self._current, label)
+            self._current.set(label)
 
         self.__update_terminal_visibility()
         return self
-
-    def reset_current(
-        self, label: str | Value, out: bool = False, below: bool = False
-    ) -> Self:
-        """Set the current label of the terminal. Unspecified arguments are reset.
-
-        Sets the current label, with unspecified arguments being reset to their original
-        (default) values. In contrast to its sister method `.set_current()`, this method
-        will always produce the same result regardless of where it is called.
-
-        Parameters
-        ----------
-        label : str | Value
-            The current label to set. Takes a TeX math mode string, or a ``Value`` to be
-            typeset as a math mode string.
-        out : bool
-            Whether the arrow accompanying the annotation should point out (away from
-            the body of the component to which the terminal is attached), or in (towards
-            the component, this is the default).
-        below : bool
-            Whether the annotation should be placed below the current arrow, or above it
-            (which is the default). Note that 'below' here is defined as below the
-            terminal when it is pointing right.
-
-        See Also
-        --------
-        set_current: Set the current label without resetting unspecified arguments.
-        """
-        return self.set_current(label=label, out=out, below=below)
-
-    def clear_current(self) -> Self:
-        """Clear the current annotation of the terminal."""
-        self.remove(self._current_arrow)
-        self._current_arrow_showing = False
-        self._clear_mark(self._current)
-        self.__update_terminal_visibility()
-        return self
-
-    def is_visible(self) -> bool:
-        """Whether the terminal is currently visible on screen."""
-        return (not self.autovisibility) or (
-            self._connection_count > 0 or self._current_arrow_showing
-        )
-
-    def match_style(self, vmobject: VMobject, _family: bool = True) -> Self:
-        """Match the style of the terminal wire to another vmobject.
-
-        Parameters
-        ----------
-        vmobject : VMobject
-            The vmobject to match to.
-        _family : bool
-            Disregarded in this case.
-
-        Notes
-        -----
-        - It is not possible to override the stroke width
-        - The ``_family`` argument has no effect.
-        """
-        self._line.match_style(vmobject).set_stroke(
-            width=config_eng.symbol.wire_stroke_width
-        )
-        return self
-
-    def _increment_connection_count(self) -> Self:
-        self._connection_count += 1
-        self.__update_terminal_visibility()
-        return self
-
-    def _decrement_connection_count(self) -> Self:
-        self._connection_count -= 1
-        self.__update_terminal_visibility()
-        return self
-
-    def __rebuild_current_arrow(self) -> None:
-        """Rebuild the current arrow.
-
-        Useful after an Uncreate or a rotation when the arrow wasn't in the scene (and
-        therefore wasn't rotated).
-        """
-        angle_to_rotate = mn.angle_of_vector(self.direction)
-        if not self._current_arrow_pointing_out:
-            angle_to_rotate += np.pi
-        self._current_arrow = CurrentArrow(self._centre_anchor.pos, angle_to_rotate)
-
-    def __update_terminal_visibility(self) -> None:
-        if not self.autovisibility:
-            return
-
-        if self._connection_count < 0:
-            raise RuntimeError(
-                f"Terminal cannot have negative connection count "
-                f"({self._connection_count})."
-            )
-
-        should_be_visible = self._connection_count > 0 or self._current_arrow_showing
-        if should_be_visible:
-            self.add(self._line)
-        else:
-            self.remove(self._line)
 
     @mn.override_animate(set_current)
     def __animate_set_current(
@@ -296,9 +197,8 @@ class Terminal(Markable):
             )
             self._current_mark_anchored_below = below
 
-        label_animation = (
-            self.animate(**anim_args)._set_mark(self._current, label).build()
-        )
+        label_tex = label if isinstance(label, str) else label.to_latex()
+        label_animation = self._label.animate(**anim_args).set(label_tex).build()
         animations.append(label_animation)
 
         visibility_change_needed = self.autovisibility and self._connection_count == 0
@@ -309,6 +209,35 @@ class Terminal(Markable):
             animations.append(terminal_animation)
 
         return mn.AnimationGroup(*animations)
+
+    def reset_current(
+        self, label: str | Value, out: bool = False, below: bool = False
+    ) -> Self:
+        """Set the current label of the terminal. Unspecified arguments are reset.
+
+        Sets the current label, with unspecified arguments being reset to their original
+        (default) values. In contrast to its sister method `.set_current()`, this method
+        will always produce the same result regardless of where it is called.
+
+        Parameters
+        ----------
+        label : str | Value
+            The current label to set. Takes a TeX math mode string, or a ``Value`` to be
+            typeset as a math mode string.
+        out : bool
+            Whether the arrow accompanying the annotation should point out (away from
+            the body of the component to which the terminal is attached), or in (towards
+            the component, this is the default).
+        below : bool
+            Whether the annotation should be placed below the current arrow, or above it
+            (which is the default). Note that 'below' here is defined as below the
+            terminal when it is pointing right.
+
+        See Also
+        --------
+        set_current: Set the current label without resetting unspecified arguments.
+        """
+        return self.set_current(label=label, out=out, below=below)
 
     @mn.override_animate(reset_current)
     def __animate_reset_current(
@@ -326,6 +255,14 @@ class Terminal(Markable):
             .build()
         )
 
+    def clear_current(self) -> Self:
+        """Clear the current annotation of the terminal."""
+        self.remove(self._current_arrow)
+        self._current_arrow_showing = False
+        self._current.clear()
+        self.__update_terminal_visibility()
+        return self
+
     @mn.override_animate(clear_current)
     def __animate_clear_current(
         self, anim_args: dict[str, Any] | None = None
@@ -334,7 +271,7 @@ class Terminal(Markable):
             anim_args = {}
 
         arrow_animation = mn.Uncreate(self._current_arrow, **anim_args)
-        label_animation = self.animate(**anim_args)._clear_mark(self._current).build()
+        label_animation = self._label.animate(**anim_args).clear().build()
         animations: list[mn.Animation] = [arrow_animation, label_animation]
 
         if self.autovisibility and self._connection_count == 0:
@@ -346,6 +283,37 @@ class Terminal(Markable):
         self._current_arrow_showing = False
 
         return mn.AnimationGroup(*animations)
+
+    def is_visible(self) -> bool:
+        """Whether the terminal is currently visible on screen."""
+        return (not self.autovisibility) or (
+            self._connection_count > 0 or self._current_arrow_showing
+        )
+
+    def match_style(self, vmobject: VMobject, _family: bool = True) -> Self:
+        """Match the style of the terminal wire to another vmobject.
+
+        Parameters
+        ----------
+        vmobject : VMobject
+            The vmobject to match to.
+        _family : bool
+            Disregarded in this case.
+
+        Notes
+        -----
+        - It is not possible to override the stroke width
+        - The ``_family`` argument has no effect.
+        """
+        self._line.match_style(vmobject).set_stroke(
+            width=config_eng.symbol.wire_stroke_width
+        )
+        return self
+
+    def _increment_connection_count(self) -> Self:
+        self._connection_count += 1
+        self.__update_terminal_visibility()
+        return self
 
     @mn.override_animate(_increment_connection_count)
     def __animate_increment_connection_count(
@@ -368,6 +336,11 @@ class Terminal(Markable):
         self.add(self._line)
         return mn.Create(self._line, introducer=False, **anim_args)
 
+    def _decrement_connection_count(self) -> Self:
+        self._connection_count -= 1
+        self.__update_terminal_visibility()
+        return self
+
     @mn.override_animate(_decrement_connection_count)
     def __animate_decrement_connection_count(
         self, anim_args: dict[str, Any] | None = None
@@ -381,3 +354,30 @@ class Terminal(Markable):
 
         self.__update_terminal_visibility()
         return mn.Uncreate(self._line, **anim_args)
+
+    def __rebuild_current_arrow(self) -> None:
+        """Rebuild the current arrow.
+
+        Useful after an Uncreate or a rotation when the arrow wasn't in the scene (and
+        therefore wasn't rotated).
+        """
+        angle_to_rotate = mn.angle_of_vector(self.direction)
+        if not self._current_arrow_pointing_out:
+            angle_to_rotate += np.pi
+        self._current_arrow = CurrentArrow(self._centre_anchor.pos, angle_to_rotate)
+
+    def __update_terminal_visibility(self) -> None:
+        if not self.autovisibility:
+            return
+
+        if self._connection_count < 0:
+            raise RuntimeError(
+                f"Terminal cannot have negative connection count "
+                f"({self._connection_count})."
+            )
+
+        should_be_visible = self._connection_count > 0 or self._current_arrow_showing
+        if should_be_visible:
+            self.add(self._line)
+        else:
+            self.remove(self._line)
