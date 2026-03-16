@@ -12,6 +12,19 @@ from manim_eng._base.anchor import CentreAnchor, LabelAnchor
 __all__ = ["CurrentArrow"]
 
 
+class CurrentArrowMoveToTarget(mn.MoveToTarget):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+
+    def finish(self) -> None:
+        super().finish()
+        # Copy over relevant aspects of the target mobject that MoveToTarget doesn't
+        # cover
+        self.mobject._alpha = self.target_mobject._alpha
+        self.mobject._invert = self.target_mobject._invert
+        self.mobject._label = self.target_mobject._label
+
+
 class CurrentArrow(Markable):
     """Current arrow placed along a line.
 
@@ -89,6 +102,7 @@ class CurrentArrow(Markable):
             self._alpha = alpha
         if invert is not None:
             self._invert = invert
+        self.__reposition()
         return self
 
     @mn.override_animate(set)
@@ -105,13 +119,16 @@ class CurrentArrow(Markable):
         if self._triangle in self.submobjects:
             if alpha is not None or invert is not None:
                 self.generate_target()
+
                 if alpha is not None:
                     self.target._alpha = alpha
                 if invert is not None:
                     self.target._invert = invert
                 if label is not None:
                     self.target._label.set(label)
-                return mn.MoveToTarget(self, **anim_args)
+
+                return CurrentArrowMoveToTarget(self, **anim_args)
+
             if label is not None:
                 return self._label.animate(**anim_args).set(label).build()
             return None
@@ -152,11 +169,18 @@ class CurrentArrow(Markable):
         self._invert = not self._invert
         return self
 
+    def get_center(self) -> mnt.Point3D:
+        """Get the centre of the current arrow.
+
+        Note that this is not the center of the Mobject overall.
+        """
+        return self._centre_anchor.pos
+
     def __reposition(self) -> None:
         new_pos, new_angle = self.__calculate_new_pose()
         self.shift(new_pos - self._centre_anchor.pos)
         angle_delta = new_angle - self.__current_angle()
-        self.rotate(angle_delta)
+        self.rotate(angle_delta, about_point=self._centre_anchor.pos)
 
     def __calculate_new_pose(self) -> tuple[mnt.Point3D, float]:
         epsilon = 1e-6
