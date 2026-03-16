@@ -7,7 +7,7 @@ import manim as mn
 from manim_eng import config_eng
 from manim_eng.components.base.bipole import Bipole
 from manim_eng.components.base.modifiers import SensorModifier, VariableModifier
-from manim_eng.components.base.terminal import Terminal
+from manim_eng.components.base.pin import Pin
 
 __all__ = ["CapacitiveSensor", "Capacitor", "VariableCapacitor"]
 
@@ -20,11 +20,11 @@ class Capacitor(Bipole):
         self.__plate_half_height = config_eng.symbol.plate_height / 2
 
         super().__init__(
-            Terminal(
+            Pin(
                 position=mn.LEFT * self.__plate_half_gap,
                 direction=mn.LEFT,
             ),
-            Terminal(
+            Pin(
                 position=mn.RIGHT * self.__plate_half_gap,
                 direction=mn.RIGHT,
             ),

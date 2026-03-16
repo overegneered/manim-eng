@@ -8,7 +8,7 @@ import numpy as np
 
 from manim_eng import config_eng
 from manim_eng.components.base.bipole import SquareBipole
-from manim_eng.components.base.terminal import Terminal
+from manim_eng.components.base.pin import Pin
 
 __all__ = [
     "CurrentSourceBase",
@@ -31,22 +31,22 @@ class Source(SquareBipole, metaclass=abc.ABCMeta):
         )
 
     @property
-    def negative(self) -> Terminal:
-        """Return the negative (left-hand) terminal of the source."""
+    def negative(self) -> Pin:
+        """Return the negative (left-hand) pin of the source."""
         return self.left
 
     @property
-    def positive(self) -> Terminal:
-        """Return the positive (right-hand) terminal of the source."""
+    def positive(self) -> Pin:
+        """Return the positive (right-hand) pin of the source."""
         return self.right
 
     @property
-    def anode(self) -> Terminal:
+    def anode(self) -> Pin:
         """Return the anode (positive terminal) of the source."""
         return self.positive
 
     @property
-    def cathode(self) -> Terminal:
+    def cathode(self) -> Pin:
         """Return the cathode (negative terminal) of the source."""
         return self.negative
 
@@ -204,7 +204,7 @@ class CurrentSourceBase(Source, metaclass=abc.ABCMeta):
 class EuropeanCurrentSourceBase(CurrentSourceBase, metaclass=abc.ABCMeta):
     """Base class for all European current sources.
 
-    Implements the setting of current on the positive terminal that is unique to
+    Implements the setting of current on the positive pin that is unique to
     European sources, as well as the internal symbol of European current sources.
 
     Designed to be used in conjunction with the ``RoundOuter`` and ``DiamondOuter``

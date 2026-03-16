@@ -247,8 +247,8 @@ class ComponentSymbolConfig(ConfigBase):
     current_arrow_radius: float = (2 / np.sqrt(3)) * 0.2 * bipole_height
     """The length from the centre of the current arrow triangle from its centre to one
     of its vertices."""
-    terminal_length: float = 0.4 * bipole_width
-    """The length of the terminal of a component."""
+    pin_length: float = 0.4 * bipole_width
+    """The length of the pin of a component."""
     wire_stroke_width: float = 0.625 * component_stroke_width
     """The stroke width to use for wires."""
     mark_font_size: float = 36.0

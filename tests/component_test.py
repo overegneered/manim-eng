@@ -16,12 +16,12 @@ from .utils.dummy_component import DummyComponent, DummyComponentMockedTerminals
     [
         pytest.param(
             None,
-            np.array([1, 2, 0]) + config_eng.symbol.terminal_length * mn.RIGHT,
+            np.array([1, 2, 0]) + config_eng.symbol.pin_length * mn.RIGHT,
             id="No direction specified takes component terminal direction",
         ),
         pytest.param(
             mn.RIGHT,
-            np.array([1, 2, 0]) + config_eng.symbol.terminal_length * mn.RIGHT,
+            np.array([1, 2, 0]) + config_eng.symbol.pin_length * mn.RIGHT,
             id="Aligning in the x-direction",
         ),
         pytest.param(
@@ -43,7 +43,7 @@ def test_align_terminal(
 ) -> None:
     alignment_point = np.array([2, 2, 0])
 
-    dummy_component.align_terminal(
+    dummy_component.align_pin(
         dummy_component.right, alignment_point, direction=direction
     )
 
@@ -57,7 +57,7 @@ def test_align_value_errors_if_terminal_belongs_to_same_component(
         ValueError,
         match="Terminal passed to `other_terminal` belongs to this component.",
     ):
-        dummy_component.align_terminal(dummy_component.right, dummy_component.right)
+        dummy_component.align_pin(dummy_component.right, dummy_component.right)
 
 
 def test_align_value_errors_if_node_passed_itself() -> None:
@@ -65,7 +65,7 @@ def test_align_value_errors_if_node_passed_itself() -> None:
     with pytest.raises(
         ValueError, match="Node passed to `other_terminal` is this component."
     ):
-        node.align_terminal(node.right, node)
+        node.align_pin(node.right, node)
 
 
 def test_align_value_errors_if_monopole_passed_itself() -> None:
@@ -73,7 +73,7 @@ def test_align_value_errors_if_monopole_passed_itself() -> None:
     with pytest.raises(
         ValueError, match="Monopole passed to `other_terminal` is this component."
     ):
-        monopole.align_terminal(monopole.terminal, monopole)
+        monopole.align_pin(monopole.pin, monopole)
 
 
 def test_set_label_no_existing_label(dummy_component: Component) -> None:
@@ -192,7 +192,7 @@ def test_set_current_string_terminal_specified(
 ) -> None:
     current_label = "current label still"
 
-    dummy_component_mocked_terminals.set_current(current_label, terminal="right")
+    dummy_component_mocked_terminals.set_current(current_label, pin="right")
 
     dummy_component_mocked_terminals.right.set_current.assert_called_once_with(
         label=current_label
@@ -206,7 +206,7 @@ def test_set_current_actual_terminal_specified(
     current_label = "current label again"
 
     dummy_component_mocked_terminals.set_current(
-        current_label, terminal=dummy_component_mocked_terminals.right
+        current_label, pin=dummy_component_mocked_terminals.right
     )
 
     dummy_component_mocked_terminals.right.set_current.assert_called_once_with(
@@ -318,14 +318,14 @@ def test_get_or_check_terminal_non_belonging_terminal() -> None:
     with pytest.raises(
         ValueError, match="Passed terminal does not belong to this component."
     ):
-        component._get_or_check_terminal(other_component.left)
+        component._get_or_check_pin(other_component.left)
 
 
 def test_get_or_check_terminal_invalid_attribute(
     dummy_component: DummyComponent,
 ) -> None:
     with pytest.raises(AttributeError):
-        dummy_component._get_or_check_terminal("invalid_attribute")
+        dummy_component._get_or_check_pin("invalid_attribute")
 
 
 def test_get_or_check_terminal_valid_attribute_not_a_terminal(
@@ -337,17 +337,17 @@ def test_get_or_check_terminal_valid_attribute_not_a_terminal(
         ValueError,
         match=f"Attribute `{not_a_terminal}` of `DummyComponent` is not a terminal.",
     ):
-        dummy_component._get_or_check_terminal(not_a_terminal)
+        dummy_component._get_or_check_pin(not_a_terminal)
 
 
 def test_get_or_check_terminal_valid_terminal(dummy_component: DummyComponent) -> None:
-    result = dummy_component._get_or_check_terminal(dummy_component.left)
+    result = dummy_component._get_or_check_pin(dummy_component.left)
 
     assert result == dummy_component.left
 
 
 def test_get_or_check_terminal_valid_string(dummy_component: DummyComponent) -> None:
-    result = dummy_component._get_or_check_terminal("left")
+    result = dummy_component._get_or_check_pin("left")
 
     assert result == dummy_component.left
 
@@ -355,6 +355,6 @@ def test_get_or_check_terminal_valid_string(dummy_component: DummyComponent) -> 
 def test_get_or_check_terminal_terminal_is_none(
     dummy_component: DummyComponent,
 ) -> None:
-    result = dummy_component._get_or_check_terminal(None)
+    result = dummy_component._get_or_check_pin(None)
 
-    assert result == dummy_component.terminals[0]
+    assert result == dummy_component.pins[0]

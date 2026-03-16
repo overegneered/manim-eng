@@ -19,11 +19,11 @@ class DummyComponent(Component):
 
     @property
     def left(self) -> Terminal:
-        return self.terminals[0]
+        return self.pins[0]
 
     @property
     def right(self) -> Terminal:
-        return self.terminals[1]
+        return self.pins[1]
 
 
 class DummyComponentMockedTerminals(Component):
@@ -38,12 +38,12 @@ class DummyComponentMockedTerminals(Component):
 
     @property
     def left(self) -> mock.MagicMock:
-        return cast(mock.MagicMock, self.terminals[0])
+        return cast(mock.MagicMock, self.pins[0])
 
     @property
     def right(self) -> mock.MagicMock:
-        return cast(mock.MagicMock, self.terminals[1])
+        return cast(mock.MagicMock, self.pins[1])
 
     @property
     def cast_terminals(self) -> list[mock.MagicMock]:
-        return cast(list[mock.MagicMock], self.terminals)
+        return cast(list[mock.MagicMock], self.pins)

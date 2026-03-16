@@ -5,7 +5,7 @@ from typing import Any, Sequence
 import manim as mn
 
 from manim_eng import config_eng
-from manim_eng.components.base import Terminal, VoltageSourceBase
+from manim_eng.components.base import Pin, VoltageSourceBase
 
 __all__ = ["RandalMunroeSourceBase"]
 
@@ -31,11 +31,11 @@ class RandalMunroeSourceBase(VoltageSourceBase):
         super().__init__(
             arrow=False,
             voltage=voltage,
-            left=Terminal(
+            left=Pin(
                 position=self.__half_width * mn.LEFT,
                 direction=mn.LEFT,
             ),
-            right=Terminal(
+            right=Pin(
                 position=self.__half_width * mn.RIGHT,
                 direction=mn.RIGHT,
             ),

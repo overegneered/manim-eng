@@ -4,6 +4,7 @@ from .bipole import *
 from .component import *
 from .modifiers import *
 from .monopole import *
+from .pin import *
 from .source import *
 from .switch import *
 from .terminal import *

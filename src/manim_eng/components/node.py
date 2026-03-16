@@ -128,7 +128,7 @@ class Node(Component):
         """
         direction = self._get_normalised_direction(direction)
 
-        for terminal in self.terminals:
+        for terminal in self.pins:
             if np.allclose(terminal.direction, direction):
                 to_return = terminal
                 break
@@ -138,7 +138,7 @@ class Node(Component):
                 direction=direction,
                 auto=True,
             ).match_style(self)
-            self._terminals.add(to_return)
+            self._pins.add(to_return)
 
         return to_return
 
@@ -346,16 +346,14 @@ class Node(Component):
         return mn.normalize(direction)
 
     def _should_be_visible(self) -> bool:
-        visible_terminal_count = sum(
-            [terminal.is_visible() for terminal in self.terminals]
-        )
-        return visible_terminal_count > AUTOBLOBBING_BLOB_THRESHOLD
+        visible_terminal_count = sum([terminal.is_visible() for terminal in self.pins])
+        return visible_terminal_count > AUTOBLOBBING_BLOB_THRESHOLD  # type: ignore[no-any-return]
 
     def _get_visible_terminal_angles(self) -> list[float]:
         return sorted(
             [
                 mn.angle_of_vector(terminal.direction)
-                for terminal in self.terminals
+                for terminal in self.pins
                 if terminal.is_visible()
             ]
         )

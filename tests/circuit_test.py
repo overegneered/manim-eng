@@ -137,13 +137,13 @@ def test_collapse_components_and_terminals_expands_components() -> None:
         [component_1, component_2.right]
     )
 
-    assert set(terminals) == {*component_1.terminals, component_2.right}
+    assert set(terminals) == {*component_1.pins, component_2.right}
 
 
 def test_collapse_components_and_terminals_removes_duplicates() -> None:
     component_1 = DummyComponent()
     component_2 = DummyComponent()
-    expected = [*component_1.terminals, component_2.right]
+    expected = [*component_1.pins, component_2.right]
 
     terminals = Circuit._collapse_components_and_terminals_to_terminals(
         [

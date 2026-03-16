@@ -55,7 +55,7 @@ class Terminal(Markable):
         self._connection_count = 0
 
         direction /= np.linalg.norm(direction)
-        end = position + (direction * config_eng.symbol.terminal_length)
+        end = position + (direction * config_eng.symbol.pin_length)
         self._line = mn.Line(
             start=position,
             end=end,

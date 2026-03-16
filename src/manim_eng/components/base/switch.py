@@ -9,13 +9,13 @@ import numpy as np
 from manim_eng import config_eng
 from manim_eng.components import node
 from manim_eng.components.base.bipole import Bipole
-from manim_eng.components.base.terminal import Terminal
+from manim_eng.components.base.pin import Pin
 
 __all__ = ["BipoleSwitchBase", "PushSwitchBase"]
 
 
 class BipoleSwitchBase(Bipole, metaclass=abc.ABCMeta):
-    """Base class for switches with two terminals.
+    """Base class for switches with two pins.
 
     Note that subclasses should construct their switch models **open**.
     """
@@ -31,11 +31,11 @@ class BipoleSwitchBase(Bipole, metaclass=abc.ABCMeta):
         )
 
         super().__init__(
-            Terminal(
+            Pin(
                 position=mn.LEFT * half_width,
                 direction=mn.LEFT,
             ),
-            Terminal(
+            Pin(
                 position=mn.RIGHT * half_width,
                 direction=mn.RIGHT,
             ),

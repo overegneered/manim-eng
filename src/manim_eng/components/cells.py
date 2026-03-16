@@ -5,8 +5,8 @@ from typing import Any
 import manim as mn
 
 from manim_eng import config_eng
+from manim_eng.components.base.pin import Pin
 from manim_eng.components.base.source import VoltageSourceBase
-from manim_eng.components.base.terminal import Terminal
 
 __all__ = ["Battery", "Cell", "Cells", "DoubleCell", "QuadrupleCell", "TripleCell"]
 
@@ -31,11 +31,11 @@ class Cells(VoltageSourceBase):
         super().__init__(
             arrow=False,
             voltage=voltage,
-            left=Terminal(
+            left=Pin(
                 position=mn.LEFT * self.__half_width,
                 direction=mn.LEFT,
             ),
-            right=Terminal(
+            right=Pin(
                 position=mn.RIGHT * self.__half_width,
                 direction=mn.RIGHT,
             ),

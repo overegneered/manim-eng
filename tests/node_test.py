@@ -39,7 +39,7 @@ def test_get_visible_terminal_angles(
         terminal_mock = mock.MagicMock(Terminal)
         terminal_mock.direction = direction
         terminal_mock.is_visible.return_value = visibility
-        node.terminals.append(terminal_mock)
+        node.pins.append(terminal_mock)
 
     actual = node._get_visible_terminal_angles()
 

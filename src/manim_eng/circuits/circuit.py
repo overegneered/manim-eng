@@ -166,7 +166,7 @@ class Circuit(mn.VMobject):
         terminals = []
         for component_or_terminal in components_or_terminals:
             if isinstance(component_or_terminal, Component):
-                terminals.extend(component_or_terminal.terminals)
+                terminals.extend(component_or_terminal.pins)
             else:
                 terminals.append(component_or_terminal)
         # Remove duplicate entries
@@ -211,7 +211,7 @@ class Circuit(mn.VMobject):
         terminal_set = set(terminals)
         owned_terminal_set = set()
         for component in self.elements:
-            owned_terminal_set.update(component.terminals)
+            owned_terminal_set.update(component.pins)
 
         terminals_not_owned = terminal_set.difference(owned_terminal_set)
         if len(terminals_not_owned) != 0:

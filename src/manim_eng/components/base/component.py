@@ -14,8 +14,7 @@ from manim_eng._base.anchor import AnnotationAnchor, CentreAnchor, LabelAnchor
 from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
 from manim_eng.circuits.voltage import Voltage
-from manim_eng.components.base.terminal import Terminal
-from manim_eng.units import Value
+from manim_eng.components.base.pin import Pin
 
 if TYPE_CHECKING:
     from manim_eng.components.base.monopole import Monopole
@@ -29,13 +28,11 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
     Parameters
     ----------
-    terminals : list[Terminal]
-        The terminals of the component. Management of terminal visibility is handled by
-        the constructor; terminals should not be added before or after they are passed
-        to this constructor.
-    label : str | Value | None, optional
-        A label to set. Takes a TeX math mode string, or a ``Value`` to be typeset as a
-        math mode string.
+    pins : list[Pin]
+        The pins of the component. Management of pins is handled by the constructor, and
+        they do not need to be added beforehand or afterwards.
+    label : str | None, optional
+        A label to set. Takes a TeX math mode string.
     annotation : str | Value | None, optional
         An annotation to set. Takes a TeX math mode string, or a ``Value`` to be typeset
          as a math mode string.
@@ -43,7 +40,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        terminals: list[Terminal],
+        pins: list[Pin],
         label: str | None = None,
         annotation: str | None = None,
         **kwargs: Any,
@@ -52,15 +49,13 @@ class Component(Markable, metaclass=abc.ABCMeta):
             stroke_width=config_eng.symbol.component_stroke_width, **kwargs
         )
 
-        for terminal in terminals:
-            terminal.match_style(self)
-        self._terminals = mn.VGroup(*terminals)
+        self._pins = mn.VGroup(*pins)
         self._body = mn.VGroup()
         self.add(self._body)
 
         self._construct()
 
-        self._body.add(self._terminals)
+        self._body.add(self._pins)
 
         self._centre_anchor = CentreAnchor()
         self._label_anchor = LabelAnchor()
@@ -85,18 +80,18 @@ class Component(Markable, metaclass=abc.ABCMeta):
         """
 
     @property
-    def terminals(self) -> list[Terminal]:
+    def pins(self) -> list[Pin]:
         """The list of terminals of the component."""
-        return cast(list[Terminal], self._terminals.submobjects)
+        return cast(list[Pin], self._pins.submobjects)
 
     @property
     def label(self) -> Mark:
-        """A handle of label of the component."""
+        """A handle to the label of the component."""
         return self._label
 
     @property
     def annotation(self) -> Mark:
-        """A handle of annotation of the component."""
+        """A handle to the annotation of the component."""
         return self._annotation
 
     def get_center(self) -> mnt.Point3D:
@@ -114,239 +109,121 @@ class Component(Markable, metaclass=abc.ABCMeta):
         """
         return self._centre_anchor.get_center()
 
-    def align_terminal(
+    def align_pin(
         self,
-        self_terminal: Terminal | str,
-        other: Terminal | mnt.Point3D | Node | Monopole,
+        pin: Pin | str,
+        other: Pin | mnt.Point3D | Node | Monopole,
         direction: mnt.Vector3D | None = None,
     ) -> Self:
-        """Align a component terminal with a point or another component.
+        """Align a component pin with a point or another component.
 
         Moves this component along the line perpendicular to ``direction`` such that the
-        line between the end of ``self_terminal`` and ``other``
-        has direction vector ``direction``.
+        line between the end of ``pin`` and ``other`` has direction vector
+        ``direction``.
 
         Parameters
         ----------
-        self_terminal : Terminal | str
-             Either a ``Terminal`` belonging to this component, or a string representing
-            an attribute of this component that returns a terminal (e.g. ``"right"``).
-        other : Terminal | Point3D | Node | Monopole
-            A ``Terminal`` belonging to another component, a ``Node``, a ``Monopole``
-            (for which its single terminal is selected), or a point in space.
+        pin : Pin | str
+             Either a ``Pin`` belonging to this component, or a string representing
+            an attribute of this component that returns a pin (e.g. ``"right"``).
+        other : Pin | Point3D | Node | Monopole
+            A ``Pin`` belonging to another component, a ``Node``, a ``Monopole``
+            (for which its single pin is selected), or a point in space.
         direction : Vector3D | None
-            The direction to align the terminals in. If not supplied, uses
-            ``self_terminal``'s direction.
+            The direction to align the pins in. If not supplied, uses
+            ``pin``'s direction.
 
         Raises
         ------
         ValueError
-            If a ``Terminal`` passed to ``self_terminal`` does not belong to this
-            component.
+            If a ``Pin`` passed to ``pin`` does not belong to this component.
         AttributeError
-            If a string passed to ``self_terminal`` does not represent an existing
-            attribute on this component.
+            If a string passed to ``pin`` does not represent an existing attribute on
+            this component.
         ValueError
-            If a string passed to ``self_terminal`` does not represent an attribute of
-            this component that produces a ``Terminal`` instance.
+            If a string passed to ``pin`` does not represent an attribute of this
+            component that produces a ``Pin`` instance.
         ValueError
-            If ``other`` belongs to this component (if it is a ``Terminal``)
+            If ``other`` belongs to this component (if it is a ``Pin``)
             or if ``other`` *is* this component (if it is a ``Node`` or
             ``Monopole``).
 
         Notes
         -----
-        In geometric terms, the component in moved such that the end of
-        ``self_terminal`` is at the intersection of the lines that
+        In geometric terms, the component in moved such that the end of ``pin`` is at
+        the intersection of the lines that
 
         - Have direction vector perpendicular to ``direction`` and go through the
-            current position of the end of ``self_terminal``; and
-        - Have direction vector ``direction`` and go through the end of
-            ``other`` (in the case that it is a ``Terminal``) or through ``other`` (in
-            the case that it is a point).
+            current position of the end of ``pin``; and
+        - Have direction vector ``direction`` and go through the end of ``other`` (in
+            the case that it is a ``Pin``) or through ``other`` (in the case that it is
+            a point).
         """
         from manim_eng.components.base.monopole import Monopole
         from manim_eng.components.node import Node
 
-        self_terminal = self._get_or_check_terminal(self_terminal)
-        if isinstance(other, Terminal):
-            if other in self.terminals:
+        pin = self._get_or_check_pin(pin)
+        if isinstance(other, Pin):
+            if other in self.pins:
                 raise ValueError(
-                    "Terminal passed to `other_terminal` belongs to this component. "
-                    "`other_terminal` should be a terminal of another component, "
+                    "Pin passed to `other` belongs to this component. "
+                    "`other` should be a pin of another component, "
                     "a point, or a separate Node or Monopole."
                 )
             other = other.end
         elif isinstance(other, Node):
             if other == self:
                 raise ValueError(
-                    "Node passed to `other_terminal` is this component. "
-                    "`other_terminal` should be a terminal of another component, "
+                    "Node passed to `other` is this component. "
+                    "`other` should be a pin of another component, "
                     "a point, or a separate Node or Monopole."
                 )
             other = other.get_center()
         elif isinstance(other, Monopole):
             if other == self:
                 raise ValueError(
-                    "Monopole passed to `other_terminal` is this component. "
-                    "`other_terminal` should be a terminal of another component, "
+                    "Monopole passed to `other` is this component. "
+                    "`other` should be a terminal of another component, "
                     "a point, or a separate Node or Monopole."
                 )
-            other = other.terminal.end
+            other = other.pin.end
 
         if direction is None:
-            direction = self_terminal.direction
+            direction = pin.direction
 
         movement_direction = np.cross(direction, mn.OUT)
         target_position = mn.find_intersection(
-            [self_terminal.end],
+            [pin.end],
             [movement_direction],
             [other],
             [direction],
         )[0]
 
-        self.shift(target_position - self_terminal.end)
-        return self
-
-    def set_current(
-        self,
-        label: str | Value | None,
-        terminal: Terminal | str | None = None,
-        **kwargs: Any,
-    ) -> Self:
-        """Set the current label on one of the terminals of the component.
-
-        Parameters
-        ----------
-        label : str | Value, optional
-            The current label to set. Takes a TeX math mode string, or a ``Value`` to be
-            typeset as a math mode string.
-        terminal : Terminal | str, optional
-            Either a ``Terminal`` belonging to this component, or a string representing
-            an attribute of this component that returns a component (e.g. ``"right"``).
-            If unspecified, defaults to the first terminal in the internal terminal
-            list. In the case of monopoles, this is the only terminal, and in the case
-            of bipoles, this is the left terminal.
-
-        Other Parameters
-        ----------------
-        **kwargs : Any
-            Kwargs to pass on to the terminal's ``.set_current()`` method.
-
-        Raises
-        ------
-        ValueError
-            If a ``Terminal`` passed to ``terminal`` does not belong to this component.
-        AttributeError
-            If a string passed to ``terminal`` does not represent an existing attribute.
-        ValueError
-            If a string passed to ``terminal`` does not represent an attribute of this
-            component that produces a ``Terminal`` instance.
-
-        See Also
-        --------
-        components.base.terminal.Terminal.set_current()
-        """
-        terminal = self._get_or_check_terminal(terminal)
-        terminal.set_current(label=label, **kwargs)
-        return self
-
-    def reset_current(
-        self, label: str | Value, terminal: Terminal | str | None = None, **kwargs: Any
-    ) -> Self:
-        """Reset the current label on one of the terminals of the component.
-
-        **Warning:** Using this will reset all unspecified arguments to their default
-        values. See the documentation of ``Terminal.reset_current()`` for more
-        information.
-
-        Parameters
-        ----------
-        label : str | Value
-            The current label to set. Takes a TeX math mode string, or a ``Value`` to be
-            typeset as a math mode string.
-        terminal : Terminal | str | None
-            Either a ``Terminal`` belonging to this component, or a string representing
-            an attribute of this component that returns a component (e.g. ``"right"``).
-            If unspecified, defaults to the first terminal in the internal terminal
-            list. In the case of monopoles, this is the only terminal, and in the case
-            of bipoles, this is the left terminal.
-
-        Other Parameters
-        ----------------
-        **kwargs : Any
-            Kwargs to pass on to the terminal's ``.set_current()`` method.
-
-        Raises
-        ------
-        ValueError
-            If a ``Terminal`` passed to ``terminal`` does not belong to this component.
-        AttributeError
-            If a string passed to ``terminal`` does not represent an existing attribute.
-        ValueError
-            If a string passed to ``terminal`` does not represent an attribute of this
-            component that produces a ``Terminal`` instance.
-
-        See Also
-        --------
-        components.base.terminal.Terminal.reset_current()
-        """
-        terminal = self._get_or_check_terminal(terminal)
-        terminal.reset_current(label, **kwargs)
-        return self
-
-    def clear_current(self, terminal: Terminal | str | None = None) -> Self:
-        """Clear the current label on one of the terminals of the component.
-
-        Parameters
-        ----------
-        terminal : Terminal | str | None
-            Either a ``Terminal`` belonging to this component, or a string representing
-            an attribute of this component that returns a component (e.g. ``"right"``).
-            If unspecified, defaults to the first terminal in the internal terminal
-            list. In the case of monopoles, this is the only terminal, and in the case
-            of bipoles, this is the left terminal.
-
-        Raises
-        ------
-        ValueError
-            If a ``Terminal`` passed to ``terminal`` does not belong to this component.
-        AttributeError
-            If a string passed to ``terminal`` does not represent an existing attribute.
-        ValueError
-            If a string passed to ``terminal`` does not represent an attribute of this
-            component that produces a ``Terminal`` instance.
-
-        See Also
-        --------
-        components.base.terminal.Terminal.clear_current()
-        """
-        terminal = self._get_or_check_terminal(terminal)
-        terminal.clear_current()
+        self.shift(target_position - pin.end)
         return self
 
     def voltage(
         self,
-        start: Terminal | str,
-        end: Terminal | str,
+        start: Pin | str,
+        end: Pin | str,
         *args: Any,
         **kwargs: Any,
     ) -> Voltage:
         """Return a voltage arrow across the component.
 
-        Convenience method for creating a voltage arrow across two terminals of this
+        Convenience method for creating a voltage arrow across two pins of this
         component. Returns the created ``Voltage`` object. This method automatically
         sets the component is it called upon in the ``avoid`` argument of ``Voltage``
         (and as such overrides this argument).
 
         Parameters
         ----------
-        start : Terminal | str
-            Either a ``Terminal`` belonging to this component, or a string representing
-            an attribute of this component that returns a terminal (e.g. ``"right"``).
-        end : Terminal | str
-            Either a ``Terminal`` belonging to this component, or a string representing
-            an attribute of this component that returns a terminal (e.g. ``"left"``).
+        start : Pin | str
+            Either a ``Pin`` belonging to this component, or a string representing
+            an attribute of this component that returns a pin (e.g. ``"right"``).
+        end : Pin | str
+            Either a ``Pin`` belonging to this component, or a string representing
+            an attribute of this component that returns a pin (e.g. ``"left"``).
         *args
             Positional arguments to be passed to the ``Voltage`` constructor.
         **kwargs
@@ -361,67 +238,65 @@ class Component(Markable, metaclass=abc.ABCMeta):
         Raises
         ------
         ValueError
-            If a passed ``Terminal`` does not belong to this component.
+            If a passed ``Pin`` does not belong to this component.
         AttributeError
-            If a string passed for either terminal does not represent an existing
-            attribute.
+            If a string passed for either pin does not represent an existing attribute.
         ValueError
-            If a string passed for either terminal does not represent an attribute of
-            this component that produces a ``Terminal`` instance.
+            If a string passed for either pin does not represent an attribute of this
+            component that produces a ``Pin`` instance.
         ValueError
-            If the terminals specified for both ``start`` and ``end`` are the same.
+            If the pins specified for both ``start`` and ``end`` are the same.
         """
-        start = self._get_or_check_terminal(start)
-        end = self._get_or_check_terminal(end)
+        start = self._get_or_check_pin(start)
+        end = self._get_or_check_pin(end)
 
         if start == end:
             raise ValueError(
-                "The terminals specified through `start` and `end` are "
-                "identical. They must be different."
+                "The pins specified through `start` and `end` are "
+                "the same. They must be different."
             )
 
         kwargs["avoid"] = self
 
         return Voltage(start, end, *args, **kwargs)
 
-    def _get_or_check_terminal(self, terminal: Terminal | str | None) -> Terminal:
-        """Get a terminal or check a passed terminal belongs to this component.
+    def _get_or_check_pin(self, pin: Pin | str | None) -> Pin:
+        """Get a pin from a string or check a passed pin belongs to this component.
 
         Parameters
         ----------
-        terminal : Terminal | str | None
-            The string to use as a terminal identifier, a ``Terminal`` instance to
-            verify belongs to this component, or ``None``, in which case the first
-            terminal will be used.
+        pin : Pin | str | None
+            The string to use as a pin identifier, a ``Pin`` instance to verify belongs
+            to this component, or ``None``, in which case the first pin on the component
+            will be selected.
 
         Returns
         -------
-        Terminal
-            The terminal identified.
+        Pin
+            The pin identified.
 
         Raises
         ------
         AttributeError
-            If the string passed for the terminal doesn't exist as an attribute on this
+            If the string passed for the pin doesn't exist as an attribute on this
             component.
         ValueError
-            If the attribute identified by the string isn't an instance of ``Terminal``.
+            If the attribute identified by the string isn't an instance of ``Pin``.
         ValueError
-            If the terminal passed doesn't belong to this component.
+            If the pin passed doesn't belong to this component.
         """
-        if terminal is None:
-            return self.terminals[0]
+        if pin is None:
+            return self.pins[0]
 
-        if isinstance(terminal, Terminal):
-            if terminal not in self.terminals:
-                raise ValueError("Passed terminal does not belong to this component.")
-            return terminal
+        if isinstance(pin, Pin):
+            if pin not in self.pins:
+                raise ValueError("Passed pin does not belong to this component.")
+            return pin
 
-        to_return = getattr(self, terminal)
-        if not isinstance(to_return, Terminal):
+        to_return = getattr(self, pin)
+        if not isinstance(to_return, Pin):
             raise ValueError(
-                f"Attribute `{terminal}` of `{self.__class__.__name__}` "
-                f"is not a terminal."
+                f"Attribute `{pin}` of `{self.__class__.__name__}` " f"is not a pin."
             )
         return to_return
 
@@ -431,43 +306,3 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self._label_anchor.shift(self._body.get_top() + 0.01 * mn.UP)
         self._annotation_anchor.shift(self._body.get_bottom() + 0.01 * mn.DOWN)
         self.add(self._centre_anchor, self._label_anchor, self._annotation_anchor)
-
-    @mn.override_animate(set_current)
-    def __animate_set_current(
-        self,
-        label: str,
-        terminal: Terminal | str | None = None,
-        anim_args: dict[str, Any] | None = None,
-        **kwargs: Any,
-    ) -> mn.Animation:
-        if anim_args is None:
-            anim_args = {}
-
-        terminal = self._get_or_check_terminal(terminal)
-        return terminal.animate(**anim_args).set_current(label, **kwargs).build()
-
-    @mn.override_animate(reset_current)
-    def __animate_reset_current(
-        self,
-        label: str,
-        terminal: Terminal | str | None = None,
-        anim_args: dict[str, Any] | None = None,
-        **kwargs: Any,
-    ) -> mn.Animation:
-        if anim_args is None:
-            anim_args = {}
-
-        terminal = self._get_or_check_terminal(terminal)
-        return terminal.animate(**anim_args).reset_current(label, **kwargs).build()
-
-    @mn.override_animate(clear_current)
-    def __animate_clear_current(
-        self,
-        terminal: Terminal | str | None = None,
-        anim_args: dict[str, Any] | None = None,
-    ) -> mn.Animation:
-        if anim_args is None:
-            anim_args = {}
-
-        terminal = self._get_or_check_terminal(terminal)
-        return terminal.animate(**anim_args).clear_current().build()

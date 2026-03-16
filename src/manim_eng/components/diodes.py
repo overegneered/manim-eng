@@ -5,7 +5,7 @@ import numpy as np
 
 from manim_eng import config_eng
 from manim_eng.components.base.bipole import SquareBipole
-from manim_eng.components.base.terminal import Terminal
+from manim_eng.components.base.pin import Pin
 
 __all__ = ["LED", "Diode", "Photodiode", "SchottkyDiode", "TunnelDiode", "ZenerDiode"]
 
@@ -52,22 +52,22 @@ class Diode(SquareBipole):
             self._body.add(line)
 
     @property
-    def positive(self) -> Terminal:
-        """Return the positive terminal of the diode."""
+    def positive(self) -> Pin:
+        """Return the positive pin of the diode."""
         return self.left
 
     @property
-    def negative(self) -> Terminal:
-        """Return the negative terminal of the diode."""
+    def negative(self) -> Pin:
+        """Return the negative pin of the diode."""
         return self.right
 
     @property
-    def anode(self) -> Terminal:
+    def anode(self) -> Pin:
         """Return the anode (positive terminal) of the diode."""
         return self.positive
 
     @property
-    def cathode(self) -> Terminal:
+    def cathode(self) -> Pin:
         """Return the cathode (negative terminal) of the diode."""
         return self.negative
 

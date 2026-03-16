@@ -10,8 +10,7 @@ from manim_eng import config_eng
 from manim_eng._base.anchor import CentreAnchor, VoltageAnchor
 from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
-from manim_eng.components.base.terminal import Terminal
-from manim_eng.units import Value
+from manim_eng.components.base.pin import Pin
 
 __all__ = ["Voltage"]
 
@@ -29,34 +28,32 @@ class Voltage(Markable):
 
     Parameters
     ----------
-    start : Terminal
-        The terminal the non-tip end of the arrow should be attached to, i.e. the
-        'negative' end.
-    end : Terminal
-        The terminal the tip end of the arrow should be attached to, i.e. the 'positive'
+    start : Pin
+        The pin the non-tip end of the arrow should be attached to, i.e. the 'negative'
         end.
-    label : str | Value
-        The label for the voltage arrow. Takes a TeX math mode string, or a ``Value``
-        to be typeset as a math mode string.
-    clockwise : bool
+    end : Pin
+        The pin the tip end of the arrow should be attached to, i.e. the 'positive' end.
+    label : str
+        The label for the voltage arrow. Takes a TeX math mode string.
+    clockwise : bool, optional
         Whether the arrow should go clockwise or anticlockwise. The default is
         anticlockwise.
-    buff : float
-        The buffer to use when attaching the arrow to the terminal ends.
-    avoid : VMobject | None
-        If a vmoject is specified, the arrow will go around it (including, if the
-        vmobject is a component, labels or annotations attached to the component).
-        If no component is specified, the arrow will take a default curvature.
-    component_buff : float
-        The buffer to use between the component body and the arrow, if a component to
+    buff : float, optional
+        The buffer to use between the arrow ends and the tips of the pins.
+    avoid : VMobject, optional
+        If a VMoject is specified, the arrow will go around it (including, if the
+        VMobject is a component, labels or annotations attached to the component).
+        If no component is specified, the arrow will take its default curvature.
+    component_buff : float, optional
+        The buffer to use between the component body and the arrow if a component to
         avoid is specified.
     """
 
     def __init__(
         self,
-        start: Terminal,
-        end: Terminal,
-        label: str | Value,
+        start: Pin,
+        end: Pin,
+        label: str,
         clockwise: bool = False,
         buff: float = mn.SMALL_BUFF,
         avoid: mn.VMobject | None = None,
@@ -83,45 +80,36 @@ class Voltage(Markable):
 
         self.add(self._arrow, self._centre_reference, self._anchor)
 
-        label_tex = label if isinstance(label, str) else label.to_latex()
-        self._label = Mark(self._anchor, self._centre_reference).set(label_tex)
+        self._label = Mark(self._anchor, self._centre_reference, label)
         self.add(self._label)
 
-    def set_label(self, label: str | Value, clockwise: bool | None = None) -> Self:
+    def set(self, label: str, clockwise: bool | None = None) -> Self:
         """Set the voltage label.
 
         Parameters
         ----------
-        label : str | Value
-            The label to set. Takes a TeX math mode string, or a ``Value`` to be typeset
-            as a math mode string.
+        label : str
+            The label to set. Takes a TeX math mode string.
         clockwise : bool | None
             Whether the arrow should go clockwise or anticlockwise. If unspecified,
             takes the previous setting.
-
-        See Also
-        --------
-        reset_label: Set the voltage label, with the sense of the arrow being reset to
-                     default if unspecified.
         """
-        label_tex = label if isinstance(label, str) else label.to_latex()
-        self._label.set(label_tex)
+        self._label.set(label)
         if clockwise is not None:
             self.set_clockwise(clockwise=clockwise)
         return self
 
-    @mn.override_animate(set_label)
+    @mn.override_animate(set)
     def __animate_set_label(
         self,
-        label: str | Value,
+        label: str,
         clockwise: bool | None = None,
         anim_args: dict[str, Any] | None = None,
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
 
-        label_tex = label if isinstance(label, str) else label.to_latex()
-        label_animation = self._label.animate(**anim_args).set(label_tex).build()
+        label_animation = self._label.animate(**anim_args).set(label).build()
         animations = [label_animation]
 
         if clockwise is not None:
@@ -131,40 +119,6 @@ class Voltage(Markable):
             animations.append(arrow_animation)
 
         return mn.AnimationGroup(*animations)
-
-    def reset_label(self, label: str | Value, clockwise: bool = False) -> Self:
-        """Set the voltage label, with the sense being reset to default if unspecified.
-
-        Parameters
-        ----------
-        label : str | Value
-            The label to set. Takes a TeX math mode string, or a ``Value`` to be typeset
-            as a math mode string.
-        clockwise : bool
-            Whether the arrow should go clockwise or anticlockwise. If unspecified,
-            takes the default setting (``False``).
-
-        See Also
-        --------
-        set_label: Set the voltage label, with the sense of the arrow being left as-is
-                   if unspecified.
-        """
-        return self.set_label(label=label, clockwise=clockwise)
-
-    @mn.override_animate(reset_label)
-    def __animate_reset_label(
-        self,
-        label: str,
-        clockwise: bool = False,
-        anim_args: dict[str, Any] | None = None,
-    ) -> mn.Animation:
-        if anim_args is None:
-            anim_args = {}
-        return (
-            self.animate(**anim_args)
-            .set_label(label=label, clockwise=clockwise)
-            .build()
-        )
 
     def set_clockwise(self, clockwise: bool = True) -> Self:
         """Set the sense of the voltage arrow (clockwise or anticlockwise).
@@ -185,17 +139,15 @@ class Voltage(Markable):
         """Set the sense of the voltage arrow to be anticlockwise."""
         return self.set_clockwise(clockwise=False)
 
-    def set_terminals(
-        self, start: Terminal | None = None, end: Terminal | None = None
-    ) -> Self:
-        """Set the terminal(s) the arrow goes from/to.
+    def set_pins(self, start: Pin | None = None, end: Pin | None = None) -> Self:
+        """Set the pin(s) the arrow goes from/to.
 
         Parameters
         ----------
-        start : Terminal | None
-            The terminal to attach the start of the arrow to.
-        end : Terminal | None
-            The terminal to attach the end of the arrow to.
+        start : Pin | None
+            The pin to attach the start of the arrow to.
+        end : Pin | None
+            The pin to attach the end of the arrow to.
 
         Raises
         ------
@@ -216,25 +168,25 @@ class Voltage(Markable):
         self.update()
         return self
 
-    def set_start(self, terminal: Terminal) -> Self:
-        """Set the terminal the arrow should start from.
+    def set_start(self, pin: Pin) -> Self:
+        """Set the pin the arrow should start from.
 
         Parameters
         ----------
-        terminal : Terminal
-            The terminal that should be at the non-tip end of the voltage arrow.
+        pin : Pin
+            The pin that should be at the non-tip end of the voltage arrow.
         """
-        return self.set_terminals(start=terminal)
+        return self.set_pins(start=pin)
 
-    def set_end(self, terminal: Terminal) -> Self:
-        """Set the terminal the arrow should point to.
+    def set_end(self, pin: Pin) -> Self:
+        """Set the pin the arrow should point to.
 
         Parameters
         ----------
-        terminal : Terminal
-            The terminal that should be at the tip end of the voltage arrow.
+        pin : Pin
+            The pin that should be at the tip end of the voltage arrow.
         """
-        return self.set_terminals(end=terminal)
+        return self.set_pins(end=pin)
 
     def flip_direction(self, flip_sense_as_well: bool = True) -> Self:
         """Flip the direction of the voltage arrow.
