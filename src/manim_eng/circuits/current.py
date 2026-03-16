@@ -133,20 +133,24 @@ class CurrentArrow(Markable):
                 return self._label.animate(**anim_args).set(label).build()
             return None
 
-        animations = []
-
         if alpha is not None:
             self._alpha = alpha
         if invert is not None:
             self._invert = invert
         self.__reposition()
 
+        if label is None:
+            # The triangle is not visible and no label is given: there is nothing to
+            # show and nothing to change visibly
+            return None
+
+        animations = []
+
         self._triangle = self.__build_triangle()
         animations.append(mn.Create(self._triangle, **anim_args))
         self.add(self._triangle)
 
-        if label is not None:
-            animations.append(self._label.animate(**anim_args).set(label).build())
+        animations.append(self._label.animate(**anim_args).set(label).build())
 
         return mn.AnimationGroup(*animations)
 
@@ -181,9 +185,20 @@ class CurrentArrow(Markable):
         Flips the direction of the current arrow while adjusting ``alpha`` to avoid it
         jumping about.
         """
-        self._alpha = 1 - self._alpha
-        self._invert = not self._invert
-        return self
+        return self.set(
+            alpha=1 - self._alpha,
+            invert=not self._invert,
+        )
+
+    @mn.override_animate(flip_direction)
+    def __animate_flip(self, anim_args: dict[str, Any]) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+        return (
+            self.animate(**anim_args)
+            .set(alpha=1 - self._alpha, invert=not self._invert)
+            .build()
+        )
 
     def get_center(self) -> mnt.Point3D:
         """Get the centre of the current arrow.
