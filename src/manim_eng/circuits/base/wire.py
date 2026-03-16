@@ -34,6 +34,9 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
 
         self.__update_points()
 
+        self._current = CurrentArrow(self)
+        self.add(self._current)
+
         self._attached = False
 
         if updating:
@@ -61,45 +64,10 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
             self._attached = False
         return self
 
-    def set_current(
-        self,
-        pos: float = 0.5,
-        backwards: bool = False,
-        label: str | None = None,
-        annotation: str | None = None,
-    ) -> Self:
-        """Draw a current arrow on the wire at the specified position.
-
-        The current arrow will be positioned by looking forward. This means that if you
-        place the arrow directly on an elbow bend, it will point in the direction of the
-        later segment.
-
-        Parameters
-        ----------
-        pos : float
-            A number between 0 and 1. The proportion of the distance along the wire the
-            current arrow should be placed at.
-        backwards : bool
-            Whether the arrow should be placed in the direction of the wire (``start``
-            to ``end``, ``False``, default) or in the opposite direction (``end`` to
-            ``start``, ``True``).
-        label : str, optional
-            The text to set as the label of the current arrow. Takes a TeX math mode
-            string or a :class:`~.Value` unit expression.
-        annotation : str, optional
-            The text to set as the annotation of the current arrow. Takes a TeX math
-            mode string or a :class:`~.Value` unit expression.
-        """
-        self.add(
-            CurrentArrow(
-                parent=self,
-                alpha=pos,
-                invert=backwards,
-                label=label,
-                annotation=annotation,
-            )
-        )
-        return self
+    @property
+    def current(self) -> CurrentArrow:
+        """A current arrow attached to the wire."""
+        return self._current
 
     def __update_points(self) -> None:
         # The extra points involving the 0.001 factors extend the wire ever so slightly

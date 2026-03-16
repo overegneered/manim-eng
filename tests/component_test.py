@@ -7,7 +7,6 @@ from manim_eng import config_eng
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.monopole import Monopole
 from manim_eng.components.node import Node
-from manim_eng.units import KILO, SECOND, VOLT
 
 from .utils.dummy_component import DummyComponent, DummyComponentMockedTerminals
 
@@ -80,65 +79,47 @@ def test_align_value_errors_if_monopole_passed_itself() -> None:
 def test_set_label_no_existing_label(dummy_component: Component) -> None:
     label = "R"
 
-    dummy_component.set_label(label)
+    dummy_component.label.set(label)
 
     assert dummy_component.label.tex_strings == [label]
 
 
 def test_set_label_existing_label(dummy_component: Component) -> None:
-    dummy_component.set_label("old")
+    dummy_component.label.set("old")
     new_label_text = "new"
 
-    dummy_component.set_label(new_label_text)
+    dummy_component.label.set(new_label_text)
 
     assert dummy_component.label.tex_strings == [new_label_text]
-
-
-def test_set_label_with_value(dummy_component: Component) -> None:
-    dummy_component.set_label(3.14 * KILO * VOLT / SECOND**2)
-
-    assert dummy_component.label.tex_strings == [r"3.14\,\mathrm{kV\,s^{-2}}"]
 
 
 def test_set_annotation_no_existing_annotation(dummy_component: Component) -> None:
     annotation = r"12 \Omega"
 
-    dummy_component.set_annotation(annotation)
+    dummy_component.annotation.set(annotation)
 
     assert dummy_component.annotation.tex_strings == [annotation]
 
 
 def test_set_annotation_existing_annotation(dummy_component: Component) -> None:
-    dummy_component.set_annotation("old")
+    dummy_component.annotation.set("old")
     new_annotation_text = "new"
 
-    dummy_component.set_annotation(new_annotation_text)
+    dummy_component.annotation.set(new_annotation_text)
 
     assert dummy_component.annotation.tex_strings == [new_annotation_text]
 
 
-def test_set_label_with_annotation(dummy_component: Component) -> None:
-    dummy_component.set_annotation(3.14 * KILO * VOLT / SECOND**2)
-
-    assert dummy_component.annotation.tex_strings == [r"3.14\,\mathrm{kV\,s^{-2}}"]
-
-
 def test_label_via_constructor_argument_works() -> None:
-    dummy_component_string = DummyComponent(label="R")
-    dummy_component_value = DummyComponent(label=3.14 * KILO * VOLT / SECOND**2)
+    dummy_component = DummyComponent(label="R")
 
-    assert dummy_component_string.label.tex_strings == ["R"]
-    assert dummy_component_value.label.tex_strings == [r"3.14\,\mathrm{kV\,s^{-2}}"]
+    assert dummy_component.label.tex_strings == ["R"]
 
 
 def test_annotation_via_constructor_argument_works() -> None:
-    dummy_component_string = DummyComponent(annotation=r"12 \Omega")
-    dummy_component_value = DummyComponent(annotation=3.14 * KILO * VOLT / SECOND**2)
+    dummy_component = DummyComponent(annotation=r"12 \Omega")
 
-    assert dummy_component_string.annotation.tex_strings == [r"12 \Omega"]
-    assert dummy_component_value.annotation.tex_strings == [
-        r"3.14\,\mathrm{kV\,s^{-2}}"
-    ]
+    assert dummy_component.annotation.tex_strings == [r"12 \Omega"]
 
 
 def test_label_and_annotation_via_constructor_argument_works() -> None:

@@ -133,6 +133,12 @@ class Mark(mn.VMobject):
             return anim
         return None
 
+    @property
+    def tex_strings(self) -> list[str] | None:
+        if self.mathtex is None:
+            return None
+        return self.mathtex.tex_strings  # type: ignore[no-any-return]
+
     def _change_anchors(self, anchor: Anchor, centre_reference: Anchor) -> None:
         """Change the anchors to which the mark is attached.
 
@@ -150,12 +156,6 @@ class Mark(mn.VMobject):
         self.updater = self.__get_updater(anchor, centre_reference)
         self.add_updater(self.updater)
         self.update()
-
-    @property
-    def tex_strings(self) -> list[str] | None:
-        if self.mathtex is None:
-            return None
-        return self.mathtex.tex_strings  # type: ignore[no-any-return]
 
     def _reposition(self) -> None:
         """Update the mark position so it is realigned with its anchor."""
