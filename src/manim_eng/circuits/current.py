@@ -31,7 +31,8 @@ class CurrentArrow(Markable):
     Parameters
     ----------
     parent : manim.VMobject
-        The mobject to place the arrow on.
+        The mobject to place the arrow on. Most likely a :class:`~.WireBase` instance,
+        but no assumptions are made regarding this.
     label : str, optional
         Initial current label to set, if desired. Placed anticlockwise from the tip.
     alpha : float, optional

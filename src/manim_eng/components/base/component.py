@@ -67,9 +67,11 @@ class Component(Markable, metaclass=abc.ABCMeta):
         self._annotation_anchor = AnnotationAnchor()
         self.__set_up_anchors()
 
-        self.label = Mark(self._label_anchor, self._centre_anchor, label)
-        self.annotation = Mark(self._annotation_anchor, self._centre_anchor, annotation)
-        self.add(self.label, self.annotation)
+        self._label = Mark(self._label_anchor, self._centre_anchor, label)
+        self._annotation = Mark(
+            self._annotation_anchor, self._centre_anchor, annotation
+        )
+        self.add(self._label, self._annotation)
 
     def _construct(self) -> None:
         """Construct the shape of the component.
@@ -86,6 +88,16 @@ class Component(Markable, metaclass=abc.ABCMeta):
     def terminals(self) -> list[Terminal]:
         """The list of terminals of the component."""
         return cast(list[Terminal], self._terminals.submobjects)
+
+    @property
+    def label(self) -> Mark:
+        """A handle of label of the component."""
+        return self._label
+
+    @property
+    def annotation(self) -> Mark:
+        """A handle of annotation of the component."""
+        return self._annotation
 
     def get_center(self) -> mnt.Point3D:
         """Get the centre of the components.
