@@ -159,6 +159,22 @@ class CurrentArrow(Markable):
         self._label.clear()
         return self
 
+    @mn.override_animate(clear)
+    def __animate_clear(self, anim_args: dict[str, Any]) -> mn.Animation | None:
+        if anim_args is None:
+            anim_args = {}
+
+        animations = []
+        if self._triangle in self.submobjects:
+            anim = mn.Uncreate(self._triangle, remover=False, **anim_args)
+            self.remove(self._triangle)
+            animations.append(anim)
+        label_anim = self._label.animate(**anim_args).clear()
+        if label_anim is not None:
+            animations.append(label_anim.build())
+
+        return mn.AnimationGroup(*animations)
+
     def flip_direction(self) -> Self:
         """Flip the direction of the current arrow.
 
