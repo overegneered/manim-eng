@@ -22,7 +22,7 @@ class CurrentArrowMoveToTarget(mn.MoveToTarget):
         # cover
         self.mobject._alpha = self.target_mobject._alpha
         self.mobject._invert = self.target_mobject._invert
-        self.mobject._label = self.target_mobject._label
+        self.mobject._label.set(self.target_mobject._label.tex_strings[0])
 
 
 class CurrentArrow(Markable):
@@ -39,7 +39,7 @@ class CurrentArrow(Markable):
         the start and ``alpha = 1`` at the end. Default is ``0.5`` (i.e. the middle).
     invert : bool, optional
         If set, ``alpha`` measures from the end to the start, and the arrow will point
-        accordinly. Default is ``False``.
+        accordingly. Default is ``False``.
     """
 
     def __init__(
@@ -80,7 +80,10 @@ class CurrentArrow(Markable):
     ) -> Self:
         """Set aspects of the current arrow.
 
-        Any parameters left unspecified will be left unchanged.
+        Any parameters left unspecified will be left unchanged. If the arrow is not
+        currently visible and the ``label`` is set, the arrow will become visible. The
+        other parameters will not change the visibility of the arrow but will still take
+        effect.
 
         Parameters
         ----------
@@ -131,6 +134,7 @@ class CurrentArrow(Markable):
 
             if label is not None:
                 return self._label.animate(**anim_args).set(label).build()
+
             return None
 
         if alpha is not None:
