@@ -101,8 +101,9 @@ class Mark(mn.VMobject):
 
         new_mathtex = mn.MathTex(*args, font_size=font_size, **kwargs)
         if self.mathtex in self.submobjects:
-            self.mathtex.target = new_mathtex
-            return mn.MoveToTarget(self.mathtex, **anim_args)
+            anim = mn.ReplacementTransform(self.mathtex, new_mathtex, **anim_args)
+            self.mathtex = new_mathtex
+            return anim
         self.mathtex = new_mathtex
         self.add(self.mathtex)
         return mn.Create(self.mathtex, **anim_args)
