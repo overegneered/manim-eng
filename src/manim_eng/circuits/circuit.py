@@ -84,7 +84,9 @@ class Circuit(mn.VMobject):
             If either terminal doesn't belong to a component in this circuit.
         """
         self.__check_terminals_all_belong_to_this_circuit([start, end])
-        self.wires.add(Wire(start, end).attach())
+        wire = Wire(start, end)
+        wire._mark_shown()
+        self.wires.add(wire)
         # Nodes will potentially change their appearance on wire attachment using an
         # updater, but it needs kicking into gear
         self.nodes.update()
@@ -118,9 +120,9 @@ class Circuit(mn.VMobject):
         to_remove = self.__get_wires_from_terminal_condition(
             terminals, lambda start, end: start and end
         )
-        self.wires.remove(*to_remove)
         for wire in to_remove:
-            wire.detach()
+            wire._mark_hidden()
+        self.wires.remove(*to_remove)
         # Nodes will potentially change their appearance on wire detachment using an
         # updater, but it needs kicking into gear
         self.nodes.update()
@@ -153,6 +155,8 @@ class Circuit(mn.VMobject):
         to_remove = self.__get_wires_from_terminal_condition(
             terminals, lambda start, end: start or end
         )
+        for wire in to_remove:
+            wire._mark_hidden()
         self.wires.remove(*to_remove)
         # Nodes will potentially change their appearance on wire detachment using an
         # updater, but it needs kicking into gear
@@ -219,7 +223,7 @@ class Circuit(mn.VMobject):
                 f"At least one passed terminal does not "
                 f"belong to any component in this circuit. "
                 f"Problem terminals have the following end coordinates: "
-                f"{[tuple(terminal.end) for terminal in terminals_not_owned]}"
+                f"{[tuple(terminal.tip) for terminal in terminals_not_owned]}"
             )
 
     @mn.override_animate(add)

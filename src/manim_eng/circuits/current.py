@@ -12,7 +12,7 @@ from manim_eng._base.anchor import CentreAnchor, LabelAnchor
 __all__ = ["CurrentArrow"]
 
 
-class CurrentArrowMoveToTarget(mn.MoveToTarget):
+class _CurrentArrowMoveToTarget(mn.MoveToTarget):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
@@ -131,7 +131,7 @@ class CurrentArrow(Markable):
                 if label is not None:
                     self.target._label.set(label)
 
-                return CurrentArrowMoveToTarget(self, **anim_args)
+                return _CurrentArrowMoveToTarget(self, **anim_args)
 
             if label is not None:
                 return self._label.animate(**anim_args).set(label).build()

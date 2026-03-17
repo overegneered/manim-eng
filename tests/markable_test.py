@@ -8,7 +8,7 @@ import pytest
 
 from manim_eng._base.anchor import Anchor
 from manim_eng._base.mark import Mark
-from manim_eng._base.markable import Markable, RotateMarkable
+from manim_eng._base.markable import Markable, _RotateMarkable
 
 
 class ConcreteMarkable(Markable):
@@ -260,7 +260,7 @@ def test_override_animation_produces_rotate_markable_instance(
     # decorator defined on Markable, so the result must be a RotateMarkable.
     anim = mn.Rotate(markable, angle=mn.PI)
 
-    assert isinstance(anim, RotateMarkable)
+    assert isinstance(anim, _RotateMarkable)
 
 
 def test_override_animation_is_not_bare_mn_rotate(
@@ -269,7 +269,7 @@ def test_override_animation_is_not_bare_mn_rotate(
     anim = mn.Rotate(markable, angle=mn.PI)
 
     # Confirm it is specifically the override subclass, not the plain base class
-    assert type(anim) is RotateMarkable
+    assert type(anim) is _RotateMarkable
 
 
 # RotateMarkable.interpolate_mobject reaches the correct final angle ===================
@@ -279,7 +279,7 @@ def test_rotate_markable_interpolate_at_1_reaches_target_angle(
     markable: ConcreteMarkable,
 ) -> None:
     angle = mn.PI / 3
-    anim = RotateMarkable(markable, angle=angle)
+    anim = _RotateMarkable(markable, angle=angle)
     anim.begin()
 
     anim.interpolate_mobject(1.0)
@@ -292,7 +292,7 @@ def test_rotate_markable_interpolate_partial_alpha(
 ) -> None:
     angle = mn.PI
     alpha = 0.5
-    anim = RotateMarkable(markable, angle=angle)
+    anim = _RotateMarkable(markable, angle=angle)
     anim.begin()
 
     anim.interpolate_mobject(alpha)
@@ -303,6 +303,6 @@ def test_rotate_markable_interpolate_partial_alpha(
 def test_rotate_markable_initial_current_rotation_is_zero(
     markable: ConcreteMarkable,
 ) -> None:
-    anim = RotateMarkable(markable, angle=mn.PI)
+    anim = _RotateMarkable(markable, angle=mn.PI)
 
     assert np.isclose(anim.current_rotation, 0.0)

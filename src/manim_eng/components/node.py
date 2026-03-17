@@ -8,7 +8,7 @@ import numpy as np
 
 from manim_eng import config_eng
 from manim_eng.components.base.component import Component
-from manim_eng.components.base.terminal import Terminal
+from manim_eng.components.base.pin import Pin
 from manim_eng.units import Value
 
 __all__ = ["Node", "OpenNode"]
@@ -55,7 +55,7 @@ class Node(Component):
 
         self.__blob: mn.Dot
 
-        super().__init__(terminals=[], **kwargs)
+        super().__init__(pins=[], **kwargs)
 
         if self.autoblob:
             self.add_updater(self.__blob_updater)
@@ -106,20 +106,20 @@ class Node(Component):
             "Nodes have no annotation. Please use `.clear_label()`."
         )
 
-    def get(self, direction: mnt.Vector3D | float) -> Terminal:
-        """Get a terminal of the node in a given direction, creating it if necessary.
+    def get(self, direction: mnt.Vector3D | float) -> Pin:
+        """Get a pin on the node in a given direction, creating it if necessary.
 
         Parameters
         ----------
         direction : mnt.Vector3D | float
-            The direction to get a terminal in, as either a direction vector or an angle
+            The direction to get the pin in, as either a direction vector or an angle
             in radians. Note that the angle is defined as is mathematical standard:
             measured anticlockwise from the positive horizontal.
 
         Returns
         -------
-        Terminal
-            The terminal on the node in the specified direction.
+        Pin
+            The pin on the node in the specified direction.
 
         See Also
         --------
@@ -128,58 +128,57 @@ class Node(Component):
         """
         direction = self._get_normalised_direction(direction)
 
-        for terminal in self.pins:
-            if np.allclose(terminal.direction, direction):
-                to_return = terminal
+        for pin in self._pins:
+            if np.allclose(pin.direction, direction):
+                to_return = pin
                 break
         else:
-            to_return = Terminal(
+            to_return = Pin(
                 position=self.get_center(),
                 direction=direction,
-                auto=True,
-            ).match_style(self)
+            )
             self._pins.add(to_return)
 
         return to_return
 
     @property
-    def right(self) -> Terminal:
-        """Get the right-pointing terminal of the node, creating it if necessary."""
+    def right(self) -> Pin:
+        """Get the right-pointing pin of the node, creating it if necessary."""
         return self.get(mn.RIGHT)
 
     @property
-    def up(self) -> Terminal:
-        """Get the up-pointing terminal of the node, creating it if necessary."""
+    def up(self) -> Pin:
+        """Get the up-pointing pin of the node, creating it if necessary."""
         return self.get(mn.UP)
 
     @property
-    def left(self) -> Terminal:
-        """Get the left-pointing terminal of the node, creating it if necessary."""
+    def left(self) -> Pin:
+        """Get the left-pointing pin of the node, creating it if necessary."""
         return self.get(mn.LEFT)
 
     @property
-    def down(self) -> Terminal:
-        """Get the down-pointing terminal of the node, creating it if necessary."""
+    def down(self) -> Pin:
+        """Get the down-pointing pin of the node, creating it if necessary."""
         return self.get(mn.DOWN)
 
     @property
-    def up_right(self) -> Terminal:
-        """Get the up-right-pointing terminal of the node, creating it if necessary."""
+    def up_right(self) -> Pin:
+        """Get the up-right-pointing pin of the node, creating it if necessary."""
         return self.get(mn.UR)
 
     @property
-    def up_left(self) -> Terminal:
-        """Get the up-left-pointing terminal of the node, creating it if necessary."""
+    def up_left(self) -> Pin:
+        """Get the up-left-pointing pin of the node, creating it if necessary."""
         return self.get(mn.UL)
 
     @property
-    def down_left(self) -> Terminal:
-        """Get the down-left-pointing terminal of the node, creating it if necessary."""
+    def down_left(self) -> Pin:
+        """Get the down-left-pointing pin of the node, creating it if necessary."""
         return self.get(mn.DL)
 
     @property
-    def down_right(self) -> Terminal:
-        """Get down-right-pointing terminal of the node, creating it if necessary."""
+    def down_right(self) -> Pin:
+        """Get down-right-pointing pin of the node, creating it if necessary."""
         return self.get(mn.DR)
 
     def set_blob_visibility(self, visible: bool) -> Self:
@@ -346,16 +345,12 @@ class Node(Component):
         return mn.normalize(direction)
 
     def _should_be_visible(self) -> bool:
-        visible_terminal_count = sum([terminal.is_visible() for terminal in self.pins])
-        return visible_terminal_count > AUTOBLOBBING_BLOB_THRESHOLD  # type: ignore[no-any-return]
+        visible_pin_count = sum([pin.is_visible() for pin in self.pins])
+        return visible_pin_count > AUTOBLOBBING_BLOB_THRESHOLD
 
-    def _get_visible_terminal_angles(self) -> list[float]:
+    def _get_visible_pin_angles(self) -> list[float]:
         return sorted(
-            [
-                mn.angle_of_vector(terminal.direction)
-                for terminal in self.pins
-                if terminal.is_visible()
-            ]
+            [mn.angle_of_vector(pin.direction) for pin in self.pins if pin.is_visible()]
         )
 
     @staticmethod
@@ -396,7 +391,7 @@ class Node(Component):
         return mn.rotate_vector(mn.RIGHT, angle)
 
     def _get_optimal_label_anchor_direction(self) -> mnt.Vector3D:
-        terminal_angles = self._get_visible_terminal_angles()
+        terminal_angles = self._get_visible_pin_angles()
         angles = self._midangles_of_largest_gaps_between_list_of_angles(terminal_angles)
         return self._topmost_angle_as_direction(angles)
 

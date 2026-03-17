@@ -41,7 +41,7 @@ def test_get_visible_terminal_angles(
         terminal_mock.is_visible.return_value = visibility
         node.pins.append(terminal_mock)
 
-    actual = node._get_visible_terminal_angles()
+    actual = node._get_visible_pin_angles()
 
     assert np.allclose(actual, expected)
 

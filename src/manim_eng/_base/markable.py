@@ -15,7 +15,7 @@ from manim_eng._base.mark import Mark
 __all__ = ["Markable"]
 
 
-class RotateMarkable(mn.Rotate):
+class _RotateMarkable(mn.Rotate):
     """Override for the Rotate animation that keeps attached marks upright."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -147,4 +147,4 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
 
     @mn.override_animation(mn.Rotate)
     def __animate_rotate(self, **kwargs: Any) -> mn.Animation:
-        return RotateMarkable(self, **kwargs)
+        return _RotateMarkable(self, **kwargs)
