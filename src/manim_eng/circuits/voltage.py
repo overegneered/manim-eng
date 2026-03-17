@@ -99,7 +99,7 @@ class Voltage(Markable):
             self.set_clockwise(clockwise=clockwise)
         return self
 
-    @mn.override_animate(set)
+    @mn.override_animate(set)  # noqa: A003
     def __animate_set_label(
         self,
         label: str,

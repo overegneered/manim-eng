@@ -109,7 +109,7 @@ class CurrentArrow(Markable):
         CurrentArrow._reposition(self)
         return self
 
-    @mn.override_animate(set)
+    @mn.override_animate(set)  # noqa: A003
     def __animate_set(
         self,
         label: str | None = None,
