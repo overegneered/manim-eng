@@ -7,6 +7,7 @@ import manim.typing as mnt
 import numpy as np
 
 from manim_eng import config_eng
+from manim_eng._base.mark import Mark
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.pin import Pin
 from manim_eng.units import Value
@@ -69,6 +70,9 @@ class Node(Component):
         self.__blob = _create_node_blob(self, self.open)
         self._body.add(self.__blob)
 
+    # TODO: move this over to the new labelling scheme
+    #       this requires us to think about how label positioning will work under the
+    #       new system
     def set_label(
         self, label: str | Value, direction: mnt.Vector3D | float | None = None
     ) -> Self:
@@ -94,16 +98,14 @@ class Node(Component):
         super().set_label(label)
         return self
 
-    def set_annotation(self, annotation: str | Value) -> Self:
-        """Fails for nodes, as they do not have annotations."""
-        raise NotImplementedError(
-            "Nodes have no annotation. Please use `.set_label()`."
-        )
+    @property
+    def annotation(self) -> Mark:
+        """Nodes do not have annotations.
 
-    def clear_annotation(self) -> Self:
-        """Fails for nodes, as they do not have annotations."""
+        **THIS WILL FAIL.**
+        """
         raise NotImplementedError(
-            "Nodes have no annotation. Please use `.clear_label()`."
+            "`Monopole`s have no annotations. Please use `label` instead."
         )
 
     def get(self, direction: mnt.Vector3D | float) -> Pin:

@@ -13,16 +13,59 @@ from manim_eng.components.base.pin import Pin
 __all__ = ["WireBase"]
 
 
-class _CreateWire(mn.Create):
+class _WireShowMixin(mn.Animation):
+    """Mixin for creation animations: marks the wire shown when the animation begins."""
+
     def begin(self) -> None:
         cast("WireBase", self.mobject)._mark_shown()
         super().begin()
 
 
-class _UncreateWire(mn.Uncreate):
+class _WireHideMixin(mn.Animation):
+    """Mixin for destruction animations: marks the wire hidden when animation ends."""
+
     def finish(self) -> None:
         super().finish()
         cast("WireBase", self.mobject)._mark_hidden()
+
+
+class _CreateWire(_WireShowMixin, mn.Create): ...
+
+
+class _FadeInWire(_WireShowMixin, mn.FadeIn): ...
+
+
+class _WriteWire(_WireShowMixin, mn.Write): ...
+
+
+class _DrawBorderThenFillWire(_WireShowMixin, mn.DrawBorderThenFill): ...
+
+
+class _GrowFromCenterWire(_WireShowMixin, mn.GrowFromCenter): ...
+
+
+class _GrowFromPointWire(_WireShowMixin, mn.GrowFromPoint): ...
+
+
+class _GrowFromEdgeWire(_WireShowMixin, mn.GrowFromEdge): ...
+
+
+class _SpinInFromNothingWire(_WireShowMixin, mn.SpinInFromNothing): ...
+
+
+class _SpiralInWire(_WireShowMixin, mn.SpiralIn): ...
+
+
+class _UncreateWire(_WireHideMixin, mn.Uncreate): ...
+
+
+class _FadeOutWire(_WireHideMixin, mn.FadeOut): ...
+
+
+class _UnwriteWire(_WireHideMixin, mn.Unwrite): ...
+
+
+class _ShrinkToCenterWire(_WireHideMixin, mn.ShrinkToCenter): ...
 
 
 class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
@@ -105,6 +148,50 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
     def __override_create(self, **kwargs: Any) -> mn.Animation:
         return _CreateWire(self, **kwargs)
 
+    @mn.override_animation(mn.FadeIn)
+    def __override_fade_in(self, **kwargs: Any) -> mn.Animation:
+        return _FadeInWire(self, **kwargs)
+
+    @mn.override_animation(mn.Write)
+    def __override_write(self, **kwargs: Any) -> mn.Animation:
+        return _WriteWire(self, **kwargs)
+
+    @mn.override_animation(mn.DrawBorderThenFill)
+    def __override_draw_border_then_fill(self, **kwargs: Any) -> mn.Animation:
+        return _DrawBorderThenFillWire(self, **kwargs)
+
+    @mn.override_animation(mn.GrowFromCenter)
+    def __override_grow_from_center(self, **kwargs: Any) -> mn.Animation:
+        return _GrowFromCenterWire(self, **kwargs)
+
+    @mn.override_animation(mn.GrowFromPoint)
+    def __override_grow_from_point(self, **kwargs: Any) -> mn.Animation:
+        return _GrowFromPointWire(self, **kwargs)
+
+    @mn.override_animation(mn.GrowFromEdge)
+    def __override_grow_from_edge(self, **kwargs: Any) -> mn.Animation:
+        return _GrowFromEdgeWire(self, **kwargs)
+
+    @mn.override_animation(mn.SpinInFromNothing)
+    def __override_spin_in_from_nothing(self, **kwargs: Any) -> mn.Animation:
+        return _SpinInFromNothingWire(self, **kwargs)
+
+    @mn.override_animation(mn.SpiralIn)
+    def __override_spiral_in(self, **kwargs: Any) -> mn.Animation:
+        return _SpiralInWire(self, **kwargs)
+
     @mn.override_animation(mn.Uncreate)
     def __override_uncreate(self, **kwargs: Any) -> mn.Animation:
         return _UncreateWire(self, **kwargs)
+
+    @mn.override_animation(mn.FadeOut)
+    def __override_fade_out(self, **kwargs: Any) -> mn.Animation:
+        return _FadeOutWire(self, **kwargs)
+
+    @mn.override_animation(mn.Unwrite)
+    def __override_unwrite(self, **kwargs: Any) -> mn.Animation:
+        return _UnwriteWire(self, **kwargs)
+
+    @mn.override_animation(mn.ShrinkToCenter)
+    def __override_shrink_to_center(self, **kwargs: Any) -> mn.Animation:
+        return _ShrinkToCenterWire(self, **kwargs)
