@@ -1,4 +1,5 @@
 import os
+import re
 from unittest import mock
 
 import pytest
@@ -48,7 +49,7 @@ def test_get_user_config_config_file_correct_path_windows(
 def test_get_user_config_config_file_throws_error_if_os_name_not_posix_or_nt() -> None:
     with pytest.raises(
         UnsupportedOsTypeError,
-        match="Unsupported/unknown OS type 'not a valid os name'.",
+        match=re.escape("Unsupported/unknown OS type 'not a valid os name'."),
     ):
         _ = get_user_config()
 

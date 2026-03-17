@@ -153,8 +153,9 @@ class Component(Markable, metaclass=abc.ABCMeta):
             ``other`` (in the case that it is a ``Terminal``) or through ``other`` (in
             the case that it is a point).
         """
-        from manim_eng.components.base.monopole import Monopole
-        from manim_eng.components.node import Node
+        # These are put here to avoid circular dependencies
+        from manim_eng.components.base.monopole import Monopole  # noqa: PLC0415
+        from manim_eng.components.node import Node  # noqa: PLC0415
 
         self_terminal = self._get_or_check_terminal(self_terminal)
         if isinstance(other, Terminal):
