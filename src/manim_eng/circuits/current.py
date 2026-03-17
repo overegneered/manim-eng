@@ -169,7 +169,7 @@ class CurrentArrow(Markable):
         return self
 
     @mn.override_animate(clear)
-    def __animate_clear(self, anim_args: dict[str, Any]) -> mn.Animation | None:
+    def __animate_clear(self, anim_args: dict[str, Any] | None) -> mn.Animation | None:
         if anim_args is None:
             anim_args = {}
 
@@ -196,7 +196,7 @@ class CurrentArrow(Markable):
         )
 
     @mn.override_animate(flip_direction)
-    def __animate_flip(self, anim_args: dict[str, Any]) -> mn.Animation:
+    def __animate_flip(self, anim_args: dict[str, Any] | None) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
         return (

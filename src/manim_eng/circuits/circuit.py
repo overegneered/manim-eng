@@ -183,7 +183,7 @@ class Circuit(mn.VMobject):
 
         Iterates through all connections and calculates if each end of the wire is in
         ``terminals``. Whether each one is in ``terminals`` is passed to ``condition``,
-        which is expected
+        which is expected to return ``True`` if the wire should be included.
 
         Parameters
         ----------

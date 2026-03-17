@@ -129,6 +129,41 @@ def test_isolate_throws_error_if_terminals_do_not_belong_to_components_in_the_ci
         circuit.animate.isolate(dummy_component.left, dummy_component.right)
 
 
+def test_connect_marks_pins_as_visible() -> None:
+    component_1 = DummyComponent()
+    component_2 = DummyComponent()
+    circuit = Circuit(component_1, component_2)
+
+    circuit.connect(component_1.right, component_2.left)
+
+    assert component_1.right.is_visible() is True
+    assert component_2.left.is_visible() is True
+
+
+def test_disconnect_marks_pins_as_not_visible() -> None:
+    component_1 = DummyComponent()
+    component_2 = DummyComponent()
+    circuit = Circuit(component_1, component_2)
+    circuit.connect(component_1.right, component_2.left)
+
+    circuit.disconnect(component_1.right, component_2.left)
+
+    assert component_1.right.is_visible() is False
+    assert component_2.left.is_visible() is False
+
+
+def test_isolate_marks_pins_as_not_visible() -> None:
+    component_1 = DummyComponent()
+    component_2 = DummyComponent()
+    circuit = Circuit(component_1, component_2)
+    circuit.connect(component_1.right, component_2.left)
+
+    circuit.isolate(component_1)
+
+    assert component_1.right.is_visible() is False
+    assert component_2.left.is_visible() is False
+
+
 def test_collapse_components_and_terminals_expands_components() -> None:
     component_1 = DummyComponent()
     component_2 = DummyComponent()
