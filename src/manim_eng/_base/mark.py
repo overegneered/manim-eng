@@ -140,6 +140,10 @@ class Mark(mn.VMobject):
             return None
         return self.mathtex.tex_strings  # type: ignore[no-any-return]
 
+    def is_visible(self) -> bool:
+        """Return whether the mark is currently visible."""
+        return self.mathtex in self.submobjects
+
     def _change_anchors(self, anchor: Anchor, centre_reference: Anchor) -> None:
         """Change the anchors to which the mark is attached.
 

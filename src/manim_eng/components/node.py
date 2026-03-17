@@ -10,7 +10,6 @@ from manim_eng import config_eng
 from manim_eng._base.mark import Mark
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.pin import Pin
-from manim_eng.units import Value
 
 __all__ = ["Node", "OpenNode"]
 
@@ -48,55 +47,39 @@ class Node(Component):
     autoblob : bool
         Whether to handle the addition/removal of solder blobs automatically. Has no
         effect if the node is open (as autoblobbing only makes sense for solder blobs).
+        Autoblobbing will add a solder blob automatically if more than two wires into
+        the node are visible or the label is shown.
+    label_pos : manim.Vector3D, optional
+        Where the node label should be placed. If left unspecified, the label is
+        automatically placed where it will fit best.
     """
 
-    def __init__(self, open_: bool = False, autoblob: bool = True, **kwargs: Any):
-        self.open = open_
-        self.autoblob = autoblob if not open_ else False
+    def __init__(
+        self,
+        open_: bool = False,
+        autoblob: bool = True,
+        label_pos: mnt.Vector3D | None = None,
+        **kwargs: Any,
+    ):
+        self._open = open_
+        self._autoblob = autoblob if not open_ else False
+        self._manual_label_pos = label_pos
 
         self.__blob: mn.Dot
 
         super().__init__(pins=[], **kwargs)
+        self.remove(self._annotation_anchor)
 
-        if self.autoblob:
+        if self._autoblob:
             self.add_updater(self.__blob_updater)
             self.update()
-
-        self.remove(self._annotation_anchor)
+        self._reposition_label_anchor(label_pos)
 
     def _construct(self) -> None:
         super()._construct()
 
-        self.__blob = _create_node_blob(self, self.open)
+        self.__blob = _create_node_blob(self, self._open)
         self._body.add(self.__blob)
-
-    # TODO: move this over to the new labelling scheme
-    #       this requires us to think about how label positioning will work under the
-    #       new system
-    def set_label(
-        self, label: str | Value, direction: mnt.Vector3D | float | None = None
-    ) -> Self:
-        """Set the label of the node, optionally specifying where it should be.
-
-        The ``direction`` parameter can be used to specify the position the label should
-        take. If it is left unspecified, the node will identify the most logical
-        position for it (the widest gap between terminals) and keep the label here, with
-        ties being broken by the uppermost position being favoured. This will continue
-        to happen as terminals are added/removed.
-
-        Parameters
-        ----------
-        label : str
-            The label to set. Takes a TeX math mode string, or a ``Value`` to be typeset
-            as a math mode string.
-        direction : Vector3D | float | None
-            The direction in which to place the label. Can either be a direction vector
-            (``Vector3D``), an angle in radians (``float``), or ``None``, which
-            signifies that the label should be placed automatically.
-        """
-        self._reposition_label_anchor(direction)
-        super().set_label(label)
-        return self
 
     @property
     def annotation(self) -> Mark:
@@ -130,7 +113,7 @@ class Node(Component):
         """
         direction = self._get_normalised_direction(direction)
 
-        for pin in self._pins:
+        for pin in self.pins:
             if np.allclose(pin.direction, direction):
                 to_return = pin
                 break
@@ -246,7 +229,7 @@ class Node(Component):
         enable_autoblobbing
         disable_autoblobbing
         """
-        self.autoblob = autoblob
+        self._autoblob = autoblob
         if autoblob:
             if self.__blob_updater not in self.updaters:
                 self.add_updater(self.__blob_updater)
@@ -280,6 +263,33 @@ class Node(Component):
         enable_autoblobbing
         """
         return self.set_autoblobbing(False)
+
+    def set_label_direction(self, direction: mnt.Vector3D) -> Self:
+        """Set the direction the label should be placed in.
+
+        Will disable automatic label placement.
+
+        Parameters
+        ----------
+        direction : mnt.Vector3D
+            The direction the label should be placed in.
+
+        See Also
+        --------
+        enable_automatic_label_placement
+        """
+        self._reposition_label_anchor(direction)
+        return self
+
+    def enable_automatic_label_placement(self) -> Self:
+        """Make the label place itself automatically.
+
+        See Also
+        --------
+        set_label_direction
+        """
+        self._reposition_label_anchor(None)
+        return self
 
     def make_open(self, make_visible: bool = True) -> Self:
         """Set the type of the node to open (an empty circle).
@@ -346,14 +356,58 @@ class Node(Component):
             return mn.rotate_vector(mn.RIGHT, direction)
         return mn.normalize(direction)
 
+    @staticmethod
+    def __blob_updater(mobject: mn.Mobject) -> None:
+        node = cast(Node, mobject)
+        node._set_blob_visibility(node._should_be_visible())
+
     def _should_be_visible(self) -> bool:
+        """Return if there are more than 2 visible wires or the label is visible."""
         visible_pin_count = sum([pin.is_visible() for pin in self.pins])
-        return visible_pin_count > AUTOBLOBBING_BLOB_THRESHOLD
+        pins_above_threshold = visible_pin_count > AUTOBLOBBING_BLOB_THRESHOLD
+        return pins_above_threshold or self._label.is_visible()
+
+    def _reposition_label_anchor(self, direction: mnt.Vector3D | float | None) -> None:
+        """Set the anchor using direction if given, otherwise enable the updater."""
+        if direction is None:
+            if self.__label_anchor_updater not in self.updaters:
+                self.add_updater(self.__label_anchor_updater)
+            self.update()
+        else:
+            if self.__label_anchor_updater in self.updaters:
+                self.remove_updater(self.__label_anchor_updater)
+            direction = self._get_normalised_direction(direction)
+            self._update_label_positioning_using_vector(direction)
+
+    @staticmethod
+    def __label_anchor_updater(mobject: mn.Mobject) -> None:
+        node = cast(Node, mobject)
+        new_direction = node._get_optimal_label_anchor_direction()
+        node._update_label_positioning_using_vector(new_direction)
+
+    def _get_optimal_label_anchor_direction(self) -> mnt.Vector3D:
+        terminal_angles = self._get_visible_pin_angles()
+        angles = self._midangles_of_largest_gaps_between_list_of_angles(terminal_angles)
+        return self._topmost_angle_as_direction(angles)
+
+    def _update_label_positioning_using_vector(self, direction: mnt.Vector3D) -> None:
+        position = self.get_center() + config_eng.symbol.node_radius * direction
+        self._label_anchor.move_to(position)
+        self._label.update()
 
     def _get_visible_pin_angles(self) -> list[float]:
         return sorted(
             [mn.angle_of_vector(pin.direction) for pin in self.pins if pin.is_visible()]
         )
+
+    @staticmethod
+    def _topmost_angle_as_direction(angles: list[float]) -> mnt.Vector3D:
+        if len(angles) == 0:
+            return mn.UP
+
+        angles.sort(key=lambda x: np.sin(x), reverse=True)
+        angle = angles[0]
+        return mn.rotate_vector(mn.RIGHT, angle)
 
     @staticmethod
     def _midangles_of_largest_gaps_between_list_of_angles(
@@ -382,57 +436,6 @@ class Node(Component):
             midangles.append(centre_angle)
 
         return sorted(midangles)
-
-    @staticmethod
-    def _topmost_angle_as_direction(angles: list[float]) -> mnt.Vector3D:
-        if len(angles) == 0:
-            return mn.UP
-
-        angles.sort(key=lambda x: np.sin(x), reverse=True)
-        angle = angles[0]
-        return mn.rotate_vector(mn.RIGHT, angle)
-
-    def _get_optimal_label_anchor_direction(self) -> mnt.Vector3D:
-        terminal_angles = self._get_visible_pin_angles()
-        angles = self._midangles_of_largest_gaps_between_list_of_angles(terminal_angles)
-        return self._topmost_angle_as_direction(angles)
-
-    def _update_label_positioning_using_vector(self, direction: mnt.Vector3D) -> None:
-        position = self.get_center() + config_eng.symbol.node_radius * direction
-        self._label_anchor.move_to(position)
-        self._label.update()
-
-    def _reposition_label_anchor(self, direction: mnt.Vector3D | float | None) -> None:
-        if direction is None:
-            if self.__label_anchor_updater not in self.updaters:
-                self.add_updater(self.__label_anchor_updater)
-            self.update()
-        else:
-            if self.__label_anchor_updater in self.updaters:
-                self.remove_updater(self.__label_anchor_updater)
-            direction = self._get_normalised_direction(direction)
-            self._update_label_positioning_using_vector(direction)
-
-    @staticmethod
-    def __blob_updater(mobject: mn.Mobject) -> None:
-        node = cast(Node, mobject)
-        node._set_blob_visibility(node._should_be_visible())
-
-    @staticmethod
-    def __label_anchor_updater(mobject: mn.Mobject) -> None:
-        node = cast(Node, mobject)
-        new_direction = node._get_optimal_label_anchor_direction()
-        node._update_label_positioning_using_vector(new_direction)
-
-    @mn.override_animate(set_label)
-    def __animate_set_label(
-        self,
-        label: str,
-        direction: mnt.Vector3D | float | None = None,
-        anim_args: dict[str, Any] | None = None,
-    ) -> mn.Animation:
-        self._reposition_label_anchor(direction)
-        return self._label.animate(**anim_args).set(label).build()
 
 
 class OpenNode(Node):
