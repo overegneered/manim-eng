@@ -1,3 +1,4 @@
+import re
 from unittest import mock
 
 import manim as mn
@@ -52,7 +53,8 @@ def test_mark_attach_requires_anchor_and_centre_reference_to_be_different(
     anchor_mock: Anchor,
 ) -> None:
     with pytest.raises(
-        ValueError, match="`anchor` and `centre_reference` cannot be the same."
+        ValueError,
+        match=re.escape("`anchor` and `centre_reference` cannot be the same."),
     ):
         _ = Mark(anchor_mock, anchor_mock)
 

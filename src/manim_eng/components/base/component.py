@@ -159,8 +159,9 @@ class Component(Markable, metaclass=abc.ABCMeta):
             the case that it is a ``Pin``) or through ``other`` (in the case that it is
             a point).
         """
-        from manim_eng.components.base.monopole import Monopole
-        from manim_eng.components.node import Node
+        # These are put here to avoid circular dependencies
+        from manim_eng.components.base.monopole import Monopole  # noqa: PLC0415
+        from manim_eng.components.node import Node  # noqa: PLC0415
 
         pin = self._get_or_check_pin(pin)
         if isinstance(other, Pin):
@@ -296,7 +297,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
         to_return = getattr(self, pin)
         if not isinstance(to_return, Pin):
             raise ValueError(
-                f"Attribute `{pin}` of `{self.__class__.__name__}` " f"is not a pin."
+                f"Attribute `{pin}` of `{self.__class__.__name__}` is not a pin."
             )
         return to_return
 

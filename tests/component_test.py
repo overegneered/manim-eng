@@ -1,3 +1,5 @@
+import re
+
 import manim as mn
 import manim.typing as mnt
 import numpy as np
@@ -55,21 +57,25 @@ def test_align_value_errors_if_pin_belongs_to_same_component(
 ) -> None:
     with pytest.raises(
         ValueError,
-        match="Pin passed to `other` belongs to this component.",
+        match=re.escape("Pin passed to `other` belongs to this component."),
     ):
         dummy_component.align_pin(dummy_component.right, dummy_component.right)
 
 
 def test_align_value_errors_if_node_passed_itself() -> None:
     node = Node()
-    with pytest.raises(ValueError, match="Node passed to `other` is this component."):
+    with pytest.raises(
+        ValueError,
+        match=re.escape("Node passed to `other` is this component."),
+    ):
         node.align_pin(node.right, node)
 
 
 def test_align_value_errors_if_monopole_passed_itself() -> None:
     monopole = Monopole(mn.UP)
     with pytest.raises(
-        ValueError, match="Monopole passed to `other` is this component."
+        ValueError,
+        match=re.escape("Monopole passed to `other` is this component."),
     ):
         monopole.align_pin(monopole.pin, monopole)
 
@@ -178,7 +184,7 @@ def test_get_or_check_pin_non_belonging_pin() -> None:
     other_component = DummyComponent()
 
     with pytest.raises(
-        ValueError, match="Passed pin does not belong to this component."
+        ValueError, match=re.escape("Passed pin does not belong to this component.")
     ):
         component._get_or_check_pin(other_component.left)
 
@@ -197,7 +203,7 @@ def test_get_or_check_pin_valid_attribute_not_a_pin(
 
     with pytest.raises(
         ValueError,
-        match=f"Attribute `{not_a_pin}` of `DummyComponent` is not a pin.",
+        match=re.escape(f"Attribute `{not_a_pin}` of `DummyComponent` is not a pin."),
     ):
         dummy_component._get_or_check_pin(not_a_pin)
 

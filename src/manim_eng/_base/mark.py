@@ -88,7 +88,7 @@ class Mark(mn.VMobject):
         self._reposition()
         return self
 
-    @mn.override_animate(set)
+    @mn.override_animate(set)  # noqa: A003
     def __animate_set(
         self,
         *args: Any,

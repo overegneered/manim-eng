@@ -22,9 +22,7 @@ class DummyConfigTable(ConfigBase):
     var_float: float = 3.14
     var_str: str = "a test string"
     var_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.RED)
-    subtable: DummyConfigSubtable = dc.field(
-        default_factory=lambda: DummyConfigSubtable()
-    )
+    subtable: DummyConfigSubtable = dc.field(default_factory=DummyConfigSubtable)
 
 
 @dc.dataclass
@@ -33,7 +31,7 @@ class DummyConfigRoot(ConfigBase):
     var_float: float = 3.14
     var_str: str = "a test string"
     var_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.RED)
-    table: DummyConfigTable = dc.field(default_factory=lambda: DummyConfigTable())
+    table: DummyConfigTable = dc.field(default_factory=DummyConfigTable)
 
 
 @pytest.fixture
