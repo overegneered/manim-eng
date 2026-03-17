@@ -19,7 +19,7 @@ class _MockMathTex(mn.VMobject):
 
 
 @pytest.fixture(autouse=True)
-def mock_mathtex(monkeypatch: pytest.MonkeyPatch) -> None:
+def _mock_mathtex(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(mn, "MathTex", _MockMathTex)
 
 

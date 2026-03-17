@@ -3,7 +3,6 @@ name = "manim-eng"
 version = "0.1.0"
 description = "A Manim CE plugin for drawing circuit diagrams (and other engineering diagrams in the future)."
 license = "MIT"
-license-files = ["LICEN[CS]E*"]
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
 authors = [
