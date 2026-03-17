@@ -75,7 +75,7 @@ class Voltage(Markable):
         self._centre_reference = CentreAnchor()
         self._anchor = VoltageAnchor()
 
-        self.add_updater(lambda mob: mob.__arrow_updater())
+        self.add_updater(Voltage._arrow_updater)
         self.update()
 
         self.add(self._arrow, self._centre_reference, self._anchor)
@@ -159,7 +159,7 @@ class Voltage(Markable):
         set_start
         set_end
         """
-        if start == end is None:
+        if start is None and end is None:
             raise ValueError("Neither `start` nor `end` specified.")
         if start is not None:
             self.start = start
@@ -204,12 +204,14 @@ class Voltage(Markable):
         self.update()
         return self
 
-    def __arrow_updater(self) -> None:
-        self._direction = self.end.tip - self.start.tip
-        self._angle_of_direction = mn.angle_of_vector(self._direction)
+    @staticmethod
+    def _arrow_updater(mob: mn.Mobject) -> None:
+        voltage = cast(Voltage, mob)
+        voltage._direction = voltage.end.tip - voltage.start.tip
+        voltage._angle_of_direction = mn.angle_of_vector(voltage._direction)
 
-        self.__update_arrow()
-        self.__update_anchors()
+        voltage.__update_arrow()
+        voltage.__update_anchors()
 
     def __update_arrow(self) -> None:
         if self.component_to_avoid is not None:
@@ -252,7 +254,8 @@ class Voltage(Markable):
             path_arc=path_arc * direction,
             stroke_width=config_eng.symbol.arrow_stroke_width,
             tip_length=config_eng.symbol.arrow_tip_length,
-            # buff=self.buff, noqa: ERA001
+            # TODO: restore buff=self.buff once
+            #       https://github.com/ManimCommunity/manim/issues/4132 is resolved
             buff=0,
         )
         self._arrow.become(new_arrow)

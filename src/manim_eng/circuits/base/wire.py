@@ -87,13 +87,13 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
         self._start = start
         self._end = end
 
-        self.__update_points()
+        WireBase._update_points(self)
 
         self._current = CurrentArrow(self)
         self.add(self._current)
 
         if updating:
-            self.add_updater(lambda mob: mob.__update_points())
+            self.add_updater(WireBase._update_points)
 
     def __del__(self) -> None:
         """Clean up wire visibility state when the wire is garbage-collected."""
@@ -115,14 +115,16 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
         """A current arrow attached to the wire."""
         return self._current
 
-    def __update_points(self) -> None:
-        self.set_points_as_corners(
+    @staticmethod
+    def _update_points(mob: mn.Mobject) -> None:
+        wire = cast("WireBase", mob)
+        wire.set_points_as_corners(
             [
-                self._start.base,
-                self._start.tip,
-                *self.get_corner_points(),
-                self._end.tip,
-                self._end.base,
+                wire._start.base,
+                wire._start.tip,
+                *wire.get_corner_points(),
+                wire._end.tip,
+                wire._end.base,
             ]
         )
 
@@ -130,8 +132,14 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
     def get_corner_points(self) -> list[mnt.Point3D]:
         """Get the corner points of the wire.
 
-        Returns the vertices of the wire, not including the end points (i.e. at the
-        start and end terminals).
+        Returns the vertices of the wire, not including the end points (i.e. the start
+        and end pins).
+
+        Returns
+        -------
+        list[Point3D]
+            The corner points of the wire between the two pins, in order from start
+            to end.
         """
 
     def _mark_shown(self) -> None:

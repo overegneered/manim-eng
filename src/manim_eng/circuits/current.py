@@ -1,6 +1,6 @@
 """Contains CurrentArrow class for drawing current arrows on lines."""
 
-from typing import Any, Self
+from typing import Any, Self, cast
 
 import manim as mn
 from manim import typing as mnt
@@ -70,8 +70,8 @@ class CurrentArrow(Markable):
         if label is not None:
             self.add(self._triangle)
 
-        self.__reposition()
-        self.add_updater(lambda mob: mob.__reposition())
+        CurrentArrow._reposition(self)
+        self.add_updater(CurrentArrow._reposition)
 
     def set(
         self,
@@ -106,7 +106,7 @@ class CurrentArrow(Markable):
             self._alpha = alpha
         if invert is not None:
             self._invert = invert
-        self.__reposition()
+        CurrentArrow._reposition(self)
         return self
 
     @mn.override_animate(set)
@@ -142,7 +142,7 @@ class CurrentArrow(Markable):
             self._alpha = alpha
         if invert is not None:
             self._invert = invert
-        self.__reposition()
+        CurrentArrow._reposition(self)
 
         if label is None:
             # The triangle is not visible and no label is given: there is nothing to
@@ -212,11 +212,16 @@ class CurrentArrow(Markable):
         """
         return self._centre_anchor.pos
 
-    def __reposition(self) -> None:
-        new_pos, new_angle = self.__calculate_new_pose()
-        self.shift(new_pos - self._centre_anchor.pos)
-        angle_delta = new_angle - self.__current_angle()
-        self.rotate(angle_delta, about_point=self._centre_anchor.pos)
+    @staticmethod
+    def _reposition(mob: mn.Mobject) -> None:
+        arrow = cast("CurrentArrow", mob)
+        # Name-mangling applies here because this method is defined inside
+        # CurrentArrow's class body, so __calculate_new_pose and __current_angle
+        # resolve correctly to _CurrentArrow__calculate_new_pose etc.
+        new_pos, new_angle = arrow.__calculate_new_pose()
+        arrow.shift(new_pos - arrow._centre_anchor.pos)
+        angle_delta = new_angle - arrow.__current_angle()
+        arrow.rotate(angle_delta, about_point=arrow._centre_anchor.pos)
 
     def __calculate_new_pose(self) -> tuple[mnt.Point3D, float]:
         epsilon = 1e-6

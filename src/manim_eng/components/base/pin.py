@@ -47,8 +47,8 @@ class Pin(Markable):
 
         self.add(self._body_anchor, self._end_anchor)
 
-        self._attached_wires: set = set()
-        self._visible_wires: set = set()
+        self._attached_wires: set[WireBase] = set()
+        self._visible_wires: set[WireBase] = set()
 
     @property
     def base(self) -> mnt.Point3D:

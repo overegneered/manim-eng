@@ -54,7 +54,7 @@ class Terminal(Markable):
         self.autovisibility = auto
         self._connection_count = 0
 
-        direction /= np.linalg.norm(direction)
+        direction = mn.normalize(direction)
         end = position + (direction * config_eng.symbol.pin_length)
         self._line = mn.Line(
             start=position,

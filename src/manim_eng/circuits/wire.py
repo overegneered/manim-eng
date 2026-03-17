@@ -98,7 +98,7 @@ class Wire(WireBase):
         """Get the corner points of the wire.
 
         Returns the vertices of the wire, not including the end points (i.e. at the
-        start and end terminals).
+        start and end pins).
         """
         from_direction = utils.cardinalised(self._start.direction)
         to_direction = utils.cardinalised(self._end.direction)
@@ -210,7 +210,7 @@ class Wire(WireBase):
         Returns
         -------
         Point3D
-            The new plane.
+            The new point.
         """
         vector_to_point = point - point_on_plane
         distance_to_move = -np.dot(normal, vector_to_point)

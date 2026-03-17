@@ -31,7 +31,7 @@ def _create_node_blob(match_to: Component, open_: bool) -> mn.Dot:
 
 
 class Node(Component):
-    """Node in a circuit and open/filled terminal circuit symbol.
+    """Circuit symbol for a node (open/filled terminal or wire-routing aid).
 
     ``Node`` handles two main purposes: it displays node symbols (open terminal symbols
     and solder blobs), and serves as an aid for wire routing, particularly when paired
@@ -88,7 +88,7 @@ class Node(Component):
         **THIS WILL FAIL.**
         """
         raise NotImplementedError(
-            "`Monopole`s have no annotations. Please use `label` instead."
+            "`Node`s have no annotations. Please use `label` instead."
         )
 
     def get(self, direction: mnt.Vector3D | float) -> Pin:
@@ -363,7 +363,7 @@ class Node(Component):
 
     def _should_be_visible(self) -> bool:
         """Return if there are more than 2 visible wires or the label is visible."""
-        visible_pin_count = sum([pin.is_visible() for pin in self.pins])
+        visible_pin_count = sum(pin.is_visible() for pin in self.pins)
         pins_above_threshold = visible_pin_count > AUTOBLOBBING_BLOB_THRESHOLD
         return pins_above_threshold or self._label.is_visible()
 
@@ -439,7 +439,7 @@ class Node(Component):
 
 
 class OpenNode(Node):
-    """Open node circuit symbol.
+    """Circuit symbol for an open terminal.
 
     A utility wrapper around the ``Node`` class that sets the ``open_`` parameter to
     ``True`` automatically.

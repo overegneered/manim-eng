@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from manim_eng import Node
-from manim_eng.components.base import Terminal
+from manim_eng.components.base.pin import Pin
 
 
 @pytest.mark.parametrize(
@@ -36,7 +36,7 @@ def test_get_visible_terminal_angles(
 ) -> None:
     node = Node()
     for direction, visibility in terminal_directions_and_visibilities:
-        terminal_mock = mock.MagicMock(Terminal)
+        terminal_mock = mock.MagicMock(Pin)
         terminal_mock.direction = direction
         terminal_mock.is_visible.return_value = visibility
         node.pins.append(terminal_mock)
