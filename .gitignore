@@ -1,4 +1,7 @@
 __pycache__
+.venv
+dist
+
 media
 build
 generated
