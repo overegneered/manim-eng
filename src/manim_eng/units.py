@@ -365,6 +365,10 @@ class Unit:
             )
         return NotImplemented
 
+    def __hash__(self) -> int:
+        """Return a hash value for the unit."""
+        return hash((self.symbol, self.exponent, self.prefix))
+
     def __repr__(self) -> str:
         """Return a string representation of the unit."""
         if self.exponent == 1:
@@ -475,6 +479,10 @@ class UnitSequence:
         if isinstance(other, UnitSequence):
             return self.units == other.units
         return NotImplemented
+
+    def __hash__(self) -> int:
+        """Return a hash of ``self``."""
+        return hash(self.units)
 
     def __repr__(self) -> str:
         """Return a string representation of the unit sequence."""
@@ -683,6 +691,10 @@ class Value:
         if isinstance(other, Value):
             return self.value == other.value and self.units == other.units
         return NotImplemented
+
+    def __hash__(self) -> int:
+        """Return a hash of ``self``."""
+        return hash((self.value, self.units))
 
     def __repr__(self) -> str:
         """Return a string representation of the value."""

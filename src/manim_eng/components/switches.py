@@ -62,7 +62,7 @@ class Switch(BipoleSwitchBase):
         self.closed = True
         return self
 
-    @mn.override_animate(open)
+    @mn.override_animate(open)  # noqa: A003
     def __animate_open(
         self, anim_args: dict[str, Any] | None = None
     ) -> mn.Animation | None:

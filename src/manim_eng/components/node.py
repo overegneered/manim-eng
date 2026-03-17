@@ -393,7 +393,7 @@ class Node(Component):
         if len(angles) == 0:
             return mn.UP
 
-        angles.sort(key=lambda x: np.sin(x), reverse=True)
+        angles.sort(key=np.sin, reverse=True)
         angle = angles[0]
         return mn.rotate_vector(mn.RIGHT, angle)
 

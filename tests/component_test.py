@@ -1,3 +1,5 @@
+import re
+
 import manim as mn
 import manim.typing as mnt
 import numpy as np
@@ -56,7 +58,9 @@ def test_align_value_errors_if_terminal_belongs_to_same_component(
 ) -> None:
     with pytest.raises(
         ValueError,
-        match="Terminal passed to `other_terminal` belongs to this component.",
+        match=re.escape(
+            "Terminal passed to `other_terminal` belongs to this component."
+        ),
     ):
         dummy_component.align_terminal(dummy_component.right, dummy_component.right)
 
@@ -64,7 +68,8 @@ def test_align_value_errors_if_terminal_belongs_to_same_component(
 def test_align_value_errors_if_node_passed_itself() -> None:
     node = Node()
     with pytest.raises(
-        ValueError, match="Node passed to `other_terminal` is this component."
+        ValueError,
+        match=re.escape("Node passed to `other_terminal` is this component."),
     ):
         node.align_terminal(node.right, node)
 
@@ -72,7 +77,8 @@ def test_align_value_errors_if_node_passed_itself() -> None:
 def test_align_value_errors_if_monopole_passed_itself() -> None:
     monopole = Monopole(mn.UP)
     with pytest.raises(
-        ValueError, match="Monopole passed to `other_terminal` is this component."
+        ValueError,
+        match=re.escape("Monopole passed to `other_terminal` is this component."),
     ):
         monopole.align_terminal(monopole.terminal, monopole)
 
@@ -335,7 +341,8 @@ def test_get_or_check_terminal_non_belonging_terminal() -> None:
     other_component = DummyComponent()
 
     with pytest.raises(
-        ValueError, match="Passed terminal does not belong to this component."
+        ValueError,
+        match=re.escape("Passed terminal does not belong to this component."),
     ):
         component._get_or_check_terminal(other_component.left)
 
@@ -354,7 +361,9 @@ def test_get_or_check_terminal_valid_attribute_not_a_terminal(
 
     with pytest.raises(
         ValueError,
-        match=f"Attribute `{not_a_terminal}` of `DummyComponent` is not a terminal.",
+        match=re.escape(
+            f"Attribute `{not_a_terminal}` of `DummyComponent` is not a terminal."
+        ),
     ):
         dummy_component._get_or_check_terminal(not_a_terminal)
 
