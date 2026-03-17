@@ -33,7 +33,7 @@ class Monopole(Component, metaclass=abc.ABCMeta):
             position=mn.ORIGIN,
             direction=direction,
         )
-        super().__init__(terminals=[pin], **kwargs)
+        super().__init__(pins=[pin], **kwargs)
 
         self._label_anchor.move_to(self.get_critical_point(-direction))
         self.update()

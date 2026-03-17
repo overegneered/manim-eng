@@ -1,9 +1,10 @@
 """Contains Pin class."""
 
+import manim as mn
 import manim.typing as mnt
 import numpy as np
 
-from manim_eng._base.anchor import TerminalAnchor
+from manim_eng._base.anchor import PinAnchor
 from manim_eng._base.markable import Markable
 from manim_eng._config import config_eng
 
@@ -31,30 +32,32 @@ class Pin(Markable):
         length: float | None = None,
     ):
         super().__init__()
-        direction /= np.linalg.norm(direction)
+        direction = mn.normalize(direction)
 
         if length is None:
             length = config_eng.symbol.pin_length
 
-        self._body_anchor = TerminalAnchor().move_to(position)
-        self._end_anchor = TerminalAnchor().move_to(position + direction * length)
+        self._body_anchor = PinAnchor().move_to(position)
+        self._end_anchor = PinAnchor().move_to(position + direction * length)
+
+        self.add(self._body_anchor, self._end_anchor)
 
     @property
-    def start(self) -> mnt.Point3D:
+    def base(self) -> mnt.Point3D:
         """The point at which the pin connects to the component body."""
         return self._body_anchor.pos
 
     @property
-    def end(self) -> mnt.Point3D:
+    def tip(self) -> mnt.Point3D:
         """The point at which the pin connects to external wires."""
         return self._end_anchor.pos
 
     @property
     def direction(self) -> mnt.Vector3D:
         """A unit vector pointing out of the pin (towards the end)."""
-        return (self.end - self.start) / self.length
+        return mn.normalize(self.tip - self.base)
 
     @property
     def length(self) -> float:
         """The length of the pin (the distance between the start and end)."""
-        return float(np.linalg.norm(self.end - self.start))
+        return float(np.linalg.norm(self.tip - self.base))

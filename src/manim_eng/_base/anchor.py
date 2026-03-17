@@ -58,9 +58,9 @@ class LabelAnchor(Anchor):
         super().__init__(config_eng.anchor.label_colour)
 
 
-class TerminalAnchor(Anchor):
+class PinAnchor(Anchor):
     def __init__(self) -> None:
-        super().__init__(config_eng.anchor.terminal_colour)
+        super().__init__(config_eng.anchor.pin_colour)
 
 
 class VoltageAnchor(Anchor):

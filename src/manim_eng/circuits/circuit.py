@@ -199,8 +199,8 @@ class Circuit(mn.VMobject):
         to_remove = []
         for wire in cast(list[Wire], self.wires.submobjects):
             if condition(
-                wire.start in terminals,
-                wire.end in terminals,
+                wire._start in terminals,
+                wire._end in terminals,
             ):
                 to_remove.append(wire)
         return to_remove

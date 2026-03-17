@@ -68,7 +68,7 @@ class Voltage(Markable):
         self.component_to_avoid = avoid
         self.component_buff = component_buff
 
-        self._direction = end.end - start.end
+        self._direction = end.tip - start.tip
         self._angle_of_direction = mn.angle_of_vector(self._direction)
 
         self._arrow: mn.Arrow = mn.Arrow(mn.ORIGIN, mn.ORIGIN)
@@ -205,7 +205,7 @@ class Voltage(Markable):
         return self
 
     def __arrow_updater(self) -> None:
-        self._direction = self.end.end - self.start.end
+        self._direction = self.end.tip - self.start.tip
         self._angle_of_direction = mn.angle_of_vector(self._direction)
 
         self.__update_arrow()
@@ -230,19 +230,19 @@ class Voltage(Markable):
         # Remove once https://github.com/ManimCommunity/manim/issues/4132 is resolved
         # Manually calculates a buff so that a buff and path_arc don't occur
         # simultaneously
-        start_to_end = self.end.end - self.start.end
+        start_to_end = self.end.tip - self.start.tip
         length = np.linalg.norm(start_to_end)
         radius = length / (2 * np.sin(0.5 * angle))
         angle_for_buff = self.buff / radius
         perp_bisector = np.cross(start_to_end, mn.IN) / length
-        center = 0.5 * (self.start.end + self.end.end) + perp_bisector * np.sqrt(
+        center = 0.5 * (self.start.tip + self.end.tip) + perp_bisector * np.sqrt(
             radius**2 - 0.25 * length**2
         )
         buffed_start = center + mn.rotate_vector(
-            self.start.end - center, angle_for_buff * direction
+            self.start.tip - center, angle_for_buff * direction
         )
         buffed_end = center + mn.rotate_vector(
-            self.end.end - center, angle_for_buff * -direction
+            self.end.tip - center, angle_for_buff * -direction
         )
         path_arc = angle - 2 * angle_for_buff
 
@@ -362,10 +362,10 @@ class Voltage(Markable):
         equations from the vector equations of the bisectors and solving for the scaling
         factors.
         """
-        chord_ab = middle_point - self.start.end
-        chord_bc = self.end.end - middle_point
+        chord_ab = middle_point - self.start.tip
+        chord_bc = self.end.tip - middle_point
 
-        mid_ab = self.start.end + chord_ab / 2
+        mid_ab = self.start.tip + chord_ab / 2
         mid_bc = middle_point + chord_bc / 2
 
         perp_ab = np.cross(chord_ab, mn.OUT)

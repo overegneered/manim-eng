@@ -290,8 +290,8 @@ class AnchorDisplayConfig(ConfigBase):
     """The radius of anchor visualisation rings."""
     stroke_width: float = 2.0
     """The stroke width of anchor visualisation rings."""
-    terminal_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.GREEN)
-    """The colour to use for terminal anchors' debug visuals. Defaults to green."""
+    pin_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.GREEN)
+    """The colour to use for pin anchors' debug visuals. Defaults to green."""
     voltage_colour: mn.ManimColor = dc.field(default_factory=lambda: mn.YELLOW)
     """The colour to use for voltage anchors' debug visuals. Defaults to yellow."""
 

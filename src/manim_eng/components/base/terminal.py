@@ -7,7 +7,7 @@ import manim.typing as mnt
 import numpy as np
 from manim import VMobject
 
-from manim_eng._base.anchor import CentreAnchor, CurrentAnchor, TerminalAnchor
+from manim_eng._base.anchor import CentreAnchor, CurrentAnchor, PinAnchor
 from manim_eng._base.mark import Mark
 from manim_eng._base.markable import Markable
 from manim_eng._config import config_eng
@@ -65,7 +65,7 @@ class Terminal(Markable):
             self.add(self._line)
 
         self._centre_anchor = CentreAnchor().move_to(self._line.get_center())
-        self._end_anchor = TerminalAnchor().move_to(end)
+        self._end_anchor = PinAnchor().move_to(end)
 
         self._current_arrow: CurrentArrow
         self._current_arrow_showing: bool = False

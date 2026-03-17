@@ -170,7 +170,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
                     "`other` should be a pin of another component, "
                     "a point, or a separate Node or Monopole."
                 )
-            other = other.end
+            other = other.tip
         elif isinstance(other, Node):
             if other == self:
                 raise ValueError(
@@ -186,20 +186,20 @@ class Component(Markable, metaclass=abc.ABCMeta):
                     "`other` should be a terminal of another component, "
                     "a point, or a separate Node or Monopole."
                 )
-            other = other.pin.end
+            other = other.pin.tip
 
         if direction is None:
             direction = pin.direction
 
         movement_direction = np.cross(direction, mn.OUT)
         target_position = mn.find_intersection(
-            [pin.end],
+            [pin.tip],
             [movement_direction],
             [other],
             [direction],
         )[0]
 
-        self.shift(target_position - pin.end)
+        self.shift(target_position - pin.tip)
         return self
 
     def voltage(
