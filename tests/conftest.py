@@ -6,7 +6,7 @@ import pytest
 
 from manim_eng.components.base.component import Component
 
-from .utils.dummy_component import DummyComponent, DummyComponentMockedTerminals
+from .utils.dummy_component import DummyComponent, DummyComponentMockedPins
 
 
 class _MockMathTex(mn.VMobject):
@@ -36,5 +36,5 @@ def dummy_component() -> Component:
 
 
 @pytest.fixture
-def dummy_component_mocked_terminals() -> Component:
-    return DummyComponentMockedTerminals()
+def dummy_component_mocked_pins() -> Component:
+    return DummyComponentMockedPins()

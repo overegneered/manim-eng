@@ -8,16 +8,16 @@ from manim_eng.components.base.component import Component
 from manim_eng.components.base.monopole import Monopole
 from manim_eng.components.node import Node
 
-from .utils.dummy_component import DummyComponent, DummyComponentMockedTerminals
+from .utils.dummy_component import DummyComponent
 
 
 @pytest.mark.parametrize(
-    ("direction", "expected_end"),
+    ("direction", "expected_tip"),
     [
         pytest.param(
             None,
             np.array([1, 2, 0]) + config_eng.symbol.pin_length * mn.RIGHT,
-            id="No direction specified takes component terminal direction",
+            id="No direction specified takes component pin direction",
         ),
         pytest.param(
             mn.RIGHT,
@@ -36,10 +36,10 @@ from .utils.dummy_component import DummyComponent, DummyComponentMockedTerminals
         ),
     ],
 )
-def test_align_terminal(
+def test_align_pins(
     dummy_component: Component,
     direction: mnt.Vector3D | None,
-    expected_end: mnt.Point3D,
+    expected_tip: mnt.Point3D,
 ) -> None:
     alignment_point = np.array([2, 2, 0])
 
@@ -47,31 +47,29 @@ def test_align_terminal(
         dummy_component.right, alignment_point, direction=direction
     )
 
-    assert np.allclose(dummy_component.right.end, expected_end)
+    assert np.allclose(dummy_component.right.tip, expected_tip)
 
 
-def test_align_value_errors_if_terminal_belongs_to_same_component(
+def test_align_value_errors_if_pin_belongs_to_same_component(
     dummy_component: Component,
 ) -> None:
     with pytest.raises(
         ValueError,
-        match="Terminal passed to `other_terminal` belongs to this component.",
+        match="Pin passed to `other` belongs to this component.",
     ):
         dummy_component.align_pin(dummy_component.right, dummy_component.right)
 
 
 def test_align_value_errors_if_node_passed_itself() -> None:
     node = Node()
-    with pytest.raises(
-        ValueError, match="Node passed to `other_terminal` is this component."
-    ):
+    with pytest.raises(ValueError, match="Node passed to `other` is this component."):
         node.align_pin(node.right, node)
 
 
 def test_align_value_errors_if_monopole_passed_itself() -> None:
     monopole = Monopole(mn.UP)
     with pytest.raises(
-        ValueError, match="Monopole passed to `other_terminal` is this component."
+        ValueError, match="Monopole passed to `other` is this component."
     ):
         monopole.align_pin(monopole.pin, monopole)
 
@@ -129,7 +127,7 @@ def test_label_and_annotation_via_constructor_argument_works() -> None:
     assert dummy_component.annotation.tex_strings == [r"(2 + j4) \,\Omega"]
 
 
-def test_voltage_processes_terminals_correctly(dummy_component: DummyComponent) -> None:
+def test_voltage_processes_pins_correctly(dummy_component: DummyComponent) -> None:
     voltage_1 = dummy_component.voltage(
         dummy_component.left,
         dummy_component.right,
@@ -157,11 +155,12 @@ def test_voltage_sets_component_it_is_called_on_as_avoid(
     assert voltage.component_to_avoid == dummy_component
 
 
-def test_voltage_errors_if_terminals_are_the_same(
+def test_voltage_errors_if_pins_are_the_same(
     dummy_component: DummyComponent,
 ) -> None:
     expected_message = (
-        "The terminals specified through `start` and `end` are identical."
+        "The pins specified through `start` and `end` are the same. "
+        "They must be different."
     )
 
     with pytest.raises(ValueError, match=expected_message):
@@ -174,185 +173,48 @@ def test_voltage_errors_if_terminals_are_the_same(
         dummy_component.voltage("left", "left")
 
 
-def test_set_current_no_terminal_specified(
-    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
-) -> None:
-    current_label = "current label"
-
-    dummy_component_mocked_terminals.set_current(current_label)
-
-    dummy_component_mocked_terminals.cast_terminals[
-        0
-    ].set_current.assert_called_once_with(label=current_label)
-    dummy_component_mocked_terminals.cast_terminals[1].set_current.assert_not_called()
-
-
-def test_set_current_string_terminal_specified(
-    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
-) -> None:
-    current_label = "current label still"
-
-    dummy_component_mocked_terminals.set_current(current_label, pin="right")
-
-    dummy_component_mocked_terminals.right.set_current.assert_called_once_with(
-        label=current_label
-    )
-    dummy_component_mocked_terminals.left.set_current.assert_not_called()
-
-
-def test_set_current_actual_terminal_specified(
-    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
-) -> None:
-    current_label = "current label again"
-
-    dummy_component_mocked_terminals.set_current(
-        current_label, pin=dummy_component_mocked_terminals.right
-    )
-
-    dummy_component_mocked_terminals.right.set_current.assert_called_once_with(
-        label=current_label
-    )
-    dummy_component_mocked_terminals.left.set_current.assert_not_called()
-
-
-def test_set_current_passes_kwargs_on_to_set_current_on_terminal(
-    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
-) -> None:
-    current_label = "current label once more"
-
-    dummy_component_mocked_terminals.set_current(current_label, out=True, below=True)
-
-    dummy_component_mocked_terminals.cast_terminals[
-        0
-    ].set_current.assert_called_once_with(label=current_label, out=True, below=True)
-
-
-def test_reset_current_no_terminal_specified(
-    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
-) -> None:
-    current_label = "current label"
-
-    dummy_component_mocked_terminals.reset_current(current_label)
-
-    dummy_component_mocked_terminals.cast_terminals[
-        0
-    ].reset_current.assert_called_once_with(current_label)
-    dummy_component_mocked_terminals.cast_terminals[1].reset_current.assert_not_called()
-
-
-def test_reset_current_string_terminal_specified(
-    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
-) -> None:
-    current_label = "current label still"
-
-    dummy_component_mocked_terminals.reset_current(current_label, terminal="left")
-
-    dummy_component_mocked_terminals.left.reset_current.assert_called_once_with(
-        current_label
-    )
-    dummy_component_mocked_terminals.right.reset_current.assert_not_called()
-
-
-def test_reset_current_actual_terminal_specified(
-    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
-) -> None:
-    current_label = "current label again"
-
-    dummy_component_mocked_terminals.reset_current(
-        current_label, terminal=dummy_component_mocked_terminals.left
-    )
-
-    dummy_component_mocked_terminals.left.reset_current.assert_called_once_with(
-        current_label
-    )
-    dummy_component_mocked_terminals.right.reset_current.assert_not_called()
-
-
-def test_reset_current_passes_kwargs_on_to_reset_current_on_terminal(
-    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
-) -> None:
-    current_label = "current label once more"
-
-    dummy_component_mocked_terminals.reset_current(current_label, out=True, below=True)
-
-    dummy_component_mocked_terminals.cast_terminals[
-        0
-    ].reset_current.assert_called_once_with(current_label, out=True, below=True)
-
-
-def test_clear_current_no_terminal_specified(
-    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
-) -> None:
-    dummy_component_mocked_terminals.clear_current()
-
-    dummy_component_mocked_terminals.cast_terminals[
-        0
-    ].clear_current.assert_called_once()
-    dummy_component_mocked_terminals.cast_terminals[1].clear_current.assert_not_called()
-
-
-def test_clear_current_string_terminal_specified(
-    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
-) -> None:
-    dummy_component_mocked_terminals.clear_current(terminal="right")
-
-    dummy_component_mocked_terminals.right.clear_current.assert_called_once()
-    dummy_component_mocked_terminals.left.clear_current.assert_not_called()
-
-
-def test_clear_current_actual_terminal_specified(
-    dummy_component_mocked_terminals: DummyComponentMockedTerminals,
-) -> None:
-    dummy_component_mocked_terminals.clear_current(
-        terminal=dummy_component_mocked_terminals.right
-    )
-
-    dummy_component_mocked_terminals.right.clear_current.assert_called_once()
-    dummy_component_mocked_terminals.left.clear_current.assert_not_called()
-
-
-def test_get_or_check_terminal_non_belonging_terminal() -> None:
+def test_get_or_check_pin_non_belonging_pin() -> None:
     component = DummyComponent()
     other_component = DummyComponent()
 
     with pytest.raises(
-        ValueError, match="Passed terminal does not belong to this component."
+        ValueError, match="Passed pin does not belong to this component."
     ):
         component._get_or_check_pin(other_component.left)
 
 
-def test_get_or_check_terminal_invalid_attribute(
+def test_get_or_check_pin_invalid_attribute(
     dummy_component: DummyComponent,
 ) -> None:
     with pytest.raises(AttributeError):
         dummy_component._get_or_check_pin("invalid_attribute")
 
 
-def test_get_or_check_terminal_valid_attribute_not_a_terminal(
+def test_get_or_check_pin_valid_attribute_not_a_terminal(
     dummy_component: DummyComponent,
 ) -> None:
-    not_a_terminal = "not_a_terminal"
+    not_a_pin = "not_a_pin"
 
     with pytest.raises(
         ValueError,
-        match=f"Attribute `{not_a_terminal}` of `DummyComponent` is not a terminal.",
+        match=f"Attribute `{not_a_pin}` of `DummyComponent` is not a pin.",
     ):
-        dummy_component._get_or_check_pin(not_a_terminal)
+        dummy_component._get_or_check_pin(not_a_pin)
 
 
-def test_get_or_check_terminal_valid_terminal(dummy_component: DummyComponent) -> None:
+def test_get_or_check_pin_valid_pin(dummy_component: DummyComponent) -> None:
     result = dummy_component._get_or_check_pin(dummy_component.left)
 
     assert result == dummy_component.left
 
 
-def test_get_or_check_terminal_valid_string(dummy_component: DummyComponent) -> None:
+def test_get_or_check_pin_valid_string(dummy_component: DummyComponent) -> None:
     result = dummy_component._get_or_check_pin("left")
 
     assert result == dummy_component.left
 
 
-def test_get_or_check_terminal_terminal_is_none(
+def test_get_or_check_pin_pin_is_none(
     dummy_component: DummyComponent,
 ) -> None:
     result = dummy_component._get_or_check_pin(None)

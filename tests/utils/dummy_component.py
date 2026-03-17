@@ -4,33 +4,33 @@ from unittest import mock
 import manim as mn
 
 from manim_eng.components.base.component import Component
-from manim_eng.components.base.terminal import Terminal
+from manim_eng.components.base.pin import Pin
 
 
 class DummyComponent(Component):
     def __init__(self, **kwargs: Any) -> None:
-        left = Terminal(mn.LEFT, mn.LEFT)
-        right = Terminal(mn.RIGHT, mn.RIGHT)
-        self.not_a_terminal = 3
+        left = Pin(mn.LEFT, mn.LEFT)
+        right = Pin(mn.RIGHT, mn.RIGHT)
+        self.not_a_pin = 3
         super().__init__([left, right], **kwargs)
 
     def _construct(self) -> None:
         pass
 
     @property
-    def left(self) -> Terminal:
+    def left(self) -> Pin:
         return self.pins[0]
 
     @property
-    def right(self) -> Terminal:
+    def right(self) -> Pin:
         return self.pins[1]
 
 
-class DummyComponentMockedTerminals(Component):
+class DummyComponentMockedPins(Component):
     def __init__(self, **kwargs: Any) -> None:
-        left = mock.MagicMock(Terminal)
-        right = mock.MagicMock(Terminal)
-        self.not_a_terminal = 3
+        left = mock.MagicMock(Pin)
+        right = mock.MagicMock(Pin)
+        self.not_a_pin = 3
         super().__init__([left, right], **kwargs)
 
     def _construct(self) -> None:
@@ -45,5 +45,5 @@ class DummyComponentMockedTerminals(Component):
         return cast(mock.MagicMock, self.pins[1])
 
     @property
-    def cast_terminals(self) -> list[mock.MagicMock]:
+    def cast_pins(self) -> list[mock.MagicMock]:
         return cast(list[mock.MagicMock], self.pins)
