@@ -1,4 +1,4 @@
-"""Nodes for wire routing and display of circuit terminals and solder blobs."""
+"""Nodes for wire routing and display of circuit pins and solder blobs."""
 
 from typing import Any, Self, cast
 
@@ -341,7 +341,7 @@ class Node(Component):
         """Get the centre of the node.
 
         Note that this is not the geometric centre, but rather the point from which
-        terminals originate (the centre of the node circle/blob).
+        pins originate (the centre of the node circle/blob).
         """
         return self.__blob.get_center()
 
@@ -386,8 +386,8 @@ class Node(Component):
         node._update_label_positioning_using_vector(new_direction)
 
     def _get_optimal_label_anchor_direction(self) -> mnt.Vector3D:
-        terminal_angles = self._get_visible_pin_angles()
-        angles = self._midangles_of_largest_gaps_between_list_of_angles(terminal_angles)
+        pin_angles = self._get_visible_pin_angles()
+        angles = self._midangles_of_largest_gaps_between_list_of_angles(pin_angles)
         return self._topmost_angle_as_direction(angles)
 
     def _update_label_positioning_using_vector(self, direction: mnt.Vector3D) -> None:

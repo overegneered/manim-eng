@@ -71,7 +71,7 @@ class Pin(Markable):
         return float(np.linalg.norm(self.tip - self.base))
 
     def register_attachment(self, wire: "WireBase") -> Self:
-        """Register that a wire is attached to this terminal.
+        """Register that a wire is attached to this pin.
 
         Does nothing if the wire is already attached.
 
@@ -84,7 +84,7 @@ class Pin(Markable):
         return self
 
     def register_detachment(self, wire: "WireBase") -> Self:
-        """Register that a wire has been detached from this terminal.
+        """Register that a wire has been detached from this pin.
 
         Does nothing if the wire was not attached.
 

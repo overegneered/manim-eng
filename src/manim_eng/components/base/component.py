@@ -81,7 +81,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
 
     @property
     def pins(self) -> list[Pin]:
-        """The list of terminals of the component."""
+        """The list of pins of the component."""
         return cast(list[Pin], self._pins.submobjects)
 
     @property
@@ -100,7 +100,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
         **This is not necessarily the exact centre of the box the component symbol
         occupies**. It is rather the point about which it is most logical to rotate
         the component. For bipoles, it will be at the midpoint of the line between the
-        two terminals.
+        two pins.
 
         Returns
         -------
@@ -183,7 +183,7 @@ class Component(Markable, metaclass=abc.ABCMeta):
             if other == self:
                 raise ValueError(
                     "Monopole passed to `other` is this component. "
-                    "`other` should be a terminal of another component, "
+                    "`other` should be a pin of another component, "
                     "a point, or a separate Node or Monopole."
                 )
             other = other.pin.tip

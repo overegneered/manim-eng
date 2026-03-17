@@ -10,18 +10,18 @@ from manim_eng.components.base.pin import Pin
 
 
 @pytest.mark.parametrize(
-    ("terminal_directions_and_visibilities", "expected"),
+    ("pin_directions_and_visibilities", "expected"),
     [
-        pytest.param([], [], id="no terminals returns empty list"),
+        pytest.param([], [], id="no pins returns empty list"),
         pytest.param(
             [(mn.UP, False), (mn.DOWN, False), (mn.LEFT, False)],
             [],
-            id="no visible terminals returns empty list",
+            id="no visible pins returns empty list",
         ),
         pytest.param(
             [(mn.RIGHT, True), (mn.LEFT, False), (mn.DOWN, False), (mn.UP, True)],
             [0.0, 0.5 * np.pi],
-            id="only returns visible terminals",
+            id="only returns visible pins",
         ),
         pytest.param(
             [(mn.UP, True), (mn.DL, True), (mn.UR, True)],
@@ -30,16 +30,16 @@ from manim_eng.components.base.pin import Pin
         ),
     ],
 )
-def test_get_visible_terminal_angles(
-    terminal_directions_and_visibilities: list[tuple[mnt.Vector3D, bool]],
+def test_get_visible_pin_angles(
+    pin_directions_and_visibilities: list[tuple[mnt.Vector3D, bool]],
     expected: list[float],
 ) -> None:
     node = Node()
-    for direction, visibility in terminal_directions_and_visibilities:
-        terminal_mock = mock.MagicMock(Pin)
-        terminal_mock.direction = direction
-        terminal_mock.is_visible.return_value = visibility
-        node.pins.append(terminal_mock)
+    for direction, visibility in pin_directions_and_visibilities:
+        pin_mock = mock.MagicMock(Pin)
+        pin_mock.direction = direction
+        pin_mock.is_visible.return_value = visibility
+        node.pins.append(pin_mock)
 
     actual = node._get_visible_pin_angles()
 

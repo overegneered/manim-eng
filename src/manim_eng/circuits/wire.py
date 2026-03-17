@@ -26,7 +26,7 @@ class ManualWire(WireBase):
         The vertices the wire should have between the two pins. Should not include
         the positions of the two pins, as these are inserted automatically when the
         wire is drawn. These should be in order from ``start`` to ``end``. If left
-        unspecified, the wire will directly connect the start and end terminals.
+        unspecified, the wire will directly connect the start and end pins.
     updating : bool
         Whether the ends of the wire should update automatically to keep connected to
         the pins. This is disabled by default. If this is enabled, it is recommended to
@@ -123,7 +123,7 @@ class Wire(WireBase):
             corner_point, from_end, from_direction
         ) or self.__point_is_behind_plane(corner_point, to_end, to_direction):
             # Move the corner point to the other vertex of the box formed from the end
-            # of each terminal, as two 90 degree turns at a component is better than one
+            # of each pin, as two 90 degree turns at a component is better than one
             # 0 degree and one 180 degree.
             if corner_point[0] == from_end[0]:
                 corner_point = np.array([to_end[0], from_end[1], 0])

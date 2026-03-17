@@ -29,7 +29,7 @@ class Inductor(Bipole):
             self._body.add(arc)
 
         # Avoid the 'cut off' look at the ends of the inductor, due to the interface
-        # between the terminal and inductor body
+        # between the pin and inductor body
         for correction_direction in [mn.LEFT, mn.RIGHT]:
             visual_correction = (
                 mn.VMobject()

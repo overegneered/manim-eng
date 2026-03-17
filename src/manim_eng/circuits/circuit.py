@@ -83,7 +83,7 @@ class Circuit(mn.VMobject):
         ValueError
             If either pin doesn't belong to a component in this circuit.
         """
-        self.__check_terminals_all_belong_to_this_circuit([start, end])
+        self.__check_pins_all_belong_to_this_circuit([start, end])
         wire = Wire(start, end)
         wire._mark_shown()
         self.wires.add(wire)
@@ -92,7 +92,7 @@ class Circuit(mn.VMobject):
         self.nodes.update()
         return self
 
-    def disconnect(self, *components_or_terminals: Component | Pin) -> Self:
+    def disconnect(self, *components_or_pins: Component | Pin) -> Self:
         """Disconnect the given components and/or pins from one another.
 
         Each wire is checked to see if *both* the start *and* end pins have been
@@ -101,7 +101,7 @@ class Circuit(mn.VMobject):
 
         Parameters
         ----------
-        *components_or_terminals : Component | Pin
+        *components_or_pins : Component | Pin
             The group of components and pins to disconnect from one another.
 
         Raises
@@ -113,12 +113,10 @@ class Circuit(mn.VMobject):
         --------
         isolate : Remove a wire if either of its ends is specified.
         """
-        terminals = self._collapse_components_and_terminals_to_terminals(
-            components_or_terminals
-        )
-        self.__check_terminals_all_belong_to_this_circuit(terminals)
-        to_remove = self.__get_wires_from_terminal_condition(
-            terminals, lambda start, end: start and end
+        pins = self._collapse_components_and_pins_to_pins(components_or_pins)
+        self.__check_pins_all_belong_to_this_circuit(pins)
+        to_remove = self.__get_wires_from_pin_condition(
+            pins, lambda start, end: start and end
         )
         for wire in to_remove:
             wire._mark_hidden()
@@ -128,7 +126,7 @@ class Circuit(mn.VMobject):
         self.nodes.update()
         return self
 
-    def isolate(self, *components_or_terminals: Component | Pin) -> Self:
+    def isolate(self, *components_or_pins: Component | Pin) -> Self:
         """Remove all wires attached to each given pin or component.
 
         Each wire is checked to see if either of its ends is a passed pin or a
@@ -136,7 +134,7 @@ class Circuit(mn.VMobject):
 
         Parameters
         ----------
-        *components_or_terminals : Component | Pin
+        *components_or_pins : Component | Pin
             The components and pins to completely disconnect from the circuit.
 
         Raises
@@ -148,12 +146,10 @@ class Circuit(mn.VMobject):
         --------
         disconnect : Remove a wire if both its ends are specified.
         """
-        terminals = self._collapse_components_and_terminals_to_terminals(
-            components_or_terminals
-        )
-        self.__check_terminals_all_belong_to_this_circuit(terminals)
-        to_remove = self.__get_wires_from_terminal_condition(
-            terminals, lambda start, end: start or end
+        pins = self._collapse_components_and_pins_to_pins(components_or_pins)
+        self.__check_pins_all_belong_to_this_circuit(pins)
+        to_remove = self.__get_wires_from_pin_condition(
+            pins, lambda start, end: start or end
         )
         for wire in to_remove:
             wire._mark_hidden()
@@ -164,35 +160,35 @@ class Circuit(mn.VMobject):
         return self
 
     @staticmethod
-    def _collapse_components_and_terminals_to_terminals(
-        components_or_terminals: Sequence[Component | Pin],
+    def _collapse_components_and_pins_to_pins(
+        components_or_pins: Sequence[Component | Pin],
     ) -> list[Pin]:
-        terminals = []
-        for component_or_terminal in components_or_terminals:
-            if isinstance(component_or_terminal, Component):
-                terminals.extend(component_or_terminal.pins)
+        pins = []
+        for component_or_pin in components_or_pins:
+            if isinstance(component_or_pin, Component):
+                pins.extend(component_or_pin.pins)
             else:
-                terminals.append(component_or_terminal)
+                pins.append(component_or_pin)
         # Remove duplicate entries
-        return list(set(terminals))
+        return list(set(pins))
 
-    def __get_wires_from_terminal_condition(
-        self, terminals: Sequence[Pin], condition: Callable[[bool, bool], bool]
+    def __get_wires_from_pin_condition(
+        self, pins: Sequence[Pin], condition: Callable[[bool, bool], bool]
     ) -> list[Wire]:
         """Return a list of wires from the circuit based on a given condition.
 
         Iterates through all connections and calculates if each end of the wire is in
-        ``terminals``. Whether each one is in ``terminals`` is passed to ``condition``,
+        ``pins``. Whether each one is in ``pins`` is passed to ``condition``,
         which is expected to return ``True`` if the wire should be included.
 
         Parameters
         ----------
-        terminals : Sequence[Pin]
+        pins : Sequence[Pin]
             The pins to check all wires for.
         condition : Callable[[bool, bool], bool]
             The condition to use to determine whether a wire should be returned. Will be
             passed two booleans, whether the start or end of the wire is in
-            ``terminals``, respectively, and should return ``True`` if the wire should
+            ``pins``, respectively, and should return ``True`` if the wire should
             be returned and ``False`` otherwise.
 
         Returns
@@ -203,27 +199,25 @@ class Circuit(mn.VMobject):
         to_remove = []
         for wire in cast(list[Wire], self.wires.submobjects):
             if condition(
-                wire._start in terminals,
-                wire._end in terminals,
+                wire._start in pins,
+                wire._end in pins,
             ):
                 to_remove.append(wire)
         return to_remove
 
-    def __check_terminals_all_belong_to_this_circuit(
-        self, terminals: list[Pin]
-    ) -> None:
-        terminal_set = set(terminals)
-        owned_terminal_set = set()
+    def __check_pins_all_belong_to_this_circuit(self, pins: list[Pin]) -> None:
+        pin_set = set(pins)
+        owned_pin_set = set()
         for component in self.elements:
-            owned_terminal_set.update(component.pins)
+            owned_pin_set.update(component.pins)
 
-        terminals_not_owned = terminal_set.difference(owned_terminal_set)
-        if len(terminals_not_owned) != 0:
+        pins_not_owned = pin_set.difference(owned_pin_set)
+        if len(pins_not_owned) != 0:
             raise ValueError(
-                f"At least one passed terminal does not "
+                f"At least one passed pin does not "
                 f"belong to any component in this circuit. "
-                f"Problem terminals have the following end coordinates: "
-                f"{[tuple(terminal.tip) for terminal in terminals_not_owned]}"
+                f"Problem pins have the following end coordinates: "
+                f"{[tuple(pin.tip) for pin in pins_not_owned]}"
             )
 
     @mn.override_animate(add)
@@ -260,7 +254,7 @@ class Circuit(mn.VMobject):
         if anim_args is None:
             anim_args = {}
 
-        self.__check_terminals_all_belong_to_this_circuit([start, end])
+        self.__check_pins_all_belong_to_this_circuit([start, end])
         new_wire = Wire(start, end)
         self.wires.add(new_wire)
         animation = mn.Create(new_wire, **anim_args)
@@ -272,18 +266,16 @@ class Circuit(mn.VMobject):
     @mn.override_animate(disconnect)
     def __animate_disconnect(
         self,
-        *components_or_terminals: Component | Pin,
+        *components_or_pins: Component | Pin,
         anim_args: dict[str, Any] | None = None,
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
 
-        terminals = self._collapse_components_and_terminals_to_terminals(
-            components_or_terminals
-        )
-        self.__check_terminals_all_belong_to_this_circuit(terminals)
-        to_remove = self.__get_wires_from_terminal_condition(
-            terminals, lambda start, end: start and end
+        pins = self._collapse_components_and_pins_to_pins(components_or_pins)
+        self.__check_pins_all_belong_to_this_circuit(pins)
+        to_remove = self.__get_wires_from_pin_condition(
+            pins, lambda start, end: start and end
         )
         for wire in to_remove:
             wire._mark_hidden()
@@ -298,18 +290,16 @@ class Circuit(mn.VMobject):
     @mn.override_animate(isolate)
     def __animate_isolate(
         self,
-        *components_or_terminals: Component | Pin,
+        *components_or_pins: Component | Pin,
         anim_args: dict[str, Any] | None = None,
     ) -> mn.Animation:
         if anim_args is None:
             anim_args = {}
 
-        terminals = self._collapse_components_and_terminals_to_terminals(
-            components_or_terminals
-        )
-        self.__check_terminals_all_belong_to_this_circuit(terminals)
-        to_remove = self.__get_wires_from_terminal_condition(
-            terminals, lambda start, end: start or end
+        pins = self._collapse_components_and_pins_to_pins(components_or_pins)
+        self.__check_pins_all_belong_to_this_circuit(pins)
+        to_remove = self.__get_wires_from_pin_condition(
+            pins, lambda start, end: start or end
         )
         for wire in to_remove:
             wire._mark_hidden()

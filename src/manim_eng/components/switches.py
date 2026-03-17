@@ -11,7 +11,7 @@ __all__ = ["PushToBreakSwitch", "PushToMakeSwitch", "Switch"]
 
 
 class Switch(BipoleSwitchBase):
-    """Circuit symbol for a basic two-terminal lever-arm switch.
+    """Circuit symbol for a basic two-pin lever-arm switch.
 
     Parameters
     ----------

@@ -190,7 +190,7 @@ def test_get_or_check_pin_invalid_attribute(
         dummy_component._get_or_check_pin("invalid_attribute")
 
 
-def test_get_or_check_pin_valid_attribute_not_a_terminal(
+def test_get_or_check_pin_valid_attribute_not_a_pin(
     dummy_component: DummyComponent,
 ) -> None:
     not_a_pin = "not_a_pin"

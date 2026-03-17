@@ -20,7 +20,7 @@ def test_connect() -> None:
         assert submobjects[0].end == component_2.right
 
 
-def test_connect_throws_value_error_if_terminals_are_identical(
+def test_connect_throws_value_error_if_pins_are_identical(
     dummy_component: DummyComponent,
 ) -> None:
     circuit = Circuit(dummy_component)
@@ -31,20 +31,20 @@ def test_connect_throws_value_error_if_terminals_are_identical(
         circuit.animate.connect(dummy_component.left, dummy_component.left)
 
 
-def test_connect_throws_error_if_terminals_do_not_belong_to_components_in_the_circuit(
+def test_connect_throws_error_if_pins_do_not_belong_to_components_in_the_circuit(
     dummy_component: DummyComponent,
 ) -> None:
     circuit = Circuit()
 
     with pytest.raises(
         ValueError,
-        match="At least one passed terminal does not "
+        match="At least one passed pin does not "
         "belong to any component in this circuit",
     ):
         circuit.connect(dummy_component.left, dummy_component.right)
     with pytest.raises(
         ValueError,
-        match="At least one passed terminal does not "
+        match="At least one passed pin does not "
         "belong to any component in this circuit",
     ):
         circuit.animate.connect(dummy_component.left, dummy_component.right)
@@ -69,20 +69,20 @@ def test_disconnect() -> None:
         assert submobjects[0].end == component_2.left
 
 
-def test_disconnect_throws_error_if_terminals_do_not_belong_to_components_in_circuit(
+def test_disconnect_throws_error_if_pins_do_not_belong_to_components_in_circuit(
     dummy_component: DummyComponent,
 ) -> None:
     circuit = Circuit()
 
     with pytest.raises(
         ValueError,
-        match="At least one passed terminal does not "
+        match="At least one passed pin does not "
         "belong to any component in this circuit",
     ):
         circuit.disconnect(dummy_component.left, dummy_component.right)
     with pytest.raises(
         ValueError,
-        match="At least one passed terminal does not "
+        match="At least one passed pin does not "
         "belong to any component in this circuit",
     ):
         circuit.animate.disconnect(dummy_component.left, dummy_component.right)
@@ -110,20 +110,20 @@ def test_isolate() -> None:
         assert submobjects[0].end == component_3.right
 
 
-def test_isolate_throws_error_if_terminals_do_not_belong_to_components_in_the_circuit(
+def test_isolate_throws_error_if_pins_do_not_belong_to_components_in_the_circuit(
     dummy_component: DummyComponent,
 ) -> None:
     circuit = Circuit()
 
     with pytest.raises(
         ValueError,
-        match="At least one passed terminal does not "
+        match="At least one passed pin does not "
         "belong to any component in this circuit",
     ):
         circuit.isolate(dummy_component.left, dummy_component.right)
     with pytest.raises(
         ValueError,
-        match="At least one passed terminal does not "
+        match="At least one passed pin does not "
         "belong to any component in this circuit",
     ):
         circuit.animate.isolate(dummy_component.left, dummy_component.right)
@@ -164,23 +164,23 @@ def test_isolate_marks_pins_as_not_visible() -> None:
     assert component_2.left.is_visible() is False
 
 
-def test_collapse_components_and_terminals_expands_components() -> None:
+def test_collapse_components_and_pins_expands_components() -> None:
     component_1 = DummyComponent()
     component_2 = DummyComponent()
 
-    terminals = Circuit._collapse_components_and_terminals_to_terminals(
+    terminals = Circuit._collapse_components_and_pins_to_pins(
         [component_1, component_2.right]
     )
 
     assert set(terminals) == {*component_1.pins, component_2.right}
 
 
-def test_collapse_components_and_terminals_removes_duplicates() -> None:
+def test_collapse_components_and_pins_removes_duplicates() -> None:
     component_1 = DummyComponent()
     component_2 = DummyComponent()
     expected = [*component_1.pins, component_2.right]
 
-    terminals = Circuit._collapse_components_and_terminals_to_terminals(
+    terminals = Circuit._collapse_components_and_pins_to_pins(
         [
             component_1,
             component_2.right,
@@ -196,9 +196,7 @@ def test_collapse_components_and_terminals_removes_duplicates() -> None:
     assert set(terminals) == set(expected)
 
 
-def test_collapse_components_and_terminals_returns_empty_list_with_empty_input() -> (
-    None
-):
-    terminals = Circuit._collapse_components_and_terminals_to_terminals([])
+def test_collapse_components_and_pins_returns_empty_list_with_empty_input() -> None:
+    terminals = Circuit._collapse_components_and_pins_to_pins([])
 
     assert terminals == []

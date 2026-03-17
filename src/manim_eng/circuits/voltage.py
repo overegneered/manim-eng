@@ -1,4 +1,4 @@
-"""Contains Voltage class for drawing voltages between component terminals."""
+"""Contains Voltage class for drawing voltages between component pins."""
 
 from typing import Any, Self, cast
 
@@ -16,7 +16,7 @@ __all__ = ["Voltage"]
 
 
 class Voltage(Markable):
-    r"""Voltage arrow between two terminal endpoints.
+    r"""Voltage arrow between two pin endpoints.
 
     .. warning::
         manim-eng currently uses arcs of up to $\pi$ (180º) to build voltage arrows, so
@@ -343,7 +343,7 @@ class Voltage(Markable):
         ----------
         middle_point : Point3D
             The extra point the arrow should pass through, as well as the two end points
-            defined by the ``start`` and ``end`` terminals.
+            defined by the ``start`` and ``end`` pins.
 
         Returns
         -------
