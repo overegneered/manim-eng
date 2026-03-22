@@ -20,11 +20,23 @@ class EngScene(mn.Scene):
 
     Notes
     -----
-    There is a small hole in this implementation: mobjects that are added to the scene,
-    and then have a wire added to them (bypassing the scene-level add call) will not
-    have their visibility properly tracked. In this case, you will need to use the
-    :meth:`~.WireBase._set_visible` and :meth:`~.WireBase._set_hidden` methods to
-    manually track visibility.
+    There is a small hole in this implementation. Visibility is only tracked when a
+    wire enters or leaves the scene through the scene's own methods (``add``,
+    ``remove``, etc.) or via an animation. If a mobject is already in the scene and a
+    wire is added to it directly — ``parent.add(wire)`` — the scene is never notified
+    and ``wire.is_visible()`` will incorrectly return ``False``. This causes things like
+    :class:`~.Node` autoblobbing to break down.
+
+    There are currently two workarounds for this:
+
+    * **Re-add the parent.** Calling ``scene.add(parent)`` again after the mutation
+      re-syncs visibility — :meth:`~.EngScene.add` rescans the full family and Manim
+      deduplicates the parent internally so it is not drawn twice.
+    * **Set visibility manually.** Call :meth:`~.WireBase._set_visible` or
+      :meth:`~.WireBase._set_hidden` directly on the wire after adding or removing it.
+      This is the only available option for those running into this problem by
+      adding/removing mobjects from a mobject from within the mobject's class
+      definition.
     """
 
     def add(self, *mobjects: mn.Mobject) -> Self:
