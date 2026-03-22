@@ -95,7 +95,11 @@ class Wire(WireBase):
     def __init__(self, start: Pin, end: Pin) -> None:
         super().__init__(start, end, updating=True)
 
-    def split_at(self, alpha: float) -> tuple[Self, Node, Self]:
+    def split_at(
+        self,
+        alpha: float,
+        container: mn.Scene | mn.Mobject | None = None,
+    ) -> tuple[Self, Node, Self]:
         """Split the wire a given point, inserting a node at the split point.
 
         The direction of the wire is maintained.
@@ -110,17 +114,21 @@ class Wire(WireBase):
         ----------
         alpha : float
             The point to split the wire at, as a proportion of the wire length.
+        container : Scene | Mobject, optional
+            If provided, the original wire is removed from ``container`` and the
+            two new wire portions and the node are added to it. **If not used, this
+            process will have to be completed manually.**
 
         Returns
         -------
-        Self
-            The first half of the wire as a new object. This is the part for which the
-            start is maintained.
-        Node
-            The node inserted at the split point.
-        Self
-            The second half of the wire as a new object. This is the part for which the
-            end is maintained.
+        tuple[Self, Node, Self]
+            A three-element tuple of ``(start_portion, node, end_portion)``.
+
+            * ``start_portion`` — the first half of the wire as a new object,
+              retaining the original start pin.
+            * ``node`` — the node inserted at the split point.
+            * ``end_portion`` — the second half of the wire as a new object,
+              retaining the original end pin.
 
         Raises
         ------
@@ -169,6 +177,10 @@ class Wire(WireBase):
                 end_portion.current.set(
                     label=current_label, alpha=new_alpha, invert=current_invert
                 )
+
+        if container is not None:
+            container.remove(self)
+            container.add(start_portion, node, end_portion)
 
         return start_portion, node, end_portion
 

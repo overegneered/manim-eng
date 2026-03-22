@@ -445,3 +445,49 @@ def test_split_at_inverted_current_alpha_remapped_correctly_for_end_portion() ->
     _start_portion, _node, end_portion = wire.split_at(0.5)
 
     assert np.isclose(end_portion.current._alpha, 0.8)
+
+
+# split_at — container parameter =======================================================
+
+
+def test_split_at_with_mobject_container_removes_wire_from_container() -> None:
+    wire = _make_horizontal_wire()
+    container = mn.VGroup(wire)
+
+    wire.split_at(0.5, container=container)
+
+    assert wire not in container.submobjects
+
+
+def test_split_at_with_mobject_container_adds_portions_and_node() -> None:
+    wire = _make_horizontal_wire()
+    container = mn.VGroup(wire)
+
+    start_portion, node, end_portion = wire.split_at(0.5, container=container)
+
+    assert start_portion in container.submobjects
+    assert node in container.submobjects
+    assert end_portion in container.submobjects
+
+
+def test_split_at_with_no_container_does_not_modify_any_group() -> None:
+    wire = _make_horizontal_wire()
+    container = mn.VGroup(wire)
+
+    wire.split_at(0.5)
+
+    assert wire in container.submobjects
+
+
+def test_split_at_with_container_still_returns_tuple() -> None:
+    wire = _make_horizontal_wire()
+    container = mn.VGroup(wire)
+
+    result = wire.split_at(0.5, container=container)
+
+    assert isinstance(result, tuple)
+    assert len(result) == 3  # noqa: PLR2004
+    start_portion, node, end_portion = result
+    assert isinstance(start_portion, Wire)
+    assert isinstance(node, Node)
+    assert isinstance(end_portion, Wire)

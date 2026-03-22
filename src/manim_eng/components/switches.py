@@ -43,7 +43,7 @@ class Switch(BipoleSwitchBase):
 
     def open(self) -> Self:
         """Open the switch, if not already open."""
-        if not self.closed:  # type: ignore[has-type]
+        if not self.closed:
             return self
         self.wiper.rotate(
             self.__open_wiper_angle, about_point=self.left_node.get_center()
