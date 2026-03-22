@@ -6,9 +6,9 @@ import numpy as np
 import pytest
 
 from manim_eng import config_eng
+from manim_eng.circuits.node import Node
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.monopole import Monopole
-from manim_eng.components.node import Node
 
 from .utils.dummy_component import DummyComponent
 
@@ -226,3 +226,34 @@ def test_get_or_check_pin_pin_is_none(
     result = dummy_component._get_or_check_pin(None)
 
     assert result == dummy_component.pins[0]
+
+
+def test_align_pin_with_node_as_other_uses_node_center(
+    dummy_component: DummyComponent,
+) -> None:
+    # Place a node at a known position and align the component's right pin to it.
+    target_position = np.array([3.0, 1.0, 0.0])
+    node = Node().move_to(target_position)
+
+    dummy_component.align_pin(dummy_component.right, node)
+
+    # After alignment, the right pin tip should lie on the line through the node
+    # centre in the pin's direction (RIGHT). The component is moved perpendicular
+    # to that direction (i.e. vertically) until the pin tip's y-coordinate matches
+    # the node centre's y-coordinate.
+    assert np.isclose(dummy_component.right.tip[1], node.get_center()[1], atol=1e-4)
+
+
+def test_align_pin_with_monopole_as_other_uses_monopole_pin_tip(
+    dummy_component: DummyComponent,
+) -> None:
+    # A Monopole facing UP has its pin tip above the origin.
+    monopole = Monopole(mn.UP)
+    monopole.move_to(np.array([2.0, 0.0, 0.0]))
+    monopole_pin_tip = monopole.pin.tip.copy()
+
+    # Align using the dummy component's right pin (facing RIGHT) towards the monopole.
+    dummy_component.align_pin(dummy_component.right, monopole, direction=mn.UP)
+
+    # The pin tip should be on the vertical line through the monopole's pin tip.
+    assert np.isclose(dummy_component.right.tip[0], monopole_pin_tip[0], atol=1e-4)

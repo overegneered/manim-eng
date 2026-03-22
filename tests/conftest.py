@@ -5,6 +5,7 @@ import manim as mn
 import pytest
 
 from manim_eng import Wire
+from manim_eng.circuits.node import Node
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.pin import Pin
 
@@ -37,6 +38,21 @@ def wire() -> Wire:
     start = Pin(mn.LEFT, mn.LEFT)
     end = Pin(mn.RIGHT, mn.RIGHT)
     return Wire(start, end)
+
+
+@pytest.fixture
+def node() -> Node:
+    # mypy can't work this one out
+    return Node().move_to(mn.ORIGIN)  # type: ignore[no-any-return]
+
+
+@pytest.fixture
+def wire_with_current() -> Wire:
+    start = Pin(mn.LEFT, mn.LEFT)
+    end = Pin(mn.RIGHT, mn.RIGHT)
+    w = Wire(start, end)
+    w.current.set(label="I")
+    return w
 
 
 @pytest.fixture

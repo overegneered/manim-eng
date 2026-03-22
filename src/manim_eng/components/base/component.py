@@ -17,8 +17,8 @@ from manim_eng.circuits.voltage import Voltage
 from manim_eng.components.base.pin import Pin
 
 if TYPE_CHECKING:
+    from manim_eng.circuits.node import Node
     from manim_eng.components.base.monopole import Monopole
-    from manim_eng.components.node import Node
 
 __all__ = ["Component"]
 
@@ -94,20 +94,15 @@ class Component(Markable, metaclass=abc.ABCMeta):
         """A handle to the annotation of the component."""
         return self._annotation
 
-    def get_center(self) -> mnt.Point3D:
-        """Get the centre of the components.
+    def get_critical_point(self, direction: mnt.Vector3D) -> mnt.Point3D:
+        """Get a critical point of the component.
 
-        **This is not necessarily the exact centre of the box the component symbol
-        occupies**. It is rather the point about which it is most logical to rotate
-        the component. For bipoles, it will be at the midpoint of the line between the
-        two pins.
-
-        Returns
-        -------
-        Point3D
-            The centre of the components.
+        Overrides the behaviour for when the centre is sought, in order to supply the
+        centre anchor. This makes movement commands behave as expected.
         """
-        return self._centre_anchor.get_center()
+        if np.all(direction == mn.ORIGIN):
+            return self._centre_anchor.pos
+        return super().get_critical_point(direction)
 
     def align_pin(
         self,
@@ -160,8 +155,8 @@ class Component(Markable, metaclass=abc.ABCMeta):
             a point).
         """
         # These are put here to avoid circular dependencies
+        from manim_eng.circuits.node import Node  # noqa: PLC0415
         from manim_eng.components.base.monopole import Monopole  # noqa: PLC0415
-        from manim_eng.components.node import Node  # noqa: PLC0415
 
         pin = self._get_or_check_pin(pin)
         if isinstance(other, Pin):

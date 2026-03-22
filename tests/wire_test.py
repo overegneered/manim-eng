@@ -1,9 +1,11 @@
 from collections.abc import Callable
 
 import manim as mn
+import numpy as np
 import pytest
 
 from manim_eng import ManualWire, Wire
+from manim_eng.circuits.node import Node
 from manim_eng.components.base.pin import Pin
 
 
@@ -140,3 +142,306 @@ def test_destruction_animation_dispatch_produces_correct_visibility_behaviour(
     anim.finish()
 
     assert wire.is_visible() is False
+
+
+# split_at — structural / return-value =================================================
+
+
+def _make_horizontal_wire() -> Wire:
+    """Return a simple left-to-right wire for use in split_at tests."""
+    start = Pin(mn.LEFT * 2, mn.RIGHT)
+    end = Pin(mn.RIGHT * 2, mn.LEFT)
+    return Wire(start, end)
+
+
+def test_split_at_returns_tuple_of_wire_node_wire() -> None:
+    wire = _make_horizontal_wire()
+
+    result = wire.split_at(0.5)
+
+    assert isinstance(result, tuple)
+    assert len(result) == 3  # noqa: PLR2004
+    start_portion, node, end_portion = result
+    assert isinstance(start_portion, Wire)
+    assert isinstance(node, Node)
+    assert isinstance(end_portion, Wire)
+
+
+def test_split_at_start_wire_retains_original_start_pin() -> None:
+    start_pin = Pin(mn.LEFT * 2, mn.RIGHT)
+    end_pin = Pin(mn.RIGHT * 2, mn.LEFT)
+    wire = Wire(start_pin, end_pin)
+
+    start_portion, _node, _end_portion = wire.split_at(0.5)
+
+    assert start_portion._start is start_pin
+
+
+def test_split_at_end_wire_retains_original_end_pin() -> None:
+    start_pin = Pin(mn.LEFT * 2, mn.RIGHT)
+    end_pin = Pin(mn.RIGHT * 2, mn.LEFT)
+    wire = Wire(start_pin, end_pin)
+
+    _start_portion, _node, end_portion = wire.split_at(0.5)
+
+    assert end_portion._end is end_pin
+
+
+def test_split_at_node_is_placed_at_correct_position() -> None:
+    wire = _make_horizontal_wire()
+    alpha = 0.5
+    expected_point = wire.point_from_proportion(alpha)
+
+    _start_portion, node, _end_portion = wire.split_at(alpha)
+
+    assert np.allclose(node.get_center(), expected_point, atol=1e-4)
+
+
+def test_split_at_node_pins_face_towards_start_and_end_wire() -> None:
+    # On a straight left-to-right wire, the node pin towards the start should
+    # point LEFT and the one towards the end should point RIGHT (antiparallel).
+    start_pin = Pin(mn.LEFT * 2, mn.RIGHT)
+    end_pin = Pin(mn.RIGHT * 2, mn.LEFT)
+    wire = Wire(start_pin, end_pin)
+
+    start_portion, _node, end_portion = wire.split_at(0.5)
+
+    # The start portion ends at a node pin; that pin's direction should point
+    # back towards the start (LEFT from node's perspective).
+    node_start_pin = start_portion._end
+    node_end_pin = end_portion._start
+
+    # Check for anti-parallelism
+    dot = np.dot(
+        mn.normalize(node_start_pin.direction),
+        mn.normalize(node_end_pin.direction),
+    )
+    assert np.isclose(dot, -1.0, atol=1e-4)
+
+
+def test_split_at_start_portion_end_pin_belongs_to_node() -> None:
+    wire = _make_horizontal_wire()
+
+    start_portion, node, _end_portion = wire.split_at(0.5)
+
+    assert start_portion._end in node.pins
+
+
+def test_split_at_end_portion_start_pin_belongs_to_node() -> None:
+    wire = _make_horizontal_wire()
+
+    _start_portion, node, end_portion = wire.split_at(0.5)
+
+    assert end_portion._start in node.pins
+
+
+# split_at — pin attachment state ======================================================
+
+
+def test_split_at_detaches_original_wire_from_start_pin() -> None:
+    start_pin = Pin(mn.LEFT * 2, mn.RIGHT)
+    end_pin = Pin(mn.RIGHT * 2, mn.LEFT)
+    wire = Wire(start_pin, end_pin)
+
+    wire.split_at(0.5)
+
+    assert start_pin.attached_wire is not wire
+
+
+def test_split_at_detaches_original_wire_from_end_pin() -> None:
+    start_pin = Pin(mn.LEFT * 2, mn.RIGHT)
+    end_pin = Pin(mn.RIGHT * 2, mn.LEFT)
+    wire = Wire(start_pin, end_pin)
+
+    wire.split_at(0.5)
+
+    assert end_pin.attached_wire is not wire
+
+
+def test_split_at_start_pin_is_attached_to_start_portion() -> None:
+    start_pin = Pin(mn.LEFT * 2, mn.RIGHT)
+    end_pin = Pin(mn.RIGHT * 2, mn.LEFT)
+    wire = Wire(start_pin, end_pin)
+
+    start_portion, _node, _end_portion = wire.split_at(0.5)
+
+    assert start_pin.attached_wire is start_portion
+
+
+def test_split_at_end_pin_is_attached_to_end_portion() -> None:
+    start_pin = Pin(mn.LEFT * 2, mn.RIGHT)
+    end_pin = Pin(mn.RIGHT * 2, mn.LEFT)
+    wire = Wire(start_pin, end_pin)
+
+    _start_portion, _node, end_portion = wire.split_at(0.5)
+
+    assert end_pin.attached_wire is end_portion
+
+
+# split_at — alpha boundary / error ====================================================
+
+
+def test_split_at_raises_value_error_if_alpha_less_than_zero() -> None:
+    wire = _make_horizontal_wire()
+
+    with pytest.raises(ValueError, match=r"`alpha` must be strictly between"):
+        wire.split_at(-0.1)
+
+
+def test_split_at_raises_value_error_if_alpha_greater_than_one() -> None:
+    wire = _make_horizontal_wire()
+
+    with pytest.raises(ValueError, match=r"`alpha` must be strictly between"):
+        wire.split_at(1.1)
+
+
+def test_split_at_raises_value_error_if_alpha_exactly_zero() -> None:
+    # alpha=0.0 causes point_from_proportion(0.0 - epsilon) which may crash or
+    # return a position outside the wire's path.
+    wire = _make_horizontal_wire()
+
+    with pytest.raises(ValueError, match=r"`alpha` must be strictly between"):
+        wire.split_at(0.0)
+
+
+def test_split_at_raises_value_error_if_alpha_exactly_one() -> None:
+    # alpha=1.0 causes point_from_proportion(1.0 + epsilon) which may crash or
+    # return a position outside the wire's path.
+    wire = _make_horizontal_wire()
+
+    with pytest.raises(ValueError, match=r"`alpha` must be strictly between"):
+        wire.split_at(1.0)
+
+
+# split_at — current placement =========================================================
+
+
+def test_split_at_places_current_on_start_portion_when_it_falls_before_split() -> None:
+    # Current is at alpha=0.3, split is at alpha=0.5 — current falls on start half.
+    start = Pin(mn.LEFT * 2, mn.RIGHT)
+    end = Pin(mn.RIGHT * 2, mn.LEFT)
+    wire = Wire(start, end)
+    wire.current.set(label="I", alpha=0.3)
+
+    start_portion, _node, end_portion = wire.split_at(0.5)
+
+    assert start_portion.current._triangle in start_portion.current.submobjects
+    assert end_portion.current._triangle not in end_portion.current.submobjects
+
+
+def test_split_at_places_current_on_end_portion_when_it_falls_after_split() -> None:
+    # Current is at alpha=0.7, split is at alpha=0.5 — current falls on end half.
+    start = Pin(mn.LEFT * 2, mn.RIGHT)
+    end = Pin(mn.RIGHT * 2, mn.LEFT)
+    wire = Wire(start, end)
+    wire.current.set(label="I", alpha=0.7)
+
+    start_portion, _node, end_portion = wire.split_at(0.5)
+
+    assert end_portion.current._triangle in end_portion.current.submobjects
+    assert start_portion.current._triangle not in start_portion.current.submobjects
+
+
+def test_split_at_remaps_current_alpha_correctly_for_start_portion() -> None:
+    # Current at alpha=0.25, split at alpha=0.5 → remapped alpha = 0.25/0.5 = 0.5.
+    start = Pin(mn.LEFT * 2, mn.RIGHT)
+    end = Pin(mn.RIGHT * 2, mn.LEFT)
+    wire = Wire(start, end)
+    wire.current.set(label="I", alpha=0.25)
+
+    start_portion, _node, _end_portion = wire.split_at(0.5)
+
+    assert np.isclose(start_portion.current._alpha, 0.5)
+
+
+def test_split_at_remaps_current_alpha_correctly_for_end_portion() -> None:
+    # Current at alpha=0.75, split at alpha=0.5 → remapped alpha = (0.75-0.5)/0.5 = 0.5.
+    start = Pin(mn.LEFT * 2, mn.RIGHT)
+    end = Pin(mn.RIGHT * 2, mn.LEFT)
+    wire = Wire(start, end)
+    wire.current.set(label="I", alpha=0.75)
+
+    _start_portion, _node, end_portion = wire.split_at(0.5)
+
+    assert np.isclose(end_portion.current._alpha, 0.5)
+
+
+def test_split_at_with_no_current_does_not_error() -> None:
+    # A wire with no current set should not raise.
+    wire = _make_horizontal_wire()
+
+    wire.split_at(0.5)
+
+
+# split_at — geometry ==================================================================
+
+
+def test_split_at_alpha_quarter_places_node_at_one_quarter_point() -> None:
+    # Wire goes from x=-2 to x=+2 (length 4), so the 25% point is at x=-1.
+    start_pin = Pin(mn.LEFT * 2, mn.RIGHT)
+    end_pin = Pin(mn.RIGHT * 2, mn.LEFT)
+    wire = Wire(start_pin, end_pin)
+    alpha = 0.25
+    expected = wire.point_from_proportion(alpha)
+
+    _start_portion, node, _end_portion = wire.split_at(alpha)
+
+    assert np.allclose(node.get_center(), expected, atol=1e-4)
+
+
+# split_at — inverted current placement ===============================================
+
+
+def _make_wire_with_inverted_current(alpha: float) -> Wire:
+    """Return a horizontal wire with an inverted current arrow at the given alpha."""
+    start = Pin(mn.LEFT * 2, mn.RIGHT)
+    end = Pin(mn.RIGHT * 2, mn.LEFT)
+    wire = Wire(start, end)
+    wire.current.set(label="I", alpha=alpha, invert=True)
+    return wire
+
+
+def test_split_at_inverted_current_before_split_placed_on_start_portion() -> None:
+    # alpha=0.3, invert=True → geometric position from start = 1 - 0.3 = 0.7.
+    # Split at 0.8 → 0.7 < 0.8, so arrow falls on start portion.
+    wire = _make_wire_with_inverted_current(alpha=0.3)
+
+    start_portion, _node, end_portion = wire.split_at(0.8)
+
+    assert start_portion.current._triangle in start_portion.current.submobjects
+    assert end_portion.current._triangle not in end_portion.current.submobjects
+
+
+def test_split_at_inverted_current_after_split_placed_on_end_portion() -> None:
+    # alpha=0.3, invert=True → geometric position from start = 1 - 0.3 = 0.7.
+    # Split at 0.5 → 0.7 >= 0.5, so arrow falls on end portion.
+    wire = _make_wire_with_inverted_current(alpha=0.3)
+
+    start_portion, _node, end_portion = wire.split_at(0.5)
+
+    assert end_portion.current._triangle in end_portion.current.submobjects
+    assert start_portion.current._triangle not in start_portion.current.submobjects
+
+
+def test_split_at_inverted_current_alpha_remapped_correctly_for_start_portion() -> None:
+    # alpha=0.2, invert=True → geometric position = 1 - 0.2 = 0.8. Split at 0.9.
+    # 0.8 < 0.9 → start portion.
+    # Remapped geometric alpha within start: 0.8 / 0.9.
+    # Since invert=True, new _alpha = 1 - (0.8 / 0.9).
+    wire = _make_wire_with_inverted_current(alpha=0.2)
+
+    start_portion, _node, _end_portion = wire.split_at(0.9)
+
+    assert np.isclose(start_portion.current._alpha, 1 - (0.8 / 0.9))
+
+
+def test_split_at_inverted_current_alpha_remapped_correctly_for_end_portion() -> None:
+    # alpha=0.4, invert=True → geometric position = 1 - 0.4 = 0.6. Split at 0.5.
+    # 0.6 >= 0.5 → end portion.
+    # Remapped geometric alpha within end: (0.6 - 0.5) / (1 - 0.5) = 0.2.
+    # Since invert=True, new _alpha = 1 - 0.2 = 0.8.
+    wire = _make_wire_with_inverted_current(alpha=0.4)
+
+    _start_portion, _node, end_portion = wire.split_at(0.5)
+
+    assert np.isclose(end_portion.current._alpha, 0.8)

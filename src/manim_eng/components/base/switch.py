@@ -7,7 +7,7 @@ import manim as mn
 import numpy as np
 
 from manim_eng import config_eng
-from manim_eng.components import node
+from manim_eng.circuits import node
 from manim_eng.components.base.bipole import Bipole
 from manim_eng.components.base.pin import Pin
 

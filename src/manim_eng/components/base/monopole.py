@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any, Self
 
 import manim as mn
 import manim.typing as mnt
@@ -11,7 +11,9 @@ import manim.typing as mnt
 from manim_eng._base import Mark
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.pin import Pin
-from manim_eng.components.node import Node
+
+if TYPE_CHECKING:
+    from manim_eng.circuits.node import Node
 
 __all__ = ["Monopole"]
 

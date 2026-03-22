@@ -8,6 +8,7 @@ import numpy as np
 
 from manim_eng._utils import utils
 from manim_eng.circuits.base.wire import WireBase
+from manim_eng.circuits.node import Node
 from manim_eng.components.base.pin import Pin
 
 __all__ = ["ManualWire", "Wire"]
@@ -93,6 +94,83 @@ class Wire(WireBase):
 
     def __init__(self, start: Pin, end: Pin) -> None:
         super().__init__(start, end, updating=True)
+
+    def split_at(self, alpha: float) -> tuple[Self, Node, Self]:
+        """Split the wire a given point, inserting a node at the split point.
+
+        The direction of the wire is maintained.
+
+        If the wire has an active current arrow, it is automatically placed on
+        whichever half it geometrically falls on based on its current ``alpha``
+        value, and its ``alpha`` is remapped so that its visual position along
+        that half is unchanged. If the split is directly over the current arrow, the
+        segment for which the start is maintained is given it.
+
+        Parameters
+        ----------
+        alpha : float
+            The point to split the wire at, as a proportion of the wire length.
+
+        Returns
+        -------
+        Self
+            The first half of the wire as a new object. This is the part for which the
+            start is maintained.
+        Node
+            The node inserted at the split point.
+        Self
+            The second half of the wire as a new object. This is the part for which the
+            end is maintained.
+
+        Raises
+        ------
+        ValueError
+            If ``alpha`` is not between 0 and 1 exclusive.
+        """
+        if not (0 < alpha < 1):
+            raise ValueError(
+                f"`alpha` must be strictly between 0 and 1 (exclusive), got {alpha!r}."
+            )
+        epsilon = 1e-6
+        split_point = self.point_from_proportion(alpha)
+        towards_start = self.point_from_proportion(alpha - epsilon)
+        towards_end = self.point_from_proportion(alpha + epsilon)
+
+        current_is_active = self._current._triangle in self._current.submobjects
+        if current_is_active:
+            tex_strings = self._current._label.tex_strings
+            # tex_strings is set when the triangle is active
+            assert tex_strings is not None
+            current_label: str = tex_strings[0]
+            current_alpha: float = self._current._alpha
+            current_invert: bool = self._current._invert
+
+        self._start.detach_wire()
+        self._end.detach_wire()
+
+        node = Node().move_to(split_point)
+        start_portion = Wire(self._start, node.get(towards_start - split_point))
+        end_portion = Wire(node.get(towards_end - split_point), self._end)
+
+        if current_is_active:
+            # When invert=True, _alpha is measured from the end of the wire, so the
+            # true geometric position from the start is (1 - current_alpha).
+            geometric_pos = (1 - current_alpha) if current_invert else current_alpha
+
+            if geometric_pos <= alpha:
+                new_geom_alpha = geometric_pos / alpha
+                new_alpha = (1 - new_geom_alpha) if current_invert else new_geom_alpha
+                start_portion.current.set(
+                    label=current_label, alpha=new_alpha, invert=current_invert
+                )
+            else:
+                new_geom_alpha = (geometric_pos - alpha) / (1 - alpha)
+                new_alpha = (1 - new_geom_alpha) if current_invert else new_geom_alpha
+                end_portion.current.set(
+                    label=current_label, alpha=new_alpha, invert=current_invert
+                )
+
+        return start_portion, node, end_portion
 
     def get_corner_points(self) -> list[mnt.Point3D]:
         """Get the corner points of the wire.

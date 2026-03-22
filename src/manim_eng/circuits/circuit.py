@@ -6,10 +6,10 @@ import manim as mn
 
 __all__ = ["Circuit"]
 
+from manim_eng.circuits.node import Node
 from manim_eng.circuits.wire import Wire
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.pin import Pin
-from manim_eng.components.node import Node
 
 
 class Circuit(mn.VMobject):
