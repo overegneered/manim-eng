@@ -4,7 +4,9 @@ from typing import Any
 import manim as mn
 import pytest
 
+from manim_eng import Wire
 from manim_eng.components.base.component import Component
+from manim_eng.components.base.pin import Pin
 
 from .utils.dummy_component import DummyComponent, DummyComponentMockedPins
 
@@ -28,6 +30,13 @@ def _mock_mathtex(monkeypatch: pytest.MonkeyPatch) -> None:
 # framework (i.e. not within a Scene's construct() method), so we have to do some work
 # ourselves.
 os.makedirs("media", exist_ok=True)
+
+
+@pytest.fixture
+def wire() -> Wire:
+    start = Pin(mn.LEFT, mn.LEFT)
+    end = Pin(mn.RIGHT, mn.RIGHT)
+    return Wire(start, end)
 
 
 @pytest.fixture

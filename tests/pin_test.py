@@ -3,78 +3,74 @@
 from unittest import mock
 
 import manim as mn
+import pytest
 
 from manim_eng.circuits.base.wire import WireBase
 from manim_eng.components.base.pin import Pin
 
 
-def test_is_visible_returns_false_when_no_wires_attached() -> None:
+def test_is_visible_returns_false_when_no_wire_attached() -> None:
     pin = Pin(mn.ORIGIN, mn.RIGHT)
 
     assert pin.is_visible() is False
 
 
-def test_register_attachment_adds_wire_but_does_not_make_pin_visible() -> None:
+def test_attach_wire_adds_wire_but_does_not_make_pin_visible() -> None:
     pin = Pin(mn.ORIGIN, mn.RIGHT)
     wire = mock.MagicMock(WireBase)
+    wire.is_visible.return_value = False
 
-    pin.register_attachment(wire)
+    pin.attach_wire(wire)
 
-    assert wire in pin._attached_wires
+    assert pin._attached_wire is wire
     assert pin.is_visible() is False
 
 
-def test_register_detachment_removes_wire_from_attached_wires() -> None:
+def test_detach_wire_removes_wire_from_attached_wire() -> None:
     pin = Pin(mn.ORIGIN, mn.RIGHT)
     wire = mock.MagicMock(WireBase)
-    pin.register_attachment(wire)
+    wire.is_visible.return_value = False
+    pin.attach_wire(wire)
 
-    pin.register_detachment(wire)
+    pin.detach_wire()
 
-    assert wire not in pin._attached_wires
+    assert pin._attached_wire is None
 
 
-def test_set_wire_visibility_true_makes_pin_visible() -> None:
+def test_pin_is_visible_when_attached_wire_is_visible() -> None:
     pin = Pin(mn.ORIGIN, mn.RIGHT)
     wire = mock.MagicMock(WireBase)
-    pin.register_attachment(wire)
-
-    pin._set_wire_visibility(wire, True)
+    wire.is_visible.return_value = True
+    pin.attach_wire(wire)
 
     assert pin.is_visible() is True
 
 
-def test_set_wire_visibility_false_makes_pin_not_visible() -> None:
+def test_pin_is_not_visible_when_attached_wire_is_hidden() -> None:
     pin = Pin(mn.ORIGIN, mn.RIGHT)
     wire = mock.MagicMock(WireBase)
-    pin.register_attachment(wire)
-    pin._set_wire_visibility(wire, True)
-
-    pin._set_wire_visibility(wire, False)
+    wire.is_visible.return_value = False
+    pin.attach_wire(wire)
 
     assert pin.is_visible() is False
 
 
-def test_is_visible_true_while_at_least_one_wire_still_visible() -> None:
-    pin = Pin(mn.ORIGIN, mn.RIGHT)
-    wire1 = mock.MagicMock(WireBase)
-    wire2 = mock.MagicMock(WireBase)
-    pin.register_attachment(wire1)
-    pin.register_attachment(wire2)
-    pin._set_wire_visibility(wire1, True)
-    pin._set_wire_visibility(wire2, True)
-
-    pin._set_wire_visibility(wire1, False)
-
-    assert pin.is_visible() is True
-
-
-def test_register_detachment_clears_wire_from_visible_wires() -> None:
+def test_detach_wire_makes_pin_not_visible() -> None:
     pin = Pin(mn.ORIGIN, mn.RIGHT)
     wire = mock.MagicMock(WireBase)
-    pin.register_attachment(wire)
-    pin._set_wire_visibility(wire, True)
+    wire.is_visible.return_value = True
+    pin.attach_wire(wire)
 
-    pin.register_detachment(wire)
+    pin.detach_wire()
 
     assert pin.is_visible() is False
+
+
+def test_attach_wire_raises_when_different_wire_already_attached() -> None:
+    pin = Pin(mn.ORIGIN, mn.RIGHT)
+    wire_a = mock.MagicMock(WireBase)
+    wire_b = mock.MagicMock(WireBase)
+    pin.attach_wire(wire_a)
+
+    with pytest.raises(AttributeError):
+        pin.attach_wire(wire_b)

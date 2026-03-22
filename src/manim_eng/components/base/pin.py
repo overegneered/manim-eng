@@ -9,6 +9,7 @@ import numpy as np
 from manim_eng._base.anchor import PinAnchor
 from manim_eng._base.markable import Markable
 from manim_eng._config import config_eng
+from manim_eng.circuits.current import CurrentArrow
 
 if TYPE_CHECKING:
     from manim_eng.circuits.base.wire import WireBase
@@ -47,8 +48,7 @@ class Pin(Markable):
 
         self.add(self._body_anchor, self._end_anchor)
 
-        self._attached_wires: set[WireBase] = set()
-        self._visible_wires: set[WireBase] = set()
+        self._attached_wire: WireBase | None = None
 
     @property
     def base(self) -> mnt.Point3D:
@@ -70,7 +70,25 @@ class Pin(Markable):
         """The length of the pin (the distance between the start and end)."""
         return float(np.linalg.norm(self.tip - self.base))
 
-    def register_attachment(self, wire: "WireBase") -> Self:
+    @property
+    def attached_wire(self) -> "WireBase | None":
+        """A reference to the wire attached to this pin, if one exists."""
+        return self._attached_wire
+
+    @property
+    def current(self) -> CurrentArrow:
+        """A handle to the current arrow on the wire attached to this pin.
+
+        Raises
+        ------
+        AttributeError
+            If no wire is attached to this pin.
+        """
+        if self._attached_wire is None:
+            raise AttributeError("No wire attached to this pin.")
+        return self._attached_wire.current
+
+    def attach_wire(self, wire: "WireBase") -> Self:
         """Register that a wire is attached to this pin.
 
         Does nothing if the wire is already attached.
@@ -79,30 +97,36 @@ class Pin(Markable):
         ----------
         wire : WireBase
             The wire to be attached.
+
+        Raises
+        ------
+        AttributeError
+            If a wire not equal to ``wire`` is already attached to this pin.
         """
-        self._attached_wires.add(wire)
+        if self._attached_wire is not None and self._attached_wire != wire:
+            raise AttributeError(
+                "A pin can only have one wire attached at any given"
+                "time. Please add a node to handle wire junctions."
+            )
+        self._attached_wire = wire
         return self
 
-    def register_detachment(self, wire: "WireBase") -> Self:
-        """Register that a wire has been detached from this pin.
+    def detach_wire(self) -> Self:
+        """Register that the attached wire has been detached.
 
-        Does nothing if the wire was not attached.
-
-        Parameters
-        ----------
-        wire : WireBase
-            The wire to be detached.
+        Does nothing if no wire was attached in the first place.
         """
-        self._attached_wires.discard(wire)
-        self._visible_wires.discard(wire)
+        self._attached_wire = None
         return self
-
-    def _set_wire_visibility(self, wire: "WireBase", visible: bool) -> None:
-        if visible:
-            self._visible_wires.add(wire)
-        else:
-            self._visible_wires.discard(wire)
 
     def is_visible(self) -> bool:
-        """Return whether any wire attached to this pin is currently visible."""
-        return len(self._visible_wires) > 0
+        """Return whether the pin appears drawn on screen, to the best of its knowledge.
+
+        Returns
+        -------
+        bool
+            ``True`` if the pin is visible, ``False`` otherwise.
+        """
+        if self._attached_wire is None:
+            return False
+        return self._attached_wire.is_visible()

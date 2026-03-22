@@ -123,7 +123,9 @@ disallow_subclassing_any = false
 disallow_untyped_decorators = false
 disallow_any_generics = false
 
-exclude = ['^docs/source/conf\.py$']
+# src/scene.py is my local uncommitted playground for messing around and testing out
+# different animations — you won't find it in the repo!
+exclude = ['^docs/source/conf\.py$', '^src/scene\.py$']
 
 
 [[tool.mypy.overrides]]

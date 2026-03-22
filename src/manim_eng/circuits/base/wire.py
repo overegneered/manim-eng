@@ -1,7 +1,7 @@
 """Wire implementation class."""
 
 import abc
-from typing import Any, cast
+from typing import Any, Self, cast
 
 import manim as mn
 from manim import typing as mnt
@@ -17,7 +17,8 @@ class _WireShowMixin(mn.Animation):
     """Mixin for creation animations: marks the wire shown when the animation begins."""
 
     def begin(self) -> None:
-        cast("WireBase", self.mobject)._mark_shown()
+        wire = cast("WireBase", self.mobject)
+        wire._set_visible()
         super().begin()
 
 
@@ -26,7 +27,8 @@ class _WireHideMixin(mn.Animation):
 
     def finish(self) -> None:
         super().finish()
-        cast("WireBase", self.mobject)._mark_hidden()
+        wire = cast("WireBase", self.mobject)
+        wire._set_hidden()
 
 
 class _CreateWire(_WireShowMixin, mn.Create): ...
@@ -75,7 +77,7 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
     declare where the wire corners should be.
     """
 
-    def __init__(self, start: Pin, end: Pin, updating: bool):
+    def __init__(self, start: Pin, end: Pin, updating: bool) -> None:
         super().__init__(stroke_width=config_eng.symbol.wire_stroke_width)
 
         if start == end:
@@ -86,6 +88,10 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
 
         self._start = start
         self._end = end
+        self._visible: bool = False
+
+        self._start.attach_wire(self)
+        self._end.attach_wire(self)
 
         WireBase._update_points(self)
 
@@ -96,9 +102,9 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
             self.add_updater(WireBase._update_points)
 
     def __del__(self) -> None:
-        """Clean up wire visibility state when the wire is garbage-collected."""
-        if hasattr(self, "_start"):
-            self._mark_hidden()
+        """Clean up wire attachments on deletion."""
+        self._start.detach_wire()
+        self._end.detach_wire()
 
     @property
     def start(self) -> Pin:
@@ -142,15 +148,29 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
             to end.
         """
 
-    def _mark_shown(self) -> None:
-        """Mark both pins of this wire as having a visible wire."""
-        self._start._set_wire_visibility(self, True)
-        self._end._set_wire_visibility(self, True)
+    def is_visible(self) -> bool:
+        """Return if the wire is visible."""
+        return self._visible
 
-    def _mark_hidden(self) -> None:
-        """Mark both pins of this wire as no longer having a visible wire."""
-        self._start._set_wire_visibility(self, False)
-        self._end._set_wire_visibility(self, False)
+    def _set_visible(self) -> Self:
+        """Mark this wire as currently visible.
+
+        See Also
+        --------
+        _set_hidden
+        """
+        self._visible = True
+        return self
+
+    def _set_hidden(self) -> Self:
+        """Mark this wire as currently hidden.
+
+        See Also
+        --------
+        _set_visible
+        """
+        self._visible = False
+        return self
 
     @mn.override_animation(mn.Create)
     def __override_create(self, **kwargs: Any) -> mn.Animation:

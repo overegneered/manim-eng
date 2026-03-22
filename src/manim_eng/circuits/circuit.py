@@ -85,7 +85,7 @@ class Circuit(mn.VMobject):
         """
         self.__check_pins_all_belong_to_this_circuit([start, end])
         wire = Wire(start, end)
-        wire._mark_shown()
+        wire._set_visible()
         self.wires.add(wire)
         # Nodes will potentially change their appearance on wire attachment using an
         # updater, but it needs kicking into gear
@@ -119,7 +119,7 @@ class Circuit(mn.VMobject):
             pins, lambda start, end: start and end
         )
         for wire in to_remove:
-            wire._mark_hidden()
+            wire._set_hidden()
         self.wires.remove(*to_remove)
         # Nodes will potentially change their appearance on wire detachment using an
         # updater, but it needs kicking into gear
@@ -152,7 +152,7 @@ class Circuit(mn.VMobject):
             pins, lambda start, end: start or end
         )
         for wire in to_remove:
-            wire._mark_hidden()
+            wire._set_hidden()
         self.wires.remove(*to_remove)
         # Nodes will potentially change their appearance on wire detachment using an
         # updater, but it needs kicking into gear
@@ -278,7 +278,7 @@ class Circuit(mn.VMobject):
             pins, lambda start, end: start and end
         )
         for wire in to_remove:
-            wire._mark_hidden()
+            wire._set_hidden()
         animations = [mn.Uncreate(wire, **anim_args) for wire in to_remove]
         self.wires.remove(*to_remove)
 
@@ -302,7 +302,7 @@ class Circuit(mn.VMobject):
             pins, lambda start, end: start or end
         )
         for wire in to_remove:
-            wire._mark_hidden()
+            wire._set_hidden()
         animations = [mn.Uncreate(wire, **anim_args) for wire in to_remove]
         self.wires.remove(*to_remove)
 

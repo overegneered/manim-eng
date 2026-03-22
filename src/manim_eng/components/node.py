@@ -397,7 +397,7 @@ class Node(Component):
 
     def _get_visible_pin_angles(self) -> list[float]:
         return sorted(
-            [mn.angle_of_vector(pin.direction) for pin in self.pins if pin.is_visible()]
+            mn.angle_of_vector(pin.direction) for pin in self.pins if pin.is_visible()
         )
 
     @staticmethod

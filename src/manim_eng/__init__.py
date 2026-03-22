@@ -4,4 +4,5 @@ from ._config import *
 from .circuits import *
 from .components import *
 from .logo import *
+from .scene import *
 from .units import *
