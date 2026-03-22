@@ -17,6 +17,14 @@ class EngScene(mn.Scene):
     additional manual intervention if you do not to make sure wire visibility is
     correctly handled. All underlying functionality is preserved; it is a transparent
     abstraction.
+
+    Notes
+    -----
+    There is a small hole in this implementation: mobjects that are added to the scene,
+    and then have a wire added to them (bypassing the scene-level add call) will not
+    have their visibility properly tracked. In this case, you will need to use the
+    :meth:`~.WireBase._set_visible` and :meth:`~.WireBase._set_hidden` methods to
+    manually track visibility.
     """
 
     def add(self, *mobjects: mn.Mobject) -> Self:
