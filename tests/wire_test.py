@@ -491,3 +491,103 @@ def test_split_at_with_container_still_returns_tuple() -> None:
     assert isinstance(start_portion, Wire)
     assert isinstance(node, Node)
     assert isinstance(end_portion, Wire)
+
+
+# split_at_corners ====================================================================
+
+
+def test_split_at_corners_no_corners_returns_self_and_empty_nodes(wire: Wire) -> None:
+    # Wire.get_corner_points() always returns 1 or 2 points for any valid pin pair,
+    # so we monkeypatch it to return [] to exercise the early-exit branch.
+    wire.get_corner_points = list  # type: ignore[method-assign]
+
+    segments, nodes = wire.split_at_corners()
+
+    assert segments == [wire]
+    assert nodes == []
+
+
+def test_split_at_corners_one_corner_returns_two_segments_one_node(
+    wire_with_one_corner: Wire,
+) -> None:
+    segments, nodes = wire_with_one_corner.split_at_corners()
+
+    assert len(segments) == 2  # noqa: PLR2004
+    assert len(nodes) == 1
+
+
+def test_split_at_corners_two_corners_returns_three_segments_two_nodes(
+    wire_with_two_corners: Wire,
+) -> None:
+    segments, nodes = wire_with_two_corners.split_at_corners()
+
+    assert len(segments) == 3  # noqa: PLR2004
+    assert len(nodes) == 2  # noqa: PLR2004
+
+
+def test_split_at_corners_segments_retain_original_start_and_end_pins(
+    wire_with_one_corner: Wire,
+) -> None:
+    original_start = wire_with_one_corner._start
+    original_end = wire_with_one_corner._end
+
+    segments, _nodes = wire_with_one_corner.split_at_corners()
+
+    assert segments[0]._start is original_start
+    assert segments[-1]._end is original_end
+
+
+def test_split_at_corners_nodes_are_at_corner_positions(
+    wire_with_one_corner: Wire,
+) -> None:
+    corner_points = wire_with_one_corner.get_corner_points()
+
+    _segments, nodes = wire_with_one_corner.split_at_corners()
+
+    for node, corner in zip(nodes, corner_points, strict=True):
+        assert np.allclose(node.get_center(), corner, atol=1e-4)
+
+
+def test_split_at_corners_with_container_removes_wire_and_adds_results(
+    wire_with_one_corner: Wire,
+) -> None:
+    container = mn.VGroup(wire_with_one_corner)
+
+    segments, nodes = wire_with_one_corner.split_at_corners(container=container)
+
+    assert wire_with_one_corner not in container.submobjects
+    for seg in segments:
+        assert seg in container.submobjects
+    for node in nodes:
+        assert node in container.submobjects
+
+
+def test_split_at_corners_with_no_container_does_not_modify_group(
+    wire_with_one_corner: Wire,
+) -> None:
+    container = mn.VGroup(wire_with_one_corner)
+
+    wire_with_one_corner.split_at_corners()
+
+    assert wire_with_one_corner in container.submobjects
+
+
+def test_split_at_corners_with_current_places_it_on_correct_segment(
+    wire_with_one_corner: Wire,
+) -> None:
+    # Place current arrow at alpha=0.1 — well into the first segment.
+    wire_with_one_corner.current.set(label="I", alpha=0.1)
+
+    segments, _nodes = wire_with_one_corner.split_at_corners()
+
+    # The triangle must appear in exactly one segment's current submobjects.
+    triangle_in = [
+        seg for seg in segments if seg.current._triangle in seg.current.submobjects
+    ]
+    triangle_absent = [
+        seg for seg in segments if seg.current._triangle not in seg.current.submobjects
+    ]
+    assert len(triangle_in) == 1
+    assert len(triangle_absent) == 1
+    # alpha=0.1 is early in the wire, so it should be on the first segment.
+    assert triangle_in[0] is segments[0]

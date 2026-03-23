@@ -56,6 +56,23 @@ def wire_with_current() -> Wire:
 
 
 @pytest.fixture
+def wire_with_one_corner() -> Wire:
+    # Perpendicular pins: one pointing RIGHT from origin, one pointing UP from (1,1,0).
+    # get_corner_points() for perpendicular pins returns exactly 1 corner point.
+    start = Pin(mn.ORIGIN, mn.RIGHT)
+    end = Pin(mn.RIGHT + mn.UP, mn.UP)
+    return Wire(start, end)
+
+
+@pytest.fixture
+def wire_with_two_corners() -> Wire:
+    # Parallel (same-direction) pins produce 2 corner points from get_corner_points().
+    start = Pin(mn.LEFT * 2, mn.RIGHT)
+    end = Pin(mn.RIGHT * 2 + mn.UP, mn.RIGHT)
+    return Wire(start, end)
+
+
+@pytest.fixture
 def dummy_component() -> Component:
     return DummyComponent()
 

@@ -134,6 +134,10 @@ class Wire(WireBase):
         ------
         ValueError
             If ``alpha`` is not between 0 and 1 exclusive.
+
+        See Also
+        --------
+        split_at_corners
         """
         if not (0 < alpha < 1):
             raise ValueError(
@@ -183,6 +187,70 @@ class Wire(WireBase):
             container.add(start_portion, node, end_portion)
 
         return start_portion, node, end_portion
+
+    def split_at_corners(
+        self, container: mn.Scene | mn.Mobject | None = None
+    ) -> tuple[list[Self], list[Node]]:
+        """Split the wire at its visual corners except those at pin tips.
+
+        Splits the wire at the points given by :meth:`~.Wire.get_corner_points`.
+
+        Parameters
+        ----------
+        container : Scene | Mobject, optional
+            If provided, the original wire is removed from ``container`` and the new
+            wire portions and nodes are added to it. **If not used, this process will
+            have to be completed manually.**
+
+        Returns
+        -------
+        tuple[list[Self], list[Node]]
+            A two-element tuple containing:
+
+            * A list of new wire segments in order from start to end.
+            * A list of new nodes in order from start to end.
+
+        See Also
+        --------
+        split_at
+        """
+        corner_points = self.get_corner_points()
+        if not corner_points:
+            return [self], []
+
+        all_vertices = [
+            self._start.base,
+            self._start.tip,
+            *corner_points,
+            self._end.tip,
+            self._end.base,
+        ]
+        cumulative = [0.0]
+        for i in range(len(all_vertices) - 1):
+            dist = float(np.linalg.norm(all_vertices[i + 1] - all_vertices[i]))
+            cumulative.append(cumulative[-1] + dist)
+        total = cumulative[-1]
+        corner_alphas = [cumulative[2 + i] / total for i in range(len(corner_points))]
+
+        segments: list[Self] = []
+        nodes: list[Node] = []
+        remaining = self
+        accumulated = 0.0
+
+        for alpha_orig in corner_alphas:
+            alpha_local = (alpha_orig - accumulated) / (1.0 - accumulated)
+            seg, node, remaining = remaining.split_at(alpha_local)
+            segments.append(seg)
+            nodes.append(node)
+            accumulated = alpha_orig
+
+        segments.append(remaining)
+
+        if container is not None:
+            container.remove(self)
+            container.add(*segments, *nodes)
+
+        return segments, nodes
 
     def get_corner_points(self) -> list[mnt.Point3D]:
         """Get the corner points of the wire.
