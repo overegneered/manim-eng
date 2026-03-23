@@ -591,3 +591,184 @@ def test_split_at_corners_with_current_places_it_on_correct_segment(
     assert len(triangle_absent) == 1
     # alpha=0.1 is early in the wire, so it should be on the first segment.
     assert triangle_in[0] is segments[0]
+
+
+# split_at_corner ======================================================================
+
+# structural / return-value ------------------------------------------------------------
+
+
+def test_split_at_corner_returns_tuple_of_wire_node_wire(
+    wire_with_one_corner: Wire,
+) -> None:
+    result = wire_with_one_corner.split_at_corner(0)
+
+    assert isinstance(result, tuple)
+    assert len(result) == 3  # noqa: PLR2004
+    start_portion, node, end_portion = result
+    assert isinstance(start_portion, Wire)
+    assert isinstance(node, Node)
+    assert isinstance(end_portion, Wire)
+
+
+def test_split_at_corner_start_portion_retains_original_start_pin(
+    wire_with_one_corner: Wire,
+) -> None:
+    original_start = wire_with_one_corner._start
+
+    start_portion, _node, _end_portion = wire_with_one_corner.split_at_corner(0)
+
+    assert start_portion._start is original_start
+
+
+def test_split_at_corner_end_portion_retains_original_end_pin(
+    wire_with_one_corner: Wire,
+) -> None:
+    original_end = wire_with_one_corner._end
+
+    _start_portion, _node, end_portion = wire_with_one_corner.split_at_corner(0)
+
+    assert end_portion._end is original_end
+
+
+# node position ------------------------------------------------------------------------
+
+
+def test_split_at_corner_node_placed_at_corner_position(
+    wire_with_one_corner: Wire,
+) -> None:
+    corner_points = wire_with_one_corner.get_corner_points()
+
+    _start_portion, node, _end_portion = wire_with_one_corner.split_at_corner(0)
+
+    assert np.allclose(node.get_center(), corner_points[0], atol=1e-4)
+
+
+def test_split_at_corner_index_zero_on_two_corner_wire_splits_at_first_corner(
+    wire_with_two_corners: Wire,
+) -> None:
+    corner_points = wire_with_two_corners.get_corner_points()
+
+    _start_portion, node, _end_portion = wire_with_two_corners.split_at_corner(0)
+
+    assert np.allclose(node.get_center(), corner_points[0], atol=1e-4)
+
+
+def test_split_at_corner_index_one_on_two_corner_wire_splits_at_second_corner(
+    wire_with_two_corners: Wire,
+) -> None:
+    corner_points = wire_with_two_corners.get_corner_points()
+
+    _start_portion, node, _end_portion = wire_with_two_corners.split_at_corner(1)
+
+    assert np.allclose(node.get_center(), corner_points[1], atol=1e-4)
+
+
+# negative indexing --------------------------------------------------------------------
+
+
+def test_split_at_corner_negative_index_minus_one_is_last_corner(
+    wire_with_one_corner: Wire,
+) -> None:
+    corner_points = wire_with_one_corner.get_corner_points()
+
+    _start_portion, node, _end_portion = wire_with_one_corner.split_at_corner(-1)
+
+    assert np.allclose(node.get_center(), corner_points[0], atol=1e-4)
+
+
+def test_split_at_corner_negative_index_minus_one_on_two_corner_wire(
+    wire_with_two_corners: Wire,
+) -> None:
+    corner_points = wire_with_two_corners.get_corner_points()
+
+    _start_portion, node, _end_portion = wire_with_two_corners.split_at_corner(-1)
+
+    assert np.allclose(node.get_center(), corner_points[1], atol=1e-4)
+
+
+def test_split_at_corner_negative_index_minus_two_on_two_corner_wire(
+    wire_with_two_corners: Wire,
+) -> None:
+    corner_points = wire_with_two_corners.get_corner_points()
+
+    _start_portion, node, _end_portion = wire_with_two_corners.split_at_corner(-2)
+
+    assert np.allclose(node.get_center(), corner_points[0], atol=1e-4)
+
+
+# error cases --------------------------------------------------------------------------
+
+
+def test_split_at_corner_raises_value_error_if_no_corners(
+    wire_with_one_corner: Wire,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(wire_with_one_corner, "get_corner_points", list, raising=False)
+
+    with pytest.raises(ValueError, match="no corners"):
+        wire_with_one_corner.split_at_corner(0)
+
+
+def test_split_at_corner_raises_index_error_if_index_too_large(
+    wire_with_one_corner: Wire,
+) -> None:
+    with pytest.raises(IndexError):
+        wire_with_one_corner.split_at_corner(1)
+
+
+def test_split_at_corner_raises_index_error_if_index_too_negative(
+    wire_with_one_corner: Wire,
+) -> None:
+    with pytest.raises(IndexError):
+        wire_with_one_corner.split_at_corner(-2)
+
+
+def test_split_at_corner_raises_index_error_for_large_positive_index_on_two_corner_wire(
+    wire_with_two_corners: Wire,
+) -> None:
+    with pytest.raises(IndexError):
+        wire_with_two_corners.split_at_corner(2)
+
+
+# container parameter ------------------------------------------------------------------
+
+
+def test_split_at_corner_with_container_removes_wire_and_adds_results(
+    wire_with_one_corner: Wire,
+) -> None:
+    container = mn.VGroup(wire_with_one_corner)
+
+    start_portion, node, end_portion = wire_with_one_corner.split_at_corner(
+        0, container=container
+    )
+
+    assert wire_with_one_corner not in container.submobjects
+    assert start_portion in container.submobjects
+    assert node in container.submobjects
+    assert end_portion in container.submobjects
+
+
+def test_split_at_corner_with_no_container_does_not_modify_group(
+    wire_with_one_corner: Wire,
+) -> None:
+    container = mn.VGroup(wire_with_one_corner)
+
+    wire_with_one_corner.split_at_corner(0)
+
+    assert wire_with_one_corner in container.submobjects
+
+
+def test_split_at_corner_with_container_still_returns_tuple(
+    wire_with_one_corner: Wire,
+) -> None:
+    container = mn.VGroup(wire_with_one_corner)
+
+    result = wire_with_one_corner.split_at_corner(0, container=container)
+
+    assert isinstance(result, tuple)
+    assert len(result) == 3  # noqa: PLR2004
+    start_portion, node, end_portion = result
+    assert isinstance(start_portion, Wire)
+    assert isinstance(node, Node)
+    assert isinstance(end_portion, Wire)

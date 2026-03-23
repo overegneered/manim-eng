@@ -137,6 +137,7 @@ class Wire(WireBase):
 
         See Also
         --------
+        split_at_corner
         split_at_corners
         """
         if not (0 < alpha < 1):
@@ -188,6 +189,75 @@ class Wire(WireBase):
 
         return start_portion, node, end_portion
 
+    def split_at_corner(
+        self,
+        index: int,
+        container: mn.Scene | mn.Mobject | None = None,
+    ) -> tuple[Self, Node, Self]:
+        """Split the wire at a single corner given by index.
+
+        Parameters
+        ----------
+        index : int
+            The index of the corner to split at. Supports negative indexing.
+            Corners are ordered from start to end, matching
+            :meth:`~.Wire.get_corner_points`.
+        container : Scene | Mobject, optional
+            If provided, the original wire is removed from ``container`` and the
+            two new wire portions and the node are added to it. **If not used, this
+            process will have to be completed manually.**
+
+        Returns
+        -------
+        tuple[Self, Node, Self]
+            A three-element tuple of ``(start_portion, node, end_portion)``.
+
+            * ``start_portion`` — the first half of the wire as a new object,
+              retaining the original start pin.
+            * ``node`` — the node inserted at the split point.
+            * ``end_portion`` — the second half of the wire as a new object,
+              retaining the original end pin.
+
+        Raises
+        ------
+        ValueError
+            If the wire has no corners.
+        IndexError
+            If ``index`` is out of range for the number of corners on the wire.
+
+        See Also
+        --------
+        split_at
+        split_at_corners
+        """
+        corner_points = self.get_corner_points()
+        n_corners = len(corner_points)
+
+        if n_corners == 0:
+            raise ValueError("This wire has no corners to split at.")
+        if not (-n_corners <= index < n_corners):
+            raise IndexError(
+                f"Corner index {index!r} is out of range for a wire with "
+                f"{n_corners} corner(s)."
+            )
+        index = index % n_corners
+
+        all_vertices = [
+            self._start.base,
+            self._start.tip,
+            *corner_points,
+            self._end.tip,
+            self._end.base,
+        ]
+        cumulative = [0.0]
+        for i in range(len(all_vertices) - 1):
+            dist = float(np.linalg.norm(all_vertices[i + 1] - all_vertices[i]))
+            cumulative.append(cumulative[-1] + dist)
+        total = cumulative[-1]
+        alpha = cumulative[2 + index] / total
+
+        return self.split_at(alpha, container=container)
+
     def split_at_corners(
         self, container: mn.Scene | mn.Mobject | None = None
     ) -> tuple[list[Self], list[Node]]:
@@ -213,36 +283,20 @@ class Wire(WireBase):
         See Also
         --------
         split_at
+        split_at_corner
         """
-        corner_points = self.get_corner_points()
-        if not corner_points:
+        n_corners = len(self.get_corner_points())  # snapshot BEFORE any splits
+        if n_corners == 0:
             return [self], []
-
-        all_vertices = [
-            self._start.base,
-            self._start.tip,
-            *corner_points,
-            self._end.tip,
-            self._end.base,
-        ]
-        cumulative = [0.0]
-        for i in range(len(all_vertices) - 1):
-            dist = float(np.linalg.norm(all_vertices[i + 1] - all_vertices[i]))
-            cumulative.append(cumulative[-1] + dist)
-        total = cumulative[-1]
-        corner_alphas = [cumulative[2 + i] / total for i in range(len(corner_points))]
 
         segments: list[Self] = []
         nodes: list[Node] = []
         remaining = self
-        accumulated = 0.0
 
-        for alpha_orig in corner_alphas:
-            alpha_local = (alpha_orig - accumulated) / (1.0 - accumulated)
-            seg, node, remaining = remaining.split_at(alpha_local)
-            segments.append(seg)
+        for _ in range(n_corners):
+            segment, node, remaining = remaining.split_at_corner(0)
+            segments.append(segment)
             nodes.append(node)
-            accumulated = alpha_orig
 
         segments.append(remaining)
 

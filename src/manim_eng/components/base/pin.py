@@ -105,7 +105,7 @@ class Pin(Markable):
         """
         if self._attached_wire is not None and self._attached_wire != wire:
             raise AttributeError(
-                "A pin can only have one wire attached at any given"
+                "A pin can only have one wire attached at any given "
                 "time. Please add a node to handle wire junctions."
             )
         self._attached_wire = wire
