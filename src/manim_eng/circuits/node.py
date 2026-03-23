@@ -345,6 +345,60 @@ class Node(Component):
         """
         return self.__blob.get_center()
 
+    def next_to(
+        self,
+        mobject_or_point: Pin | mn.Mobject | mnt.Point3DLike,
+        direction: mnt.Vector3D | None = None,
+        buff: float = mn.DEFAULT_MOBJECT_TO_MOBJECT_BUFFER,
+        aligned_edge: mnt.Vector3D = mn.ORIGIN,
+        submobject_to_align: mn.Mobject | None = None,
+        index_of_submobject_to_align: int | None = None,
+        coor_mask: mnt.Vector3D | None = None,
+    ) -> Self:
+        """Move this node next to another pin, mobject, or point.
+
+        Operates much as :meth:`manim.mobject.mobject.Mobject.next_to` does, but with
+        added ability to handle :class:`~.Pin` objects.
+
+        Parameters
+        ----------
+        mobject_or_point : Pin | Mobject | Point3DLike
+            The target to place this node next to. If a :class:`~.Pin` is passed, its
+            tip position is used as the reference point, and (unless ``direction`` is
+            given explicitly) its outward direction is used as the placement direction.
+        direction : Vector3D | None, optional
+            The direction from ``mobject_or_point`` in which this node is placed.
+            Defaults to the pin's outward direction when a :class:`~.Pin` is passed,
+            or :attr:`manim.RIGHT` when ``None`` is passed or no value is given.
+            Supplying this argument always overrides the pin's direction.
+
+        See Also
+        --------
+        :meth:`manim.mobject.mobject.Mobject.next_to`.
+        """
+        point: mn.Mobject | mnt.Point3DLike
+        if isinstance(mobject_or_point, Pin):
+            if direction is None:
+                direction = mobject_or_point.direction
+            point = mobject_or_point.tip
+        else:
+            point = mobject_or_point
+
+        if direction is None:
+            direction = mn.RIGHT
+        if coor_mask is None:
+            coor_mask = np.array([1, 1, 1])
+
+        return super().next_to(  # type: ignore[no-any-return]  # Manim lacks stubs
+            point,
+            direction,
+            buff,
+            aligned_edge,
+            submobject_to_align,
+            index_of_submobject_to_align,
+            coor_mask,
+        )
+
     def _set_blob_visibility(self, visible: bool) -> Self:
         self.__blob.set_opacity(1.0 if visible else 0.0)
         return self
