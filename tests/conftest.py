@@ -9,7 +9,11 @@ from manim_eng.circuits.node import Node
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.pin import Pin
 
-from .utils.dummy_component import DummyComponent, DummyComponentMockedPins
+from .utils.dummy_component import (
+    DummyComponent,
+    DummyComponentMockedPins,
+    DummyComponentOffCentre,
+)
 
 
 class _MockMathTex(mn.VMobject):
@@ -75,6 +79,11 @@ def wire_with_two_corners() -> Wire:
 @pytest.fixture
 def dummy_component() -> Component:
     return DummyComponent()
+
+
+@pytest.fixture
+def dummy_component_off_centre() -> Component:
+    return DummyComponentOffCentre()
 
 
 @pytest.fixture

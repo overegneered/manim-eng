@@ -95,14 +95,32 @@ class Component(Markable, metaclass=abc.ABCMeta):
         return self._annotation
 
     def get_critical_point(self, direction: mnt.Vector3D) -> mnt.Point3D:
-        """Get a critical point of the component.
+        """Get a critical point from the bounding box of the component.
 
-        Overrides the behaviour for when the centre is sought, in order to supply the
-        centre anchor. This makes movement commands behave as expected.
+        Note that this slightly overrides the behaviour of the underlying
+        ``Mobject.get_critical_point()`` method.
+
+        - The centre is taken to be the position of the component's centre anchor,
+          which is the logical centre of the component. This may not be the geometrical
+          centre — as an example, the American inductor's logical centre is on the
+          bottom of the symbol, between the two pins.
+        - Critical points in the middle of the sides of the bounding box are adjusted to
+          align with the logical centre in the axis perpendicular to the relevant
+          bounding box edge.
         """
+        direction = mn.normalize(direction)
+
         if np.all(direction == mn.ORIGIN):
             return self._centre_anchor.pos
-        return super().get_critical_point(direction)
+
+        result = super().get_critical_point(direction)
+
+        if np.all(direction == mn.UP) or np.all(direction == mn.DOWN):
+            result[0] = self._centre_anchor.pos[0]
+        if np.all(direction == mn.RIGHT) or np.all(direction == mn.LEFT):
+            result[1] = self._centre_anchor.pos[1]
+
+        return result
 
     def align_pin(
         self,

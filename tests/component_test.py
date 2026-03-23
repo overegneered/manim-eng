@@ -10,7 +10,7 @@ from manim_eng.circuits.node import Node
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.monopole import Monopole
 
-from .utils.dummy_component import DummyComponent
+from .utils.dummy_component import DummyComponent, DummyComponentOffCentre
 
 
 @pytest.mark.parametrize(
@@ -257,3 +257,166 @@ def test_align_pin_with_monopole_as_other_uses_monopole_pin_tip(
 
     # The pin tip should be on the vertical line through the monopole's pin tip.
     assert np.isclose(dummy_component.right.tip[0], monopole_pin_tip[0], atol=1e-4)
+
+
+# Zero-vector direction returns the logical centre =====================================
+
+
+def test_get_critical_point_zero_vector_returns_centre_anchor_position(
+    dummy_component: DummyComponent,
+) -> None:
+    result = dummy_component.get_critical_point(mn.ORIGIN)
+
+    assert np.allclose(result, dummy_component._centre_anchor.pos)
+
+
+def test_get_critical_point_zero_vector_matches_get_center(
+    dummy_component: DummyComponent,
+) -> None:
+    # Uses the symmetric DummyComponent (pins at LEFT/RIGHT, no offset) so that
+    # the logical centre coincides with the geometric centre and the assertion
+    # is meaningful: get_critical_point(ORIGIN) must equal get_center().
+    result = dummy_component.get_critical_point(mn.ORIGIN)
+
+    assert np.allclose(result, dummy_component.get_center())
+
+
+# Direction is normalised before comparison ============================================
+
+
+def test_get_critical_point_unnormalised_up_direction(
+    dummy_component: DummyComponent,
+) -> None:
+    unnormalised = np.array([0.0, 2.0, 0.0])
+
+    assert np.allclose(
+        dummy_component.get_critical_point(unnormalised),
+        dummy_component.get_critical_point(mn.UP),
+    )
+
+
+def test_get_critical_point_unnormalised_right_direction(
+    dummy_component: DummyComponent,
+) -> None:
+    unnormalised = np.array([3.0, 0.0, 0.0])
+
+    assert np.allclose(
+        dummy_component.get_critical_point(unnormalised),
+        dummy_component.get_critical_point(mn.RIGHT),
+    )
+
+
+def test_get_critical_point_unnormalised_zero_vector(
+    dummy_component: DummyComponent,
+) -> None:
+    # mn.normalize([0, 0, 0]) returns ORIGIN (no exception is raised), so a
+    # near-zero vector that still normalises to ORIGIN is treated as a zero
+    # direction and therefore returns the logical centre.
+    unnormalised_zero = np.array([0.0, 0.0, 0.0])
+
+    assert np.allclose(
+        dummy_component.get_critical_point(unnormalised_zero),
+        dummy_component._centre_anchor.pos,
+    )
+
+
+# Mid-edge points snap the perpendicular axis to the logical centre ====================
+
+
+def test_get_critical_point_up_x_snapped_to_logical_centre(
+    dummy_component_off_centre: DummyComponentOffCentre,
+) -> None:
+    result = dummy_component_off_centre.get_critical_point(mn.UP)
+    centre_x = dummy_component_off_centre._centre_anchor.pos[0]
+
+    assert np.isclose(result[0], centre_x)
+
+
+def test_get_critical_point_down_x_snapped_to_logical_centre(
+    dummy_component_off_centre: DummyComponentOffCentre,
+) -> None:
+    result = dummy_component_off_centre.get_critical_point(mn.DOWN)
+    centre_x = dummy_component_off_centre._centre_anchor.pos[0]
+
+    assert np.isclose(result[0], centre_x)
+
+
+def test_get_critical_point_right_y_snapped_to_logical_centre(
+    dummy_component_off_centre: DummyComponentOffCentre,
+) -> None:
+    result = dummy_component_off_centre.get_critical_point(mn.RIGHT)
+    centre_y = dummy_component_off_centre._centre_anchor.pos[1]
+
+    assert np.isclose(result[1], centre_y)
+
+
+def test_get_critical_point_left_y_snapped_to_logical_centre(
+    dummy_component_off_centre: DummyComponentOffCentre,
+) -> None:
+    result = dummy_component_off_centre.get_critical_point(mn.LEFT)
+    centre_y = dummy_component_off_centre._centre_anchor.pos[1]
+
+    assert np.isclose(result[1], centre_y)
+
+
+def test_get_critical_point_up_y_is_bounding_box_top(
+    dummy_component_off_centre: DummyComponentOffCentre,
+) -> None:
+    # The y-coordinate must still come from the real bounding box.
+    result = dummy_component_off_centre.get_critical_point(mn.UP)
+    expected_y = mn.Mobject.get_critical_point(dummy_component_off_centre, mn.UP)[1]
+
+    assert np.isclose(result[1], expected_y)
+
+
+def test_get_critical_point_right_x_is_bounding_box_right(
+    dummy_component_off_centre: DummyComponentOffCentre,
+) -> None:
+    # The x-coordinate must still come from the real bounding box.
+    result = dummy_component_off_centre.get_critical_point(mn.RIGHT)
+    expected_x = mn.Mobject.get_critical_point(dummy_component_off_centre, mn.RIGHT)[0]
+
+    assert np.isclose(result[0], expected_x)
+
+
+# Corner directions are unmodified =====================================================
+
+
+@pytest.mark.parametrize(
+    "direction",
+    [mn.UR, mn.UL, mn.DR, mn.DL],
+    ids=["UR", "UL", "DR", "DL"],
+)
+def test_get_critical_point_corner_directions_not_modified(
+    dummy_component: DummyComponent,
+    direction: mnt.Vector3D,
+) -> None:
+    result = dummy_component.get_critical_point(direction)
+    expected = mn.Mobject.get_critical_point(dummy_component, mn.normalize(direction))
+
+    assert np.allclose(result, expected)
+
+
+# Behaviour after translation ==========================================================
+
+
+def test_get_critical_point_centre_updates_after_move_to(
+    dummy_component: DummyComponent,
+) -> None:
+    target = np.array([3.0, 4.0, 0.0])
+    dummy_component.move_to(target)
+
+    result = dummy_component.get_critical_point(mn.ORIGIN)
+
+    assert np.allclose(result, dummy_component._centre_anchor.pos)
+
+
+def test_get_critical_point_up_snaps_after_move_to(
+    dummy_component_off_centre: DummyComponentOffCentre,
+) -> None:
+    dummy_component_off_centre.move_to(np.array([5.0, 0.0, 0.0]))
+
+    result = dummy_component_off_centre.get_critical_point(mn.UP)
+    centre_x = dummy_component_off_centre._centre_anchor.pos[0]
+
+    assert np.isclose(result[0], centre_x)
