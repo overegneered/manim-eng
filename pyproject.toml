@@ -1,6 +1,6 @@
 [project]
 name = "manim-eng"
-version = "0.1.0"
+version = "0.2.0-dev"
 description = "A Manim CE plugin for drawing circuit diagrams (and other engineering diagrams in the future)."
 license = "MIT"
 readme = "README.md"

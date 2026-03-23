@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path("..", "..", "src").resolve()))
 project = "manim-eng"
 copyright = f"overegneered 2024–{datetime.datetime.now().year}"
 author = "overegneered"
-release = "0.1.0"
+release = "0.2.0-dev"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

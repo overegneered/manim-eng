@@ -4,7 +4,7 @@
 cff-version: 1.2.0
 type: software
 title: manim-eng
-version: 0.1.0
+version: 0.2.0-dev
 repository-code: 'https://github.com/overegneered/manim-eng'
 message: >-
   If you use this software, please cite it using the
