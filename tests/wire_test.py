@@ -1,3 +1,4 @@
+import itertools
 from collections.abc import Callable
 
 import manim as mn
@@ -142,6 +143,50 @@ def test_destruction_animation_dispatch_produces_correct_visibility_behaviour(
     anim.finish()
 
     assert wire.is_visible() is False
+
+
+# _get_full_corner_points =============================================================
+
+
+def test_get_full_corner_points_removes_backtracking_collinear_point() -> None:
+    # A corner point that lies past end.base on a straight horizontal wire overshoots
+    # and creates an invisible zig-zag; it should be stripped out.
+    start = Pin(mn.LEFT * 2, mn.RIGHT)
+    end = Pin(mn.RIGHT * 2, mn.LEFT)
+    wire = ManualWire(start, end, [])
+    overshoot = np.array([10.0, 0.0, 0.0])
+    wire.get_corner_points = lambda: [overshoot]  # type: ignore[method-assign]
+
+    points = wire._get_full_corner_points()
+
+    assert not any(np.allclose(p, overshoot) for p in points)
+
+
+def test_get_full_corner_points_removes_adjacent_duplicate_point() -> None:
+    # A corner equal to start.tip produces two identical adjacent points; the
+    # duplicate should be collapsed.
+    start = Pin(mn.LEFT * 2, mn.RIGHT)
+    end = Pin(mn.RIGHT * 2, mn.LEFT)
+    wire = ManualWire(start, end, [])
+    wire.get_corner_points = lambda: [start.tip]  # type: ignore[method-assign]
+
+    points = wire._get_full_corner_points()
+
+    # No two consecutive points should be identical after cleanup.
+    for a, b in itertools.pairwise(points):
+        assert not np.allclose(a, b)
+
+
+def test_get_full_corner_points_preserves_legitimate_corner() -> None:
+    # A genuine right-angle corner must not be removed.
+    start = Pin(mn.ORIGIN, mn.RIGHT)
+    end = Pin(mn.RIGHT + mn.UP, mn.UP)
+    corner = np.array([1.0, 0.0, 0.0])
+    wire = ManualWire(start, end, [corner])
+
+    points = wire._get_full_corner_points()
+
+    assert any(np.allclose(p, corner) for p in points)
 
 
 # split_at — structural / return-value =================================================

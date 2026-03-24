@@ -4,6 +4,7 @@ import abc
 from typing import Any, Self, cast
 
 import manim as mn
+import numpy as np
 from manim import typing as mnt
 
 from manim_eng import config_eng
@@ -121,19 +122,6 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
         """A current arrow attached to the wire."""
         return self._current
 
-    @staticmethod
-    def _update_points(mob: mn.Mobject) -> None:
-        wire = cast("WireBase", mob)
-        wire.set_points_as_corners(
-            [
-                wire._start.base,
-                wire._start.tip,
-                *wire.get_corner_points(),
-                wire._end.tip,
-                wire._end.base,
-            ]
-        )
-
     @abc.abstractmethod
     def get_corner_points(self) -> list[mnt.Point3D]:
         """Get the corner points of the wire.
@@ -147,6 +135,55 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
             The corner points of the wire between the two pins, in order from start
             to end.
         """
+
+    @staticmethod
+    def _update_points(mob: mn.Mobject) -> None:
+        wire = cast("WireBase", mob)
+        wire.set_points_as_corners(wire._get_full_corner_points())
+
+    def _get_full_corner_points(self) -> list[mnt.Point3D]:
+        """Get the full ordered point list for this wire, including pin bases and tips.
+
+        Builds the complete sequence of points, then cleans it up by removing duplicate
+        adjacent points and collinear points that lie outside their neighbours (i.e.
+        backtracking paths that look straight on screen but would cause animation
+        glitches).
+
+        Returns
+        -------
+        list[Point3D]
+            The filtered set of corners points
+        """
+        points = [
+            self._start.base,
+            self._start.tip,
+            *self.get_corner_points(),
+            self._end.tip,
+            self._end.base,
+        ]
+
+        i = 0
+        while i < len(points) - 2:
+            a, b, c = points[i], points[i + 1], points[i + 2]
+
+            # Cut out duplicates
+            if np.allclose(a, b) or np.allclose(b, c):
+                del points[i + 1]
+                continue
+
+            # Cut out backtracking collinear paths that appear direct on screen
+            ab = b - a
+            ac = c - a
+            if np.allclose(np.cross(ab, ac), np.zeros(3)):
+                ac_sq = np.dot(ac, ac)
+                if not np.isclose(ac_sq, 0):
+                    t = np.dot(ab, ac) / ac_sq
+                    if not (0 <= t <= 1):
+                        del points[i + 1]
+                        continue
+            i += 1
+
+        return points
 
     def is_visible(self) -> bool:
         """Return if the wire is visible."""
