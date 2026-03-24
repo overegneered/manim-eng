@@ -7,5 +7,4 @@ from .monopole import *
 from .pin import *
 from .source import *
 from .switch import *
-from .terminal import *
 from .xkcd import *
