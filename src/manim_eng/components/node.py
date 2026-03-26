@@ -437,7 +437,7 @@ class Node(Component):
         anim_args: dict[str, Any] | None = None,
     ) -> mn.Animation:
         self._reposition_label_anchor(direction)
-        return self.animate(**anim_args)._set_mark(self._label, label).build()
+        return self._label.animate(**anim_args).set(label).build()
 
 
 class OpenNode(Node):
