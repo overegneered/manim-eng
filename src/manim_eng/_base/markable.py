@@ -11,7 +11,6 @@ from typing import Any, Self
 import manim as mn
 
 from manim_eng._base.mark import Mark
-from manim_eng.units import Value
 
 __all__ = ["Markable"]
 
@@ -60,8 +59,10 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
             if isinstance(mobject, Markable):
                 self.__rotate.add(mobject.__rotate)
                 self.__marks.add(mobject.__marks)
+            elif isinstance(mobject, Mark):
+                self.__marks.add(mobject)
             else:
-                self.__rotate.add(*mobjects)
+                self.__rotate.add(mobject)
         return self
 
     def add_to_back(self, *mobjects: mn.Mobject) -> Self:
@@ -69,8 +70,10 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
             if isinstance(mobject, Markable):
                 self.__rotate.add_to_back(mobject.__rotate)
                 self.__marks.add_to_back(mobject.__marks)
+            elif isinstance(mobject, Mark):
+                self.__marks.add_to_back(mobject)
             else:
-                self.__rotate.add_to_back(*mobjects)
+                self.__rotate.add_to_back(mobject)
         return self
 
     def remove(self, *mobjects: mn.Mobject) -> Self:
@@ -78,53 +81,16 @@ class Markable(mn.VMobject, metaclass=abc.ABCMeta):
             if isinstance(mobject, Markable):
                 self.__rotate.remove(mobject.__rotate)
                 self.__marks.remove(mobject.__marks)
+            elif isinstance(mobject, Mark):
+                self.__marks.remove(mobject)
             else:
-                self.__rotate.remove(*mobjects)
+                self.__rotate.remove(mobject)
         return self
-
-    def _set_mark(self, mark_to_set: Mark, mark_text: str | Value) -> None:
-        """Set a mark's label, adding the mark if necessary."""
-        mark_text = mark_text if isinstance(mark_text, str) else mark_text.to_latex()
-        self.__marks.add(mark_to_set)
-        mark_to_set.set_text(mark_text)
-
-    def _clear_mark(self, mark: Mark) -> None:
-        """Clear a mark from the object."""
-        self.__marks.remove(mark)
 
     def __reposition_marks(self) -> None:
         """Force marks to update their positions even if updating is disabled."""
         for mark in self.__marks.submobjects:
             mark._reposition()
-
-    @mn.override_animate(_set_mark)
-    def __animate_set_mark(
-        self,
-        mark_to_set: Mark,
-        mark_text: str | Value,
-        anim_args: dict[str, Any] | None = None,
-    ) -> mn.Animation:
-        if anim_args is None:
-            anim_args = {}
-
-        mark_text = mark_text if isinstance(mark_text, str) else mark_text.to_latex()
-        if mark_to_set not in self.__marks.submobjects:
-            self.__marks.add(mark_to_set)
-            return mn.Create(mark_to_set.set_text(mark_text))
-
-        mark_to_set.generate_target()
-        mark_to_set.target.set_text(mark_text)
-        return mn.MoveToTarget(mark_to_set, **anim_args)
-
-    @mn.override_animate(_clear_mark)
-    def __animate_clear_mark(
-        self, mark_to_clear: Mark, anim_args: dict[str, Any] | None = None
-    ) -> mn.Animation:
-        if anim_args is None:
-            anim_args = {}
-        anim = mn.Uncreate(mark_to_clear, remover=False, **anim_args)
-        self.__marks.remove(mark_to_clear)
-        return anim
 
     @mn.override_animation(mn.Rotate)
     def __animate_rotate(self, **kwargs: Any) -> mn.Animation:

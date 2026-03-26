@@ -33,7 +33,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "ruff >=0.5.5, <0.6.0",
+    "ruff >=0.15.6, <0.16.0",
     "pre-commit >=3.8.0, <4.0.0",
     "pytest >=8.3.2, <9.0.0",
     "mypy >=1.11.1, <2.0.0",
