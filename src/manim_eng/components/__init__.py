@@ -4,9 +4,13 @@ from .capacitors import *
 from .cells import *
 from .diodes import *
 from .inductors import *
+from .meters import *
 from .monopoles import *
 from .node import *
+from .opamp import *
 from .resistors import *
 from .sources import *
 from .switches import *
+from .transistors import *
+from .utilities import *
 from .xkcd import *

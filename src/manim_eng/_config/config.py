@@ -3,7 +3,7 @@
 import dataclasses as dc
 import re
 from collections import defaultdict
-from typing import Any, Self
+from typing import Any, Literal, Self
 
 import manim as mn
 import numpy as np
@@ -242,6 +242,20 @@ class ComponentSymbolConfig(ConfigBase):
     square_bipole_side_length: float = 1.5 * bipole_height
     """The standard height to use for bipoles with square bounding boxes, such as
     voltage sources and sensors."""
+    biased_bipole_width: float = square_bipole_side_length
+    """The standard width to use for biased bipoles, such as buzzers and speakers."""
+    biased_bipole_height: float = square_bipole_side_length * 0.8
+    """The standard height to use for biased bipoles, such as buzzers and speakers."""
+    tripole_width: float = 1.0
+    """The standard width to use for tripoles, such as transistors and MOSFETs."""
+    tripole_height: float = tripole_width * np.sqrt(3) / 2
+    """The standard height to use for tripoles, such as transistors and MOSFETs.
+    By default, set to the height of an equilateral triangle with side length equal
+    to the tripole width, as many tripoles are drawn with triangular bodies."""
+    opamp_width: float = 1.5
+    """The standard width of operational amplifiers."""
+    opamp_height: float = 1.25
+    """The standard height of operational amplifiers."""
     component_stroke_width: float = mn.DEFAULT_STROKE_WIDTH
     """The stroke width to use for the component symbols."""
     current_arrow_radius: float = (2 / np.sqrt(3)) * 0.2 * bipole_height
@@ -249,22 +263,33 @@ class ComponentSymbolConfig(ConfigBase):
     of its vertices."""
     terminal_length: float = 0.4 * bipole_width
     """The length of the terminal of a component."""
+    terminal_spacing: float = 0.4 * bipole_width
+    """The default spacing between parallel terminals."""
+    terminal_name_buff: float = 0.1 * bipole_width
+    """The spacing between terminal labels and their corresponding terminals, for
+    components with labeled terminals, e.g. op amps and labelled chips."""
     wire_stroke_width: float = 0.625 * component_stroke_width
     """The stroke width to use for wires."""
     mark_font_size: float = 36.0
     """The default font size to use for marks (e.g. labels and annotations)."""
+    terminal_name_font_size: float = 14.0
+    """The default font size for terminal labels within each component, for components
+    with labeled terminals."""
     mark_cardinal_alignment_margin: float = 5 * mn.DEGREES
     """The maximum angle a component can be from one of horizontal or vertical whilst
     still being considered horizontal or vertical for the purpose of mark alignment."""
     arrow_stroke_width: float = wire_stroke_width
     """The stroke width to use for arrows in voltage marks and similar."""
-    arrow_tip_length: float = 0.2
-    """The length of voltage arrow tips."""
+    arrow_tip_length: float = 0.4
+    """The length of arrow tips."""
+    max_tip_length_to_length_ratio: float = 0.4
+    """The default maximum tip length to arrow length ratio. Might be overridden by
+    components demanding higher tip length to length ratio for better visuals."""
     voltage_default_angle: float = 60 * mn.DEGREES
     """The angle a voltage arrow will sweep with no other reference provided."""
     node_radius: float = 0.06
     """The radius of wire nodes."""
-    variability_arrow_tip_length: float = 0.125
+    variability_arrow_tip_length: float = 0.2
     """The length of arrow tips in arrows signifying variability in a component."""
     monopole_width: float = 0.5 * bipole_width
     """The width of monopole source/ground symbols."""
@@ -272,6 +297,16 @@ class ComponentSymbolConfig(ConfigBase):
     """The gap between plates of plated components (i.e. capacitors and cells)."""
     plate_height: float = 5 * plate_gap
     """The height of plates of plated components (i.e. capacitors and cells)."""
+    resistor_standard: Literal["ANSI", "IEC"] = "IEC"
+    """The standard to use for resistor symbols. Set to ``ANSI`` for the zigzag symbol,
+    and ``IEC`` for the box symbol. Defaults to ``IEC``."""
+    fuse_standard: Literal["ANSI", "IEC"] = "IEC"
+    """The standard to use for resistor symbols. Set to ``ANSI`` for the zigzag symbol,
+    and ``IEC`` for the box symbol. Defaults to ``IEC``."""
+    meter_diameter: float = square_bipole_side_length
+    """The diameter of meters."""
+    meter_font: str = "sans-serif"
+    """The fonts for the letter in meters (i.e. 'V' in voltmeter and 'A' in ammeter)."""
 
 
 @dc.dataclass

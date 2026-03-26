@@ -198,7 +198,7 @@ class Terminal(Markable):
             self._current_mark_anchored_below = below
 
         label_tex = label if isinstance(label, str) else label.to_latex()
-        label_animation = self._label.animate(**anim_args).set(label_tex).build()
+        label_animation = self._current.animate(**anim_args).set(label_tex).build()
         animations.append(label_animation)
 
         visibility_change_needed = self.autovisibility and self._connection_count == 0
@@ -271,7 +271,7 @@ class Terminal(Markable):
             anim_args = {}
 
         arrow_animation = mn.Uncreate(self._current_arrow, **anim_args)
-        label_animation = self._label.animate(**anim_args).clear().build()
+        label_animation = self._current.animate(**anim_args).clear().build()
         animations: list[mn.Animation] = [arrow_animation, label_animation]
 
         if self.autovisibility and self._connection_count == 0:

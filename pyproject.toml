@@ -108,7 +108,7 @@ allowed-confusables = ["×"]
 convention = "numpy"
 
 [tool.ruff.lint.per-file-ignores]
-"{tests/*,conftest.py}" = [
+"{tests/*,examples/*,conftest.py}" = [
     # Do not require docstrings for every 'public' function/class/method/module/package that is actually for testing
     "D1",
 ]
