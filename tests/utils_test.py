@@ -84,6 +84,24 @@ def test_cardinalised(
 @pytest.mark.parametrize(
     ("vector", "expected"),
     [
+        pytest.param([1, 0, 0], True, id="RIGHT"),
+        pytest.param([0, 1, 0], True, id="UP"),
+        pytest.param([0, 0, 1], True, id="OUT"),
+        pytest.param([-1, 0, 0], True, id="LEFT"),
+        pytest.param([0, -1, 0], True, id="DOWN"),
+        pytest.param([3, 0, 0], True, id="non-unit cardinal magnitude"),
+        pytest.param([1, 1, 0], False, id="diagonal"),
+        pytest.param([0.99, 0.01, 0], False, id="nearly-cardinal"),
+        pytest.param([0, 0, 0], False, id="zero vector"),
+    ],
+)
+def test_is_cardinal(vector: list[float], expected: bool) -> None:
+    assert utils.is_cardinal(vector) == expected
+
+
+@pytest.mark.parametrize(
+    ("vector", "expected"),
+    [
         pytest.param([1, 0, 0], [1, 0, 0], id="no action necessary"),
         pytest.param(
             [0.7071067811865475, 0.7071067811865475, 0],

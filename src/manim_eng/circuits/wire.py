@@ -53,8 +53,14 @@ class ManualWire(WireBase):
     def get_corner_points(self) -> list[mnt.Point3D]:
         """Get the corner points of the wire.
 
-        Returns the vertices of the wire, not including the end points (i.e. at the
-        start and end pins).
+        Returns the vertices of the wire, not including the points at which the wires
+        connect to the components themselves (i.e. the pin bases).
+
+        Returns
+        -------
+        list[Point3D]
+            The corner points of the wire between the two pin bases, in order from start
+            to end.
         """
         return self._corner_points
 
@@ -64,9 +70,14 @@ class ManualWire(WireBase):
         Parameters
         ----------
         points : Sequence[Point3D]
-            The vertices the wire should have between the two pins. Should not
-            include the positions of the two pins, as these are inserted automatically
-            when the wire is drawn. These should be in order from ``start`` to ``end``.
+            The vertices the wire should have between the two pin bases. Should not
+            include the points at which the wires connect to the components themselves,
+            but should include all other points.
+
+        Notes
+        -----
+        :attr:`~.Pin.tip` may be helpful when placing points if you want to ensure wires
+        always have some distance straight out from a component's body.
         """
         self._corner_points = list(points)
         return self
@@ -242,19 +253,15 @@ class Wire(WireBase):
             )
         index = index % n_corners
 
-        all_vertices = [
-            self._start.base,
-            self._start.tip,
-            *corner_points,
-            self._end.tip,
-            self._end.base,
-        ]
+        all_vertices = self.get_all_vertices()
+
         cumulative = [0.0]
         for i in range(len(all_vertices) - 1):
             dist = float(np.linalg.norm(all_vertices[i + 1] - all_vertices[i]))
             cumulative.append(cumulative[-1] + dist)
         total = cumulative[-1]
-        alpha = cumulative[2 + index] / total
+        # Bump index by one to skip over initial cumulative element with value 0
+        alpha = cumulative[1 + index] / total
 
         return self.split_at(alpha, container=container)
 
@@ -309,17 +316,63 @@ class Wire(WireBase):
     def get_corner_points(self) -> list[mnt.Point3D]:
         """Get the corner points of the wire.
 
-        Returns the vertices of the wire, not including the end points (i.e. at the
-        start and end pins).
+        Returns the vertices of the wire, not including the points at which the wires
+        connect to the components themselves (i.e. the pin bases). Vertices for the pin
+        tips are only included where they would be visible corners (i.e. the pin is not
+        in a cardinal direction but the wire coming out of it is).
+
+        Returns
+        -------
+        list[Point3D]
+            The corner points of the wire between the two pin bases, in order from start
+            to end.
         """
+        intersection = mn.find_intersection(
+            [self._start.base],
+            [self._start.direction],
+            [self._end.base],
+            [self._end.direction],
+        )[0]
+
+        start_proj = np.dot(intersection - self._start.base, self._start.direction)
+        end_proj = np.dot(intersection - self._end.base, self._end.direction)
+        start_is_cardinal = utils.is_cardinal(self._start.direction)
+        end_is_cardinal = utils.is_cardinal(self._end.direction)
+
+        intersection_in_front = start_proj >= 0 and end_proj >= 0
+        cardinal_or_intersection_in_pin = (
+            start_is_cardinal or start_proj <= self._start.length
+        ) and (end_is_cardinal or end_proj <= self._end.length)
+        # mn.find_intersection() returns p0s when the lines are parallel
+        parallel_but_pins_intersecting = (
+            np.isclose(start_proj, 0)
+            and end_proj <= self._start.length + self._end.length
+            and np.isclose(end_proj, np.linalg.norm(self._start.base - self._end.base))
+        )
+
+        if parallel_but_pins_intersecting or (
+            intersection_in_front and cardinal_or_intersection_in_pin
+        ):
+            return [intersection]
+
         from_direction = utils.cardinalised(self._start.direction)
         to_direction = utils.cardinalised(self._end.direction)
 
         if np.isclose(np.dot(from_direction, to_direction), 0):
-            return self.__get_corner_points_for_perpendicular_pins(
+            corner_points = self.__get_corner_points_for_perpendicular_pins(
                 from_direction, to_direction
             )
-        return self.__get_corner_points_for_parallel_pins(from_direction, to_direction)
+        else:
+            corner_points = self.__get_corner_points_for_parallel_pins(
+                from_direction, to_direction
+            )
+
+        if not start_is_cardinal:
+            corner_points.insert(0, self._start.tip)
+        if not end_is_cardinal:
+            corner_points.append(self._end.tip)
+
+        return corner_points
 
     def __get_corner_points_for_perpendicular_pins(
         self, from_direction: mnt.Vector3D, to_direction: mnt.Vector3D
@@ -373,13 +426,15 @@ class Wire(WireBase):
             )
 
         perpendicular_direction = np.cross(from_direction, mn.OUT)
-        corner_points = mn.find_intersection(
-            [midpoint] * 2,
-            [perpendicular_direction] * 2,
-            [self._start.tip, self._end.tip],
-            [from_direction, to_direction],
+        return cast(
+            list[mnt.Point3D],
+            mn.find_intersection(
+                [midpoint] * 2,
+                [perpendicular_direction] * 2,
+                [self._start.tip, self._end.tip],
+                [from_direction, to_direction],
+            ),
         )
-        return list(corner_points)
 
     @staticmethod
     def __point_is_behind_plane(

@@ -47,3 +47,33 @@ def cardinalised(vector: mnt.Vector3D, margin: float | None = None) -> mnt.Vecto
         return cardinalised_vector
 
     return vector
+
+
+def is_cardinal(vector: mnt.Vector3D) -> bool:
+    """Return whether a vector points in a cardinal direction.
+
+    A cardinal direction is one aligned with an axis — i.e. a vector with only one
+    non-zero element
+
+    Parameters
+    ----------
+    vector : mnt.Vector3D
+        The vector to check.
+
+    Returns
+    -------
+    bool
+        ``True`` if the vector is in a cardinal direction, ``False`` otherwise.
+    """
+    # Exactly two components must be zero (one non-zero = cardinal).
+    # == 2 rather than >= 2 rejects the zero vector, which would give sum 3.
+    # int() cast is required because np.isclose returns Any under mypy's numpy stubs,
+    # which causes sum([Any, ...]) to also be Any.
+    zeros: int = sum(
+        [
+            int(np.isclose(vector[0], 0)),
+            int(np.isclose(vector[1], 0)),
+            int(np.isclose(vector[2], 0)),
+        ]
+    )
+    return zeros == 2  # noqa: PLR2004
