@@ -59,10 +59,10 @@ class Terminal(Markable):
         self._line = mn.Line(
             start=position,
             end=end,
+            stroke_opacity=0.0 if self.autovisibility else 1.0,
             stroke_width=config_eng.symbol.wire_stroke_width,
         )
-        if not self.autovisibility:
-            self.add(self._line)
+        self.add(self._line)
 
         self._centre_anchor = CentreAnchor().move_to(self._line.get_center())
         self._end_anchor = TerminalAnchor().move_to(end)
@@ -203,8 +203,8 @@ class Terminal(Markable):
 
         visibility_change_needed = self.autovisibility and self._connection_count == 0
         if visibility_change_needed:
-            # The terminal is not yet showing, so 'create' it
-            self.add(self._line)
+            # The terminal is not yet showing, so update it so it is
+            self.__update_terminal_visibility()
             terminal_animation = mn.Create(self._line, introducer=False, **anim_args)
             animations.append(terminal_animation)
 
@@ -271,16 +271,18 @@ class Terminal(Markable):
             anim_args = {}
 
         arrow_animation = mn.Uncreate(self._current_arrow, **anim_args)
+        self._current_arrow_showing = False
+
         label_animation = self._label.animate(**anim_args).clear().build()
+
         animations: list[mn.Animation] = [arrow_animation, label_animation]
 
         if self.autovisibility and self._connection_count == 0:
             # The current arrow was the only reason for the terminal being shown, so
             # 'uncreate' it
-            terminal_animation = mn.Uncreate(self._line, **anim_args)
+            terminal_animation = mn.Uncreate(self._line, remover=False, **anim_args)
+            self.__update_terminal_visibility()
             animations.append(terminal_animation)
-
-        self._current_arrow_showing = False
 
         return mn.AnimationGroup(*animations)
 
@@ -333,7 +335,6 @@ class Terminal(Markable):
         if terminal_already_visible:
             return None
 
-        self.add(self._line)
         return mn.Create(self._line, introducer=False, **anim_args)
 
     def _decrement_connection_count(self) -> Self:
@@ -353,7 +354,7 @@ class Terminal(Markable):
             anim_args = {}
 
         self.__update_terminal_visibility()
-        return mn.Uncreate(self._line, **anim_args)
+        return mn.Uncreate(self._line, remover=False, **anim_args)
 
     def __rebuild_current_arrow(self) -> None:
         """Rebuild the current arrow.
@@ -377,7 +378,4 @@ class Terminal(Markable):
             )
 
         should_be_visible = self._connection_count > 0 or self._current_arrow_showing
-        if should_be_visible:
-            self.add(self._line)
-        else:
-            self.remove(self._line)
+        self._line.set(stroke_opacity=1.0 if should_be_visible else 0.0)
