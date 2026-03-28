@@ -34,10 +34,12 @@ class BipoleSwitchBase(Bipole, metaclass=abc.ABCMeta):
             Pin(
                 position=mn.LEFT * half_width,
                 direction=mn.LEFT,
+                parent=self,
             ),
             Pin(
                 position=mn.RIGHT * half_width,
                 direction=mn.RIGHT,
+                parent=self,
             ),
             **kwargs,
         )

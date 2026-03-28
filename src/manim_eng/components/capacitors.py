@@ -23,10 +23,12 @@ class Capacitor(Bipole):
             Pin(
                 position=mn.LEFT * self.__plate_half_gap,
                 direction=mn.LEFT,
+                parent=self,
             ),
             Pin(
                 position=mn.RIGHT * self.__plate_half_gap,
                 direction=mn.RIGHT,
+                parent=self,
             ),
             **kwargs,
         )

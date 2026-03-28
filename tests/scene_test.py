@@ -6,9 +6,9 @@ import pytest
 from manim_eng import EngScene, Wire
 from manim_eng.circuits.base import WireBase
 from manim_eng.circuits.circuit import Circuit
-from manim_eng.components.base.pin import Pin
 
 from .utils.dummy_component import DummyComponent
+from .utils.pin_mocked_parent import PinMockedParent
 
 
 @pytest.fixture
@@ -156,12 +156,12 @@ def test_replace_with_new_wire_marks_wire_visible(scene: EngScene, wire: Wire) -
 
 
 def test_replace_wire_with_wire_old_hidden_new_visible(scene: EngScene) -> None:
-    start_a = Pin(mn.LEFT * 2, mn.LEFT)
-    end_a = Pin(mn.RIGHT * 2, mn.RIGHT)
+    start_a = PinMockedParent(mn.LEFT * 2, mn.LEFT)
+    end_a = PinMockedParent(mn.RIGHT * 2, mn.RIGHT)
     wire_a = Wire(start_a, end_a)
 
-    start_b = Pin(mn.LEFT * 3, mn.LEFT)
-    end_b = Pin(mn.RIGHT * 3, mn.RIGHT)
+    start_b = PinMockedParent(mn.LEFT * 3, mn.LEFT)
+    end_b = PinMockedParent(mn.RIGHT * 3, mn.RIGHT)
     wire_b = Wire(start_b, end_b)
 
     scene.add(wire_a)

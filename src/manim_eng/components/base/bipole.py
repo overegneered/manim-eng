@@ -41,12 +41,12 @@ class Bipole(Component, metaclass=abc.ABCMeta):
         left = (
             left
             if left is not None
-            else Pin(position=half_width * mn.LEFT, direction=mn.LEFT)
+            else Pin(position=half_width * mn.LEFT, direction=mn.LEFT, parent=self)
         )
         right = (
             right
             if right is not None
-            else Pin(position=half_width * mn.RIGHT, direction=mn.RIGHT)
+            else Pin(position=half_width * mn.RIGHT, direction=mn.RIGHT, parent=self)
         )
         super().__init__(pins=[left, right], **kwargs)
 
@@ -98,12 +98,14 @@ class SquareBipole(Bipole, metaclass=abc.ABCMeta):
             Pin(
                 position=mn.LEFT * half_width,
                 direction=mn.LEFT,
+                parent=self,
             )
             if left is None
             else left,
             Pin(
                 position=mn.RIGHT * half_width,
                 direction=mn.RIGHT,
+                parent=self,
             )
             if right is None
             else right,

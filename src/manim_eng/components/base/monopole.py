@@ -34,6 +34,7 @@ class Monopole(Component, metaclass=abc.ABCMeta):
         pin = Pin(
             position=mn.ORIGIN,
             direction=direction,
+            parent=self,
         )
         super().__init__(pins=[pin], **kwargs)
 

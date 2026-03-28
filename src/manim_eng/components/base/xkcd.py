@@ -34,10 +34,12 @@ class RandalMunroeSourceBase(VoltageSourceBase):
             left=Pin(
                 position=self.__half_width * mn.LEFT,
                 direction=mn.LEFT,
+                parent=self,
             ),
             right=Pin(
                 position=self.__half_width * mn.RIGHT,
                 direction=mn.RIGHT,
+                parent=self,
             ),
             **kwargs,
         )

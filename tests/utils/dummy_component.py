@@ -10,8 +10,8 @@ from manim_eng.components.base.pin import Pin
 
 class DummyComponent(Component):
     def __init__(self, **kwargs: Any) -> None:
-        left = Pin(mn.LEFT, mn.LEFT)
-        right = Pin(mn.RIGHT, mn.RIGHT)
+        left = Pin(mn.LEFT, mn.LEFT, parent=self)
+        right = Pin(mn.RIGHT, mn.RIGHT, parent=self)
         self.not_a_pin = 3
         super().__init__([left, right], **kwargs)
 
@@ -36,8 +36,8 @@ class DummyComponentOffCentre(Component):
     """
 
     def __init__(self, **kwargs: Any) -> None:
-        left = Pin(mn.LEFT, mn.LEFT)
-        right = Pin(mn.RIGHT, mn.RIGHT)
+        left = Pin(mn.LEFT, mn.LEFT, parent=self)
+        right = Pin(mn.RIGHT, mn.RIGHT, parent=self)
         self.not_a_pin = 3
         super().__init__([left, right], **kwargs)
         # _centre_anchor is created inside Component.__init__(), so the shift

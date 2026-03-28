@@ -13,6 +13,7 @@ from manim_eng.circuits.current import CurrentArrow
 
 if TYPE_CHECKING:
     from manim_eng.circuits.base.wire import WireBase
+    from manim_eng.components.base.component import Component
 
 __all__ = ["Pin"]
 
@@ -26,6 +27,8 @@ class Pin(Markable):
         The point at which the pin meets the body of the component.
     direction : manim.Vector3D
         A vector pointing in the direction of the pin (away from the body).
+    parent : Component
+        A handle to the parent component.
     length : float, optional
         The length the pin should have. If left unspecified, takes the value
         ``config_eng.symbol.pin_length``.
@@ -35,10 +38,13 @@ class Pin(Markable):
         self,
         position: mnt.Point3D,
         direction: mnt.Vector3D,
+        parent: "Component",
         length: float | None = None,
     ):
         super().__init__()
         direction = mn.normalize(direction)
+
+        self._parent = parent
 
         if length is None:
             length = config_eng.symbol.pin_length
@@ -74,6 +80,27 @@ class Pin(Markable):
     def attached_wire(self) -> "WireBase | None":
         """A reference to the wire attached to this pin, if one exists."""
         return self._attached_wire
+
+    @property
+    def other_end(self) -> Self | None:
+        """A reference to the pin on the other end of an attached wire, if one exists.
+
+        Returns
+        -------
+        Self | None
+            ``Self`` if a wire is attached, ``None`` otherwise.
+        """
+        if self._attached_wire is None:
+            return None
+
+        if self._attached_wire.start == self:
+            return self._attached_wire.end
+        return self._attached_wire.start
+
+    @property
+    def parent(self) -> "Component":
+        """The parent component of this pin."""
+        return self._parent
 
     @property
     def current(self) -> CurrentArrow:
@@ -130,3 +157,7 @@ class Pin(Markable):
         if self._attached_wire is None:
             return False
         return self._attached_wire.is_visible()
+
+    def wire_currently_attached(self) -> bool:
+        """Return whether a wire is currently attached to this pin."""
+        return self._attached_wire is not None

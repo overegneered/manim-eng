@@ -3,15 +3,15 @@ from collections.abc import Callable
 import manim as mn
 import numpy as np
 import pytest
+from utils.pin_mocked_parent import PinMockedParent
 
 from manim_eng import ManualWire, Wire
 from manim_eng._utils.utils import cardinalised
 from manim_eng.circuits.node import Node
-from manim_eng.components.base.pin import Pin
 
 
 def test_wire_throws_value_error_if_pins_are_identical() -> None:
-    pin = Pin(mn.ORIGIN, mn.LEFT)
+    pin = PinMockedParent(mn.ORIGIN, mn.LEFT)
 
     with pytest.raises(
         ValueError,
@@ -22,7 +22,7 @@ def test_wire_throws_value_error_if_pins_are_identical() -> None:
 
 
 def test_manual_wire_throws_value_error_if_pins_are_identical() -> None:
-    pin = Pin(mn.ORIGIN, mn.LEFT)
+    pin = PinMockedParent(mn.ORIGIN, mn.LEFT)
 
     with pytest.raises(
         ValueError,
@@ -150,8 +150,8 @@ def test_destruction_animation_dispatch_produces_correct_visibility_behaviour(
 
 def _make_horizontal_wire() -> Wire:
     """Return a simple left-to-right wire for use in split_at tests."""
-    start = Pin(mn.LEFT * 2, mn.RIGHT)
-    end = Pin(mn.RIGHT * 2, mn.LEFT)
+    start = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end = PinMockedParent(mn.RIGHT * 2, mn.LEFT)
     return Wire(start, end)
 
 
@@ -169,8 +169,8 @@ def test_split_at_returns_tuple_of_wire_node_wire() -> None:
 
 
 def test_split_at_start_wire_retains_original_start_pin() -> None:
-    start_pin = Pin(mn.LEFT * 2, mn.RIGHT)
-    end_pin = Pin(mn.RIGHT * 2, mn.LEFT)
+    start_pin = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end_pin = PinMockedParent(mn.RIGHT * 2, mn.LEFT)
     wire = Wire(start_pin, end_pin)
 
     start_portion, _node, _end_portion = wire.split_at(0.5)
@@ -179,8 +179,8 @@ def test_split_at_start_wire_retains_original_start_pin() -> None:
 
 
 def test_split_at_end_wire_retains_original_end_pin() -> None:
-    start_pin = Pin(mn.LEFT * 2, mn.RIGHT)
-    end_pin = Pin(mn.RIGHT * 2, mn.LEFT)
+    start_pin = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end_pin = PinMockedParent(mn.RIGHT * 2, mn.LEFT)
     wire = Wire(start_pin, end_pin)
 
     _start_portion, _node, end_portion = wire.split_at(0.5)
@@ -201,8 +201,8 @@ def test_split_at_node_is_placed_at_correct_position() -> None:
 def test_split_at_node_pins_face_towards_start_and_end_wire() -> None:
     # On a straight left-to-right wire, the node pin towards the start should
     # point LEFT and the one towards the end should point RIGHT (antiparallel).
-    start_pin = Pin(mn.LEFT * 2, mn.RIGHT)
-    end_pin = Pin(mn.RIGHT * 2, mn.LEFT)
+    start_pin = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end_pin = PinMockedParent(mn.RIGHT * 2, mn.LEFT)
     wire = Wire(start_pin, end_pin)
 
     start_portion, _node, end_portion = wire.split_at(0.5)
@@ -240,8 +240,8 @@ def test_split_at_end_portion_start_pin_belongs_to_node() -> None:
 
 
 def test_split_at_detaches_original_wire_from_start_pin() -> None:
-    start_pin = Pin(mn.LEFT * 2, mn.RIGHT)
-    end_pin = Pin(mn.RIGHT * 2, mn.LEFT)
+    start_pin = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end_pin = PinMockedParent(mn.RIGHT * 2, mn.LEFT)
     wire = Wire(start_pin, end_pin)
 
     wire.split_at(0.5)
@@ -250,8 +250,8 @@ def test_split_at_detaches_original_wire_from_start_pin() -> None:
 
 
 def test_split_at_detaches_original_wire_from_end_pin() -> None:
-    start_pin = Pin(mn.LEFT * 2, mn.RIGHT)
-    end_pin = Pin(mn.RIGHT * 2, mn.LEFT)
+    start_pin = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end_pin = PinMockedParent(mn.RIGHT * 2, mn.LEFT)
     wire = Wire(start_pin, end_pin)
 
     wire.split_at(0.5)
@@ -260,8 +260,8 @@ def test_split_at_detaches_original_wire_from_end_pin() -> None:
 
 
 def test_split_at_start_pin_is_attached_to_start_portion() -> None:
-    start_pin = Pin(mn.LEFT * 2, mn.RIGHT)
-    end_pin = Pin(mn.RIGHT * 2, mn.LEFT)
+    start_pin = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end_pin = PinMockedParent(mn.RIGHT * 2, mn.LEFT)
     wire = Wire(start_pin, end_pin)
 
     start_portion, _node, _end_portion = wire.split_at(0.5)
@@ -270,8 +270,8 @@ def test_split_at_start_pin_is_attached_to_start_portion() -> None:
 
 
 def test_split_at_end_pin_is_attached_to_end_portion() -> None:
-    start_pin = Pin(mn.LEFT * 2, mn.RIGHT)
-    end_pin = Pin(mn.RIGHT * 2, mn.LEFT)
+    start_pin = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end_pin = PinMockedParent(mn.RIGHT * 2, mn.LEFT)
     wire = Wire(start_pin, end_pin)
 
     _start_portion, _node, end_portion = wire.split_at(0.5)
@@ -319,8 +319,8 @@ def test_split_at_raises_value_error_if_alpha_exactly_one() -> None:
 
 def test_split_at_places_current_on_start_portion_when_it_falls_before_split() -> None:
     # Current is at alpha=0.3, split is at alpha=0.5 — current falls on start half.
-    start = Pin(mn.LEFT * 2, mn.RIGHT)
-    end = Pin(mn.RIGHT * 2, mn.LEFT)
+    start = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end = PinMockedParent(mn.RIGHT * 2, mn.LEFT)
     wire = Wire(start, end)
     wire.current.set(label="I", alpha=0.3)
 
@@ -332,8 +332,8 @@ def test_split_at_places_current_on_start_portion_when_it_falls_before_split() -
 
 def test_split_at_places_current_on_end_portion_when_it_falls_after_split() -> None:
     # Current is at alpha=0.7, split is at alpha=0.5 — current falls on end half.
-    start = Pin(mn.LEFT * 2, mn.RIGHT)
-    end = Pin(mn.RIGHT * 2, mn.LEFT)
+    start = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end = PinMockedParent(mn.RIGHT * 2, mn.LEFT)
     wire = Wire(start, end)
     wire.current.set(label="I", alpha=0.7)
 
@@ -345,8 +345,8 @@ def test_split_at_places_current_on_end_portion_when_it_falls_after_split() -> N
 
 def test_split_at_remaps_current_alpha_correctly_for_start_portion() -> None:
     # Current at alpha=0.25, split at alpha=0.5 → remapped alpha = 0.25/0.5 = 0.5.
-    start = Pin(mn.LEFT * 2, mn.RIGHT)
-    end = Pin(mn.RIGHT * 2, mn.LEFT)
+    start = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end = PinMockedParent(mn.RIGHT * 2, mn.LEFT)
     wire = Wire(start, end)
     wire.current.set(label="I", alpha=0.25)
 
@@ -357,8 +357,8 @@ def test_split_at_remaps_current_alpha_correctly_for_start_portion() -> None:
 
 def test_split_at_remaps_current_alpha_correctly_for_end_portion() -> None:
     # Current at alpha=0.75, split at alpha=0.5 → remapped alpha = (0.75-0.5)/0.5 = 0.5.
-    start = Pin(mn.LEFT * 2, mn.RIGHT)
-    end = Pin(mn.RIGHT * 2, mn.LEFT)
+    start = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end = PinMockedParent(mn.RIGHT * 2, mn.LEFT)
     wire = Wire(start, end)
     wire.current.set(label="I", alpha=0.75)
 
@@ -379,8 +379,8 @@ def test_split_at_with_no_current_does_not_error() -> None:
 
 def test_split_at_alpha_quarter_places_node_at_one_quarter_point() -> None:
     # Wire goes from x=-2 to x=+2 (length 4), so the 25% point is at x=-1.
-    start_pin = Pin(mn.LEFT * 2, mn.RIGHT)
-    end_pin = Pin(mn.RIGHT * 2, mn.LEFT)
+    start_pin = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end_pin = PinMockedParent(mn.RIGHT * 2, mn.LEFT)
     wire = Wire(start_pin, end_pin)
     alpha = 0.25
     expected = wire.point_from_proportion(alpha)
@@ -395,8 +395,8 @@ def test_split_at_alpha_quarter_places_node_at_one_quarter_point() -> None:
 
 def _make_wire_with_inverted_current(alpha: float) -> Wire:
     """Return a horizontal wire with an inverted current arrow at the given alpha."""
-    start = Pin(mn.LEFT * 2, mn.RIGHT)
-    end = Pin(mn.RIGHT * 2, mn.LEFT)
+    start = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end = PinMockedParent(mn.RIGHT * 2, mn.LEFT)
     wire = Wire(start, end)
     wire.current.set(label="I", alpha=alpha, invert=True)
     return wire
@@ -799,8 +799,8 @@ def test_get_corner_points_non_cardinal_start_inserts_start_tip_as_first_corner(
     # Diagonal start direction [1,1,0] with end placed far enough that the intersection
     # of the two rays is beyond start.length, so the early-return is not taken and the
     # tip-insertion branch prepends start.tip.
-    start = Pin(mn.ORIGIN, np.array([1.0, 1.0, 0.0]))
-    end = Pin(np.array([3.0, 0.0, 0.0]), mn.UP)
+    start = PinMockedParent(mn.ORIGIN, np.array([1.0, 1.0, 0.0]))
+    end = PinMockedParent(np.array([3.0, 0.0, 0.0]), mn.UP)
     wire = Wire(start, end)
 
     result = wire.get_corner_points()
@@ -812,8 +812,8 @@ def test_get_corner_points_non_cardinal_start_inserts_start_tip_as_first_corner(
 def test_get_corner_points_non_cardinal_end_inserts_end_tip_as_last_corner() -> None:
     # Cardinal start, mostly-DOWN (non-cardinal) end. The routing helper produces one
     # corner; then end.tip is appended because end is non-cardinal.
-    start = Pin(mn.ORIGIN, mn.RIGHT)
-    end = Pin(np.array([3.0, 3.0, 0.0]), np.array([0.1, -1.0, 0.0]))
+    start = PinMockedParent(mn.ORIGIN, mn.RIGHT)
+    end = PinMockedParent(np.array([3.0, 3.0, 0.0]), np.array([0.1, -1.0, 0.0]))
     wire = Wire(start, end)
 
     result = wire.get_corner_points()
@@ -825,8 +825,8 @@ def test_get_corner_points_non_cardinal_end_inserts_end_tip_as_last_corner() -> 
 def test_get_corner_points_both_non_cardinal_pins_inserts_both_tips() -> None:
     # Both pins diagonal. Routing helper produces one corner; both tips are inserted
     # around it.
-    start = Pin(mn.ORIGIN, np.array([1.0, 1.0, 0.0]))
-    end = Pin(np.array([4.0, 4.0, 0.0]), np.array([0.1, -1.0, 0.0]))
+    start = PinMockedParent(mn.ORIGIN, np.array([1.0, 1.0, 0.0]))
+    end = PinMockedParent(np.array([4.0, 4.0, 0.0]), np.array([0.1, -1.0, 0.0]))
     wire = Wire(start, end)
 
     result = wire.get_corner_points()
@@ -857,8 +857,8 @@ def test_get_corner_points_perpendicular_facing_pins_returns_intersection() -> N
     # Two cardinal pins whose extended rays cross at a single point in front of both.
     # Branch: intersection_in_front=True, cardinal_or_intersection_in_pin=True → early
     # return fires, yielding the raw intersection as the sole corner.
-    start = Pin(np.array([0.0, 1.0, 0.0]), mn.RIGHT)
-    end = Pin(np.array([1.0, 0.0, 0.0]), mn.UP)
+    start = PinMockedParent(np.array([0.0, 1.0, 0.0]), mn.RIGHT)
+    end = PinMockedParent(np.array([1.0, 0.0, 0.0]), mn.UP)
     wire = Wire(start, end)
 
     result = wire.get_corner_points()
@@ -873,8 +873,8 @@ def test_get_corner_points_intersection_behind_end_bypasses_early_return() -> No
     # so the early return is bypassed and the routing helper is invoked instead.
     # The routing helper places the corner via the pin tips, which produces a different
     # point from the raw intersection — confirming the early-return path was NOT taken.
-    start = Pin(mn.ORIGIN, mn.RIGHT)
-    end = Pin(np.array([1.0, -1.0, 0.0]), mn.DOWN)
+    start = PinMockedParent(mn.ORIGIN, mn.RIGHT)
+    end = PinMockedParent(np.array([1.0, -1.0, 0.0]), mn.DOWN)
     raw_intersection = mn.find_intersection(
         [start.base], [start.direction], [end.base], [end.direction]
     )[0]
@@ -890,10 +890,10 @@ def test_get_corner_points_non_cardinal_near_intersection_takes_early_return() -
     # Non-cardinal start pin with the ray intersection landing within start.length of
     # start.base (start_proj <= start.length). The early return fires: result has one
     # element and it is NOT start.tip — the tip-insertion code is never reached.
-    start = Pin(mn.ORIGIN, np.array([1.0, 1.0, 0.0]))
+    start = PinMockedParent(mn.ORIGIN, np.array([1.0, 1.0, 0.0]))
     # end placed so the intersection of the two rays is at (0.1, 0.1, 0), well within
     # start.length ≈ 0.4.
-    end = Pin(np.array([0.1, 2.0, 0.0]), mn.DOWN)
+    end = PinMockedParent(np.array([0.1, 2.0, 0.0]), mn.DOWN)
     wire = Wire(start, end)
 
     result = wire.get_corner_points()
@@ -906,8 +906,8 @@ def test_get_corner_points_non_cardinal_far_intersection_inserts_tip() -> None:
     # Non-cardinal start pin; end is far enough that the intersection of the two rays
     # falls well beyond start.length.  Early return is NOT taken; tip-insertion fires
     # and start.tip becomes the first corner.
-    start = Pin(mn.ORIGIN, np.array([1.0, 1.0, 0.0]))
-    end = Pin(np.array([2.0, 4.0, 0.0]), mn.DOWN)
+    start = PinMockedParent(mn.ORIGIN, np.array([1.0, 1.0, 0.0]))
+    end = PinMockedParent(np.array([2.0, 4.0, 0.0]), mn.DOWN)
     wire = Wire(start, end)
 
     result = wire.get_corner_points()
@@ -921,8 +921,10 @@ def test_get_corner_points_collinear_opposing_overlapping_pins_early_return() ->
     # than start.length + end.length ≈ 0.8).
     # mn.find_intersection returns start.base; parallel_but_pins_intersecting=True so
     # the early-return fires.
-    start = Pin(mn.ORIGIN, mn.RIGHT)  # base=(0,0,0), tip=(0.4,0,0)
-    end = Pin(np.array([0.6, 0.0, 0.0]), mn.LEFT)  # base=(0.6,0,0), tip=(0.2,0,0)
+    start = PinMockedParent(mn.ORIGIN, mn.RIGHT)  # base=(0,0,0), tip=(0.4,0,0)
+    end = PinMockedParent(
+        np.array([0.6, 0.0, 0.0]), mn.LEFT
+    )  # base=(0.6,0,0), tip=(0.2,0,0)
     wire = Wire(start, end)
 
     result = wire.get_corner_points()
@@ -935,8 +937,8 @@ def test_get_corner_points_parallel_same_direction_pins_skips_early_return() -> 
     # The parallel_but_pins_intersecting guard is False; the early-return for facing
     # pins also doesn't fire. The parallel helper is invoked and returns 2 routing
     # corners.
-    start = Pin(mn.LEFT * 2, mn.RIGHT)
-    end = Pin(mn.RIGHT * 2 + mn.UP, mn.RIGHT)
+    start = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end = PinMockedParent(mn.RIGHT * 2 + mn.UP, mn.RIGHT)
     wire = Wire(start, end)
 
     result = wire.get_corner_points()
@@ -951,18 +953,24 @@ def test_get_corner_points_parallel_same_direction_pins_skips_early_return() -> 
     "make_wire",
     [
         # perpendicular cardinal
-        lambda: Wire(Pin(mn.ORIGIN, mn.RIGHT), Pin(mn.RIGHT + mn.UP, mn.UP)),
+        lambda: Wire(
+            PinMockedParent(mn.ORIGIN, mn.RIGHT),
+            PinMockedParent(mn.RIGHT + mn.UP, mn.UP),
+        ),
         # parallel same-direction
-        lambda: Wire(Pin(mn.LEFT * 2, mn.RIGHT), Pin(mn.RIGHT * 2 + mn.UP, mn.RIGHT)),
+        lambda: Wire(
+            PinMockedParent(mn.LEFT * 2, mn.RIGHT),
+            PinMockedParent(mn.RIGHT * 2 + mn.UP, mn.RIGHT),
+        ),
         # perpendicular with intersection in front of both (early-return branch)
         lambda: Wire(
-            Pin(np.array([0.0, 1.0, 0.0]), mn.RIGHT),
-            Pin(np.array([1.0, 0.0, 0.0]), mn.UP),
+            PinMockedParent(np.array([0.0, 1.0, 0.0]), mn.RIGHT),
+            PinMockedParent(np.array([1.0, 0.0, 0.0]), mn.UP),
         ),
         # non-cardinal start, cardinal end
         lambda: Wire(
-            Pin(mn.ORIGIN, np.array([1.0, 1.0, 0.0])),
-            Pin(np.array([3.0, 0.0, 0.0]), mn.UP),
+            PinMockedParent(mn.ORIGIN, np.array([1.0, 1.0, 0.0])),
+            PinMockedParent(np.array([3.0, 0.0, 0.0]), mn.UP),
         ),
     ],
     ids=[

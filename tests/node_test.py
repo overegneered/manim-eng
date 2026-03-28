@@ -4,10 +4,11 @@ import manim as mn
 import manim.typing as mnt
 import numpy as np
 import pytest
+from utils.pin_mocked_parent import PinMockedParent
 
 from manim_eng import Node
+from manim_eng.components.base import Pin
 from manim_eng.components.base.component import Component
-from manim_eng.components.base.pin import Pin
 
 
 @pytest.mark.parametrize(
@@ -84,7 +85,7 @@ def test_midangles_of_largest_gaps_between_list_of_angles(
 def test_next_to_with_pin_uses_pin_tip_as_reference() -> None:
     """Passing a Pin moves the node relative to the pin's tip."""
     node = Node().move_to(mn.ORIGIN)
-    pin = Pin(position=mn.RIGHT * 3, direction=mn.RIGHT)
+    pin = PinMockedParent(position=mn.RIGHT * 3, direction=mn.RIGHT)
 
     node.next_to(pin)
 
@@ -95,7 +96,7 @@ def test_next_to_with_pin_uses_pin_tip_as_reference() -> None:
 def test_next_to_with_pin_uses_pin_direction_by_default() -> None:
     """When a Pin is passed without an explicit direction, pin.direction is used."""
     node = Node().move_to(mn.ORIGIN)
-    pin = Pin(position=mn.ORIGIN, direction=mn.UP)
+    pin = PinMockedParent(position=mn.ORIGIN, direction=mn.UP)
 
     node.next_to(pin)
 
@@ -106,7 +107,7 @@ def test_next_to_with_pin_uses_pin_direction_by_default() -> None:
 def test_next_to_with_pin_explicit_direction_overrides_pin_direction() -> None:
     """An explicit direction argument overrides the pin's own direction."""
     # Place the pin pointing UP so its direction and the override (RIGHT) are distinct.
-    pin = Pin(position=mn.ORIGIN, direction=mn.UP)
+    pin = PinMockedParent(position=mn.ORIGIN, direction=mn.UP)
 
     # Place the node using the pin's direction (UP) — baseline.
     node_default = Node().move_to(mn.ORIGIN)

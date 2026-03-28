@@ -7,13 +7,13 @@ import pytest
 from manim_eng import Wire
 from manim_eng.circuits.node import Node
 from manim_eng.components.base.component import Component
-from manim_eng.components.base.pin import Pin
 
 from .utils.dummy_component import (
     DummyComponent,
     DummyComponentMockedPins,
     DummyComponentOffCentre,
 )
+from .utils.pin_mocked_parent import PinMockedParent
 
 
 class _MockMathTex(mn.VMobject):
@@ -39,8 +39,8 @@ os.makedirs("media", exist_ok=True)
 
 @pytest.fixture
 def wire() -> Wire:
-    start = Pin(mn.LEFT, mn.LEFT)
-    end = Pin(mn.RIGHT, mn.RIGHT)
+    start = PinMockedParent(mn.LEFT, mn.LEFT)
+    end = PinMockedParent(mn.RIGHT, mn.RIGHT)
     return Wire(start, end)
 
 
@@ -52,8 +52,8 @@ def node() -> Node:
 
 @pytest.fixture
 def wire_with_current() -> Wire:
-    start = Pin(mn.LEFT, mn.LEFT)
-    end = Pin(mn.RIGHT, mn.RIGHT)
+    start = PinMockedParent(mn.LEFT, mn.LEFT)
+    end = PinMockedParent(mn.RIGHT, mn.RIGHT)
     w = Wire(start, end)
     w.current.set(label="I")
     return w
@@ -63,16 +63,16 @@ def wire_with_current() -> Wire:
 def wire_with_one_corner() -> Wire:
     # Perpendicular pins: one pointing RIGHT from origin, one pointing UP from (1,1,0).
     # get_corner_points() for perpendicular pins returns exactly 1 corner point.
-    start = Pin(mn.ORIGIN, mn.RIGHT)
-    end = Pin(mn.RIGHT + mn.UP, mn.UP)
+    start = PinMockedParent(mn.ORIGIN, mn.RIGHT)
+    end = PinMockedParent(mn.RIGHT + mn.UP, mn.UP)
     return Wire(start, end)
 
 
 @pytest.fixture
 def wire_with_two_corners() -> Wire:
     # Parallel (same-direction) pins produce 2 corner points from get_corner_points().
-    start = Pin(mn.LEFT * 2, mn.RIGHT)
-    end = Pin(mn.RIGHT * 2 + mn.UP, mn.RIGHT)
+    start = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end = PinMockedParent(mn.RIGHT * 2 + mn.UP, mn.RIGHT)
     return Wire(start, end)
 
 

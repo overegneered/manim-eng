@@ -121,6 +121,7 @@ class Node(Component):
             to_return = Pin(
                 position=self.get_center(),
                 direction=direction,
+                parent=self,
             )
             self._pins.add(to_return)
 

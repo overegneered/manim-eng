@@ -34,10 +34,12 @@ class Cells(VoltageSourceBase):
             left=Pin(
                 position=mn.LEFT * self.__half_width,
                 direction=mn.LEFT,
+                parent=self,
             ),
             right=Pin(
                 position=mn.RIGHT * self.__half_width,
                 direction=mn.RIGHT,
+                parent=self,
             ),
             **kwargs,
         )
