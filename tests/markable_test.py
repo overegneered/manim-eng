@@ -44,7 +44,9 @@ def child_markable() -> ConcreteMarkable:
     return ConcreteMarkable()
 
 
-# add() routing ========================================================================
+# --------------------------------------------------------------------------------------
+# add() routing
+# --------------------------------------------------------------------------------------
 
 
 def test_add_vmobject_appears_in_submobjects(
@@ -71,7 +73,9 @@ def test_add_child_markable_appears_in_submobjects(
     assert child_markable in markable.submobjects
 
 
-# submobjects getter: ordering should be __rotate, __marks, __markables ================
+# --------------------------------------------------------------------------------------
+# submobjects getter: ordering should be __rotate, __marks, __markables
+# --------------------------------------------------------------------------------------
 
 
 def test_submobjects_order_rotate_then_marks_then_markables(
@@ -107,7 +111,9 @@ def test_submobjects_does_not_expose_internal_vgroups(
         assert not (isinstance(sub, mn.VGroup) and sub not in known)
 
 
-# add_to_back() routing ================================================================
+# --------------------------------------------------------------------------------------
+# add_to_back() routing
+# --------------------------------------------------------------------------------------
 
 
 def test_add_to_back_vmobject_appears_in_submobjects(
@@ -146,7 +152,9 @@ def test_add_to_back_vmobject_placed_before_existing(
     assert subs.index(second) < subs.index(first)
 
 
-# remove() routing =====================================================================
+# --------------------------------------------------------------------------------------
+# remove() routing
+# --------------------------------------------------------------------------------------
 
 
 def test_remove_vmobject_no_longer_in_submobjects(
@@ -176,7 +184,9 @@ def test_remove_child_markable_no_longer_in_submobjects(
     assert child_markable not in markable.submobjects
 
 
-# 5. submobjects setter round-trip =====================================================
+# --------------------------------------------------------------------------------------
+# submobjects setter round-trip
+# --------------------------------------------------------------------------------------
 
 
 def test_submobjects_setter_routes_vmobject(
@@ -225,7 +235,9 @@ def test_submobjects_setter_preserves_ordering(
     assert subs.index(plain_vmobject) < subs.index(mark) < subs.index(child_markable)
 
 
-# rotate() with nested child Markable — no name-mangling regression ====================
+# --------------------------------------------------------------------------------------
+# rotate() with nested child Markable — no name-mangling regression
+# --------------------------------------------------------------------------------------
 
 
 def test_rotate_with_nested_child_markable_does_not_raise(
@@ -250,7 +262,9 @@ def test_rotate_propagates_to_child_markable(markable: ConcreteMarkable) -> None
     assert not np.allclose(inner.get_center(), original_center)
 
 
-# RotateMarkable animation is produced via the @mn.override_animation hook =============
+# --------------------------------------------------------------------------------------
+# RotateMarkable animation is produced via the @mn.override_animation hook
+# --------------------------------------------------------------------------------------
 
 
 def test_override_animation_produces_rotate_markable_instance(
@@ -272,7 +286,9 @@ def test_override_animation_is_not_bare_mn_rotate(
     assert type(anim) is _RotateMarkable
 
 
-# RotateMarkable.interpolate_mobject reaches the correct final angle ===================
+# --------------------------------------------------------------------------------------
+# RotateMarkable.interpolate_mobject reaches the correct final angle
+# --------------------------------------------------------------------------------------
 
 
 def test_rotate_markable_interpolate_at_1_reaches_target_angle(

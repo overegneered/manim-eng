@@ -220,6 +220,47 @@ class Circuit(mn.VMobject):
                 f"{[tuple(pin.tip) for pin in pins_not_owned]}"
             )
 
+    def _get_connections_for_pin(
+        self, pin: Pin, existing: set[Pin] | None = None
+    ) -> set[Pin]:
+        """Get a full set of pins connected to this pin, including the original pin.
+
+        The returned set has all pins *logically* connected to ``pin``, i.e. direct
+        connections and any component connected to any pin on a connected
+        :class:`~.Node`.
+
+        Parameters
+        ----------
+        pin : Pin
+            The pin to base the search off.
+
+        Returns
+        -------
+        set[Pin]
+            All pins on the connection network the pin is a member of, including the pin
+            itself.
+        """
+        if pin.other_end is None:
+            return set()
+
+        other_end = pin.other_end
+
+        end_component = other_end.parent
+        if not isinstance(end_component, Node):
+            return {pin, other_end}
+
+        if existing is None:
+            existing = {pin}
+
+        for end_pin in end_component.pins:
+            if end_pin not in existing:
+                existing.add(end_pin)
+                existing.update(
+                    self._get_connections_for_pin(end_pin, existing=existing)
+                )
+
+        return existing
+
     @mn.override_animate(add)
     def __animate_add(
         self, *components: Component, anim_args: dict[str, Any] | None = None

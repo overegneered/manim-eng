@@ -32,7 +32,9 @@ def test_manual_wire_throws_value_error_if_pins_are_identical() -> None:
         ManualWire(pin, pin, [])
 
 
-# Helpers ==============================================================================
+# --------------------------------------------------------------------------------------
+# Helpers
+# --------------------------------------------------------------------------------------
 
 _CREATION_ANIM_FACTORIES: list[Callable[[Wire], mn.Animation]] = [
     mn.Create,
@@ -54,14 +56,18 @@ _DESTRUCTION_ANIM_FACTORIES: list[Callable[[Wire], mn.Animation]] = [
 ]
 
 
-# Initial state ========================================================================
+# --------------------------------------------------------------------------------------
+# Initial state
+# --------------------------------------------------------------------------------------
 
 
 def test_wire_is_hidden_on_construction(wire: Wire) -> None:
     assert wire.is_visible() is False
 
 
-# Creation animations ==================================================================
+# --------------------------------------------------------------------------------------
+# Creation animations
+# --------------------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize("factory", _CREATION_ANIM_FACTORIES)
@@ -94,7 +100,9 @@ def test_wire_remains_visible_after_creation_animation_finishes(
     assert wire.is_visible() is True
 
 
-# Destruction animations ===============================================================
+# --------------------------------------------------------------------------------------
+# Destruction animations
+# --------------------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize("factory", _DESTRUCTION_ANIM_FACTORIES)
@@ -120,7 +128,9 @@ def test_wire_remains_visible_during_destruction_animation(
     assert wire.is_visible() is True
 
 
-# Dispatch produces correct visibility behaviour (end-to-end) ==========================
+# --------------------------------------------------------------------------------------
+# Dispatch produces correct visibility behaviour (end-to-end)
+# --------------------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize("factory", _CREATION_ANIM_FACTORIES)
@@ -145,7 +155,9 @@ def test_destruction_animation_dispatch_produces_correct_visibility_behaviour(
     assert wire.is_visible() is False
 
 
-# split_at — structural / return-value =================================================
+# --------------------------------------------------------------------------------------
+# split_at — structural / return-value
+# --------------------------------------------------------------------------------------
 
 
 def _make_horizontal_wire() -> Wire:
@@ -236,7 +248,9 @@ def test_split_at_end_portion_start_pin_belongs_to_node() -> None:
     assert end_portion._start in node.pins
 
 
-# split_at — pin attachment state ======================================================
+# --------------------------------------------------------------------------------------
+# split_at — pin attachment state
+# --------------------------------------------------------------------------------------
 
 
 def test_split_at_detaches_original_wire_from_start_pin() -> None:
@@ -279,7 +293,9 @@ def test_split_at_end_pin_is_attached_to_end_portion() -> None:
     assert end_pin.attached_wire is end_portion
 
 
-# split_at — alpha boundary / error ====================================================
+# --------------------------------------------------------------------------------------
+# split_at — alpha boundary / error
+# --------------------------------------------------------------------------------------
 
 
 def test_split_at_raises_value_error_if_alpha_less_than_zero() -> None:
@@ -314,7 +330,9 @@ def test_split_at_raises_value_error_if_alpha_exactly_one() -> None:
         wire.split_at(1.0)
 
 
-# split_at — current placement =========================================================
+# --------------------------------------------------------------------------------------
+# split_at — current placement
+# --------------------------------------------------------------------------------------
 
 
 def test_split_at_places_current_on_start_portion_when_it_falls_before_split() -> None:
@@ -374,7 +392,9 @@ def test_split_at_with_no_current_does_not_error() -> None:
     wire.split_at(0.5)
 
 
-# split_at — geometry ==================================================================
+# --------------------------------------------------------------------------------------
+# split_at — geometry
+# --------------------------------------------------------------------------------------
 
 
 def test_split_at_alpha_quarter_places_node_at_one_quarter_point() -> None:
@@ -390,7 +410,9 @@ def test_split_at_alpha_quarter_places_node_at_one_quarter_point() -> None:
     assert np.allclose(node.get_center(), expected, atol=1e-4)
 
 
-# split_at — inverted current placement ===============================================
+# --------------------------------------------------------------------------------------
+# split_at — inverted current placement
+# --------------------------------------------------------------------------------------
 
 
 def _make_wire_with_inverted_current(alpha: float) -> Wire:
@@ -448,7 +470,9 @@ def test_split_at_inverted_current_alpha_remapped_correctly_for_end_portion() ->
     assert np.isclose(end_portion.current._alpha, 0.8)
 
 
-# split_at — container parameter =======================================================
+# --------------------------------------------------------------------------------------
+# split_at — container parameter
+# --------------------------------------------------------------------------------------
 
 
 def test_split_at_with_mobject_container_removes_wire_from_container() -> None:
@@ -494,7 +518,9 @@ def test_split_at_with_container_still_returns_tuple() -> None:
     assert isinstance(end_portion, Wire)
 
 
-# split_at_corners ====================================================================
+# --------------------------------------------------------------------------------------
+# split_at_corners
+# --------------------------------------------------------------------------------------
 
 
 def test_split_at_corners_no_corners_returns_self_and_empty_nodes(wire: Wire) -> None:
@@ -594,7 +620,9 @@ def test_split_at_corners_with_current_places_it_on_correct_segment(
     assert triangle_in[0] is segments[0]
 
 
-# split_at_corner ======================================================================
+# --------------------------------------------------------------------------------------
+# split_at_corner
+# --------------------------------------------------------------------------------------
 
 # structural / return-value ------------------------------------------------------------
 
@@ -775,7 +803,9 @@ def test_split_at_corner_with_container_still_returns_tuple(
     assert isinstance(end_portion, Wire)
 
 
-# get_corner_points — tip insertion (cardinal vs non-cardinal pins) ====================
+# --------------------------------------------------------------------------------------
+# get_corner_points — tip insertion (cardinal vs non-cardinal pins)
+# --------------------------------------------------------------------------------------
 
 
 def test_get_corner_points_cardinal_start_does_not_include_start_tip(
@@ -850,7 +880,9 @@ def test_get_corner_points_cardinal_pins_return_value_does_not_contain_either_ti
     assert not any(np.allclose(p, end.tip) for p in result)
 
 
-# get_corner_points — intersection-override (early-return) logic ======================
+# --------------------------------------------------------------------------------------
+# get_corner_points — intersection-override (early-return) logic
+# --------------------------------------------------------------------------------------
 
 
 def test_get_corner_points_perpendicular_facing_pins_returns_intersection() -> None:
@@ -946,7 +978,9 @@ def test_get_corner_points_parallel_same_direction_pins_skips_early_return() -> 
     assert len(result) == 2  # noqa: PLR2004
 
 
-# get_corner_points — additional edges =================================================
+# --------------------------------------------------------------------------------------
+# get_corner_points — additional edges
+# --------------------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize(

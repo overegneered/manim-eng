@@ -259,7 +259,9 @@ def test_align_pin_with_monopole_as_other_uses_monopole_pin_tip(
     assert np.isclose(dummy_component.right.tip[0], monopole_pin_tip[0], atol=1e-4)
 
 
-# Zero-vector direction returns the logical centre =====================================
+# --------------------------------------------------------------------------------------
+# Zero-vector direction returns the logical centre
+# --------------------------------------------------------------------------------------
 
 
 def test_get_critical_point_zero_vector_returns_centre_anchor_position(
@@ -281,7 +283,9 @@ def test_get_critical_point_zero_vector_matches_get_center(
     assert np.allclose(result, dummy_component.get_center())
 
 
-# Direction is normalised before comparison ============================================
+# --------------------------------------------------------------------------------------
+# Direction is normalised before comparison
+# --------------------------------------------------------------------------------------
 
 
 def test_get_critical_point_unnormalised_up_direction(
@@ -320,7 +324,9 @@ def test_get_critical_point_unnormalised_zero_vector(
     )
 
 
-# Mid-edge points snap the perpendicular axis to the logical centre ====================
+# --------------------------------------------------------------------------------------
+# Mid-edge points snap the perpendicular axis to the logical centre
+# --------------------------------------------------------------------------------------
 
 
 def test_get_critical_point_up_x_snapped_to_logical_centre(
@@ -379,7 +385,9 @@ def test_get_critical_point_right_x_is_bounding_box_right(
     assert np.isclose(result[0], expected_x)
 
 
-# Corner directions are unmodified =====================================================
+# --------------------------------------------------------------------------------------
+# Corner directions are unmodified
+# --------------------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -397,7 +405,9 @@ def test_get_critical_point_corner_directions_not_modified(
     assert np.allclose(result, expected)
 
 
-# Behaviour after translation ==========================================================
+# --------------------------------------------------------------------------------------
+# Behaviour after translation
+# --------------------------------------------------------------------------------------
 
 
 def test_get_critical_point_centre_updates_after_move_to(
