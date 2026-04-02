@@ -358,6 +358,7 @@ version = "0.2.0.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "manim" },
+    { name = "numpy" },
 ]
 
 [package.dev-dependencies]
@@ -373,7 +374,10 @@ docs = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "manim", specifier = ">=0.19.0,<0.20.0" }]
+requires-dist = [
+    { name = "manim", specifier = ">=0.19.0,<0.20.0" },
+    { name = "numpy", specifier = ">=2.3.4" },
+]
 
 [package.metadata.requires-dev]
 dev = [
