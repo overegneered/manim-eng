@@ -116,3 +116,138 @@ def test_cardinalised_no_margin_given(
     result = utils.cardinalised(vector)
 
     assert np.allclose(result, expected)
+
+
+# --------------------------------------------------------------------------------------
+# closest_points_of_two_line_segments
+# --------------------------------------------------------------------------------------
+
+
+def test_closest_points_both_segments_degenerate() -> None:
+    # Both segments collapse to single points.
+    p, q = utils.closest_points_of_two_line_segments(
+        np.array([1.0, 0.0, 0.0]),
+        np.array([1.0, 0.0, 0.0]),
+        np.array([4.0, 0.0, 0.0]),
+        np.array([4.0, 0.0, 0.0]),
+    )
+
+    assert p == pytest.approx([1.0, 0.0, 0.0])
+    assert q == pytest.approx([4.0, 0.0, 0.0])
+
+
+def test_closest_points_first_segment_degenerate() -> None:
+    # First segment is a point; closest point on the second is computed.
+    p, q = utils.closest_points_of_two_line_segments(
+        np.array([0.0, 0.0, 0.0]),
+        np.array([0.0, 0.0, 0.0]),
+        np.array([-1.0, 1.0, 0.0]),
+        np.array([1.0, 1.0, 0.0]),
+    )
+
+    assert p == pytest.approx([0.0, 0.0, 0.0])
+    assert q == pytest.approx([0.0, 1.0, 0.0])
+
+
+def test_closest_points_second_segment_degenerate() -> None:
+    # Second segment is a point; closest point on the first is computed.
+    p, q = utils.closest_points_of_two_line_segments(
+        np.array([-1.0, 0.0, 0.0]),
+        np.array([1.0, 0.0, 0.0]),
+        np.array([0.0, 2.0, 0.0]),
+        np.array([0.0, 2.0, 0.0]),
+    )
+
+    assert p == pytest.approx([0.0, 0.0, 0.0])
+    assert q == pytest.approx([0.0, 2.0, 0.0])
+
+
+def test_closest_points_crossing_segments() -> None:
+    # Two segments that intersect; distance should be zero.
+    p, q = utils.closest_points_of_two_line_segments(
+        np.array([-1.0, 0.0, 0.0]),
+        np.array([1.0, 0.0, 0.0]),
+        np.array([0.0, -1.0, 0.0]),
+        np.array([0.0, 1.0, 0.0]),
+    )
+
+    assert p == pytest.approx([0.0, 0.0, 0.0])
+    assert q == pytest.approx([0.0, 0.0, 0.0])
+
+
+def test_closest_points_skew_segments() -> None:
+    # One segment along the x-axis, the other along z offset by (0,1,0).
+    p, q = utils.closest_points_of_two_line_segments(
+        np.array([0.0, 0.0, 0.0]),
+        np.array([2.0, 0.0, 0.0]),
+        np.array([1.0, 1.0, -1.0]),
+        np.array([1.0, 1.0, 1.0]),
+    )
+
+    assert p == pytest.approx([1.0, 0.0, 0.0])
+    assert q == pytest.approx([1.0, 1.0, 0.0])
+
+
+def test_closest_points_parallel_overlapping() -> None:
+    # Overlap interval is [1, 2]; midpoint on each is (1.5, 0, 0).
+    p, q = utils.closest_points_of_two_line_segments(
+        np.array([0.0, 0.0, 0.0]),
+        np.array([2.0, 0.0, 0.0]),
+        np.array([1.0, 0.0, 0.0]),
+        np.array([3.0, 0.0, 0.0]),
+    )
+
+    assert p == pytest.approx([1.5, 0.0, 0.0])
+    assert q == pytest.approx([1.5, 0.0, 0.0])
+
+
+def test_closest_points_parallel_non_overlapping() -> None:
+    # Gap between the segments; closest points are the facing endpoints.
+    p, q = utils.closest_points_of_two_line_segments(
+        np.array([0.0, 0.0, 0.0]),
+        np.array([1.0, 0.0, 0.0]),
+        np.array([3.0, 0.0, 0.0]),
+        np.array([4.0, 0.0, 0.0]),
+    )
+
+    assert p == pytest.approx([1.0, 0.0, 0.0])
+    assert q == pytest.approx([3.0, 0.0, 0.0])
+
+
+def test_closest_points_anti_parallel_overlapping() -> None:
+    # Same geometry as parallel_overlapping but with the second segment reversed.
+    p, q = utils.closest_points_of_two_line_segments(
+        np.array([0.0, 0.0, 0.0]),
+        np.array([2.0, 0.0, 0.0]),
+        np.array([3.0, 0.0, 0.0]),
+        np.array([1.0, 0.0, 0.0]),
+    )
+
+    assert p == pytest.approx([1.5, 0.0, 0.0])
+    assert q == pytest.approx([1.5, 0.0, 0.0])
+
+
+def test_closest_points_t_clamps_to_zero() -> None:
+    # Unclamped t would be negative; closest point on second segment is its start.
+    p, q = utils.closest_points_of_two_line_segments(
+        np.array([0.0, 0.0, 0.0]),
+        np.array([1.0, 0.0, 0.0]),
+        np.array([0.5, 2.0, 0.0]),
+        np.array([0.5, 3.0, 0.0]),
+    )
+
+    assert p == pytest.approx([0.5, 0.0, 0.0])
+    assert q == pytest.approx([0.5, 2.0, 0.0])
+
+
+def test_closest_points_t_clamps_to_one() -> None:
+    # Unclamped t would exceed 1; closest point on second segment is its end.
+    p, q = utils.closest_points_of_two_line_segments(
+        np.array([0.0, 0.0, 0.0]),
+        np.array([1.0, 0.0, 0.0]),
+        np.array([0.5, -3.0, 0.0]),
+        np.array([0.5, -2.0, 0.0]),
+    )
+
+    assert p == pytest.approx([0.5, 0.0, 0.0])
+    assert q == pytest.approx([0.5, -2.0, 0.0])

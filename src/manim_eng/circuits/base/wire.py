@@ -1,12 +1,15 @@
 """Wire implementation class."""
 
 import abc
+import itertools
 from typing import Any, Self, cast
 
 import manim as mn
+import numpy as np
 from manim import typing as mnt
 
 from manim_eng import config_eng
+from manim_eng._utils import utils
 from manim_eng.circuits.current import CurrentArrow
 from manim_eng.components.base.pin import Pin
 
@@ -148,6 +151,81 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
             The full list of vertices defining the shape of the wire.
         """
         return [self._start.base, *self.get_corner_points(), self._end.base]
+
+    def get_point_closest_to(self, point: mnt.Point3D | Pin) -> mnt.Point3D:
+        """Get the point on the wire closest to the given point.
+
+        If multiple segments on the wire are equally close to ``point``, the segment
+        earlier in the wire (closer to the start) will take priority.
+
+        Parameters
+        ----------
+        point : Point3D | Pin
+            The point to find the closest point to. If a ``Pin`` is provided, the point
+            is taken to be the pin's tip.
+
+        Returns
+        -------
+        Point3D
+            A point on the wire closest to ``point``.
+        """
+        if isinstance(point, Pin):
+            point = point.tip
+
+        best_closest_point = mn.ORIGIN
+        smallest_square_distance = np.inf
+
+        for start, end in itertools.pairwise(self.get_all_vertices()):
+            closest_point = utils.closest_point_on_line_segment_to_point(
+                start, end, point
+            )
+            vector = point - closest_point
+            square_distance = np.dot(vector, vector)
+
+            if square_distance < smallest_square_distance:
+                smallest_square_distance = square_distance
+                best_closest_point = closest_point
+
+        return best_closest_point
+
+    def get_closest_points_with(
+        self, other: "WireBase"
+    ) -> tuple[mnt.Point3D, mnt.Point3D]:
+        """Get the points on ``self`` and ``other`` that are closest to each other.
+
+        Parameters
+        ----------
+        other : WireBase
+            The wire to find the closest points to.
+
+        Returns
+        -------
+        tuple[Point3D, Point3D]
+            A two-element tuple containing the pair of points closest to each other. The
+            first element is a point on ``self``, the second is a point on ``other``.
+
+        Notes
+        -----
+        Uses the closest points of two line segments algorithm due to Ericson, as
+        published in *Real-Time Collision Detection* (2005), §5.1.9.
+        """
+        best_point_self = mn.ORIGIN
+        best_point_other = mn.ORIGIN
+        best_dist = np.inf
+
+        for self_segment in itertools.pairwise(self.get_all_vertices()):
+            for other_segment in itertools.pairwise(other.get_all_vertices()):
+                point_self, point_other = utils.closest_points_of_two_line_segments(
+                    *self_segment, *other_segment
+                )
+                vector = point_other - point_self
+                dist = np.dot(vector, vector)
+                if dist < best_dist:
+                    best_point_self = point_self
+                    best_point_other = point_other
+                    best_dist = dist
+
+        return best_point_self, best_point_other
 
     @staticmethod
     def _update_points(mob: mn.Mobject) -> None:

@@ -8,7 +8,7 @@ from manim_eng.circuits.base import WireBase
 from manim_eng.circuits.circuit import Circuit
 
 from .utils.dummy_component import DummyComponent
-from .utils.pin_mocked_parent import PinMockedParent
+from .utils.pin_mocked import PinMockedParent
 
 
 @pytest.fixture

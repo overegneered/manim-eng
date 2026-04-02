@@ -4,7 +4,7 @@ import manim as mn
 import manim.typing as mnt
 import numpy as np
 import pytest
-from utils.pin_mocked_parent import PinMockedParent
+from utils.pin_mocked import PinMockedParent
 
 from manim_eng import Node
 from manim_eng.components.base import Pin

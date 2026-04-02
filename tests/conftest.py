@@ -13,7 +13,7 @@ from .utils.dummy_component import (
     DummyComponentMockedPins,
     DummyComponentOffCentre,
 )
-from .utils.pin_mocked_parent import PinMockedParent
+from .utils.pin_mocked import PinMockedParent
 
 
 class _MockMathTex(mn.VMobject):

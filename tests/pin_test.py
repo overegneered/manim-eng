@@ -4,7 +4,7 @@ from unittest import mock
 
 import manim as mn
 import pytest
-from utils.pin_mocked_parent import PinMockedParent
+from utils.pin_mocked import PinMockedParent
 
 from manim_eng.circuits.base.wire import WireBase
 

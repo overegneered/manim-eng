@@ -4,12 +4,12 @@ from typing import Any, Callable, Self, Sequence, cast
 
 import manim as mn
 
-__all__ = ["Circuit"]
-
 from manim_eng.circuits.node import Node
 from manim_eng.circuits.wire import Wire
 from manim_eng.components.base.component import Component
 from manim_eng.components.base.pin import Pin
+
+__all__ = ["Circuit"]
 
 
 class Circuit(mn.VMobject):

@@ -77,3 +77,117 @@ def is_cardinal(vector: mnt.Vector3D) -> bool:
         ]
     )
     return zeros == 2  # noqa: PLR2004
+
+
+def closest_points_of_two_line_segments(
+    p0: mnt.Point3D,
+    p1: mnt.Point3D,
+    q0: mnt.Point3D,
+    q1: mnt.Point3D,
+) -> tuple[mnt.Point3D, mnt.Point3D]:
+    """Compute the closest points of two given line segments.
+
+    If the two segments are parallel and overlapping, selects the midpoints of the
+    overlap.
+
+    Parameters
+    ----------
+    p0 : Point3D
+        The start of the first segment.
+    p1 : Point3D
+        The end of the first segment.
+    q0 : Point3D
+        The start of the second segment.
+    q1 : Point3D
+        The end of the second segment.
+
+    Returns
+    -------
+    tuple[mnt.Point3D, mnt.Point3D]
+        A two-element tuple consisting of the closest points on the two line segments.
+        The point on segment (``p0``, ``p1``) is first, then the point on segment
+        (``q0``, ``q1``).
+
+    Notes
+    -----
+    Uses the closest points of two line segments algorithm due to Ericson, as published
+    in *Real-Time Collision Detection* (2005), §5.1.9.
+
+    See Also
+    --------
+    closest_point_on_line_segment_to_point
+    """
+    d1 = p1 - p0
+    d2 = q1 - q0
+    r = p0 - q0
+
+    a = np.dot(d1, d1)
+    e = np.dot(d2, d2)
+
+    if np.isclose(a, 0) and np.isclose(e, 0):
+        # Both segments degenerate
+        return p0, q0
+
+    f = np.dot(d2, r)
+    if np.isclose(a, 0):
+        # Segment (p0, p1) degenerate
+        t = np.clip(f / e, 0, 1)
+        return p0, q0 + t * d2
+
+    c = np.dot(d1, r)
+    if np.isclose(e, 0):
+        # Segment (q0, q1) degenerate
+        s = np.clip(-c / a, 0, 1)
+        return p0 + s * d1, q0
+
+    b = np.dot(d1, d2)
+    denom = a * e - b * b
+
+    if not np.isclose(denom, 0):
+        # Non-parallel
+        s = np.clip((b * f - c * e) / denom, 0, 1)
+    else:
+        # Parallel — select midpoint of overlap if the segments overlap, otherwise
+        # fall back to the nearest endpoint of the first segment
+        s0 = np.dot(q0 - p0, d1) / a
+        s1 = np.dot(q1 - p0, d1) / a
+
+        s_lo, s_hi = np.sort([s0, s1])
+        overlap_lo = max(s_lo, 0)
+        overlap_hi = min(s_hi, 1)
+        s = (overlap_lo + overlap_hi) / 2 if overlap_lo <= overlap_hi else 0
+
+    t = (b * s + f) / e
+
+    if t < 0:
+        t = 0
+        s = np.clip(-c / a, 0, 1)
+    elif t > 1:
+        t = 1
+        s = np.clip((b - c) / a, 0, 1)
+
+    return p0 + s * d1, q0 + t * d2
+
+
+def closest_point_on_line_segment_to_point(
+    start: mnt.Point3D, end: mnt.Point3D, point: mnt.Point3D
+) -> mnt.Point3D:
+    """Compute the closest point on the line segment to point ``point``.
+
+    Convenience wrapper around :meth:`closest_points_of_two_line_segments`.
+
+    Parameters
+    ----------
+    start : mnt.Point3D
+        The start point of the line segment.
+    end : mnt.Point3D
+        The end point of the line segment.
+    point : mnt.Point3D
+        The point to find the closest point on (``start``, ``end``) to.
+
+    See Also
+    --------
+    closest_points_of_two_line_segments
+    """
+    closest_point, _ = closest_points_of_two_line_segments(start, end, point, point)
+    return closest_point
