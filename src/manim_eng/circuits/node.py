@@ -167,6 +167,11 @@ class Node(Component):
         """Get down-right-pointing pin of the node, creating it if necessary."""
         return self.get(mn.DR)
 
+    @property
+    def connected_pins(self) -> list[Pin]:
+        """Get the pins of this node that are currently attached to wires."""
+        return [pin for pin in self.pins if pin.wire_currently_attached()]
+
     def set_blob_visibility(self, visible: bool) -> Self:
         """Alter the solder blob visibility.
 

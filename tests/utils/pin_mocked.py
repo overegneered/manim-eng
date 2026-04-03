@@ -12,8 +12,17 @@ class PinMockedParent(Pin):
     """Pin that mocks its parent to simplify testing setups."""
 
     def __init__(
-        self, position: mnt.Point3D, direction: mnt.Vector3D, *args: Any, **kwargs: Any
+        self,
+        position: mnt.Point3D | None = None,
+        direction: mnt.Vector3D | None = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
+        if position is None:
+            position = mn.ORIGIN
+        if direction is None:
+            direction = mn.RIGHT
+
         super().__init__(
             position,
             direction,
@@ -24,7 +33,7 @@ class PinMockedParent(Pin):
 
 
 class PinTipOnly(PinMockedParent):
-    """Minimal pin stub that exposes only the ``tip`` attribute."""
+    """Pin mock defined by the location of its tip."""
 
     def __init__(self, tip: mnt.Point3D) -> None:
         super().__init__(tip - mn.RIGHT, mn.RIGHT, length=1.0)
