@@ -488,6 +488,147 @@ def test_split_at_corners_with_current_places_it_on_correct_segment(
 
 
 # --------------------------------------------------------------------------------------
+# split_at_point
+# --------------------------------------------------------------------------------------
+
+# happy path — straight wire -----------------------------------------------------------
+
+
+def test_split_at_point_returns_tuple_of_wire_node_wire() -> None:
+    wire = _make_horizontal_wire()
+    # ORIGIN lies on the horizontal wire between (-2,0,0) and (2,0,0).
+    point = mn.ORIGIN
+
+    result = wire.split_at_point(point)
+
+    assert isinstance(result, tuple)
+    assert len(result) == 3  # noqa: PLR2004
+    start_portion, node, end_portion = result
+    assert isinstance(start_portion, Wire)
+    assert isinstance(node, Node)
+    assert isinstance(end_portion, Wire)
+
+
+def test_split_at_point_node_placed_at_given_point() -> None:
+    wire = _make_horizontal_wire()
+    point = mn.ORIGIN
+
+    _start_portion, node, _end_portion = wire.split_at_point(point)
+
+    assert np.allclose(node.get_center(), point, atol=1e-4)
+
+
+def test_split_at_point_start_portion_retains_original_start_pin() -> None:
+    start_pin = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end_pin = PinMockedParent(mn.RIGHT * 2, mn.LEFT)
+    wire = Wire(start_pin, end_pin)
+    point = mn.ORIGIN
+
+    start_portion, _node, _end_portion = wire.split_at_point(point)
+
+    assert start_portion._start is start_pin
+
+
+def test_split_at_point_end_portion_retains_original_end_pin() -> None:
+    start_pin = PinMockedParent(mn.LEFT * 2, mn.RIGHT)
+    end_pin = PinMockedParent(mn.RIGHT * 2, mn.LEFT)
+    wire = Wire(start_pin, end_pin)
+    point = mn.ORIGIN
+
+    _start_portion, _node, end_portion = wire.split_at_point(point)
+
+    assert end_portion._end is end_pin
+
+
+# happy path — multi-segment wire ------------------------------------------------------
+
+
+def _make_two_segment_wire() -> Wire:
+    """Return a two-segment L-shaped wire for use in split_at_point tests."""
+    # Perpendicular cardinal pins produce a single routing corner, giving two segments.
+    # start points RIGHT from ORIGIN; end points UP from (1,1,0).
+    start = PinMockedParent(mn.ORIGIN, mn.RIGHT)
+    end = PinMockedParent(mn.RIGHT + mn.UP, mn.UP)
+    return Wire(start, end)
+
+
+def test_split_at_point_on_first_segment_places_node_correctly() -> None:
+    wire = _make_two_segment_wire()
+    # Use get_all_vertices() so the test is robust against pin_length config changes.
+    vertices = wire.get_all_vertices()
+    # Pick the midpoint of the first segment.
+    point = mn.midpoint(vertices[0], vertices[1])
+
+    _start_portion, node, _end_portion = wire.split_at_point(point)
+
+    assert np.allclose(node.get_center(), point, atol=1e-4)
+
+
+def test_split_at_point_on_second_segment_places_node_correctly() -> None:
+    wire = _make_two_segment_wire()
+    vertices = wire.get_all_vertices()
+    # Pick the midpoint of the second segment.
+    point = mn.midpoint(vertices[1], vertices[2])
+
+    _start_portion, node, _end_portion = wire.split_at_point(point)
+
+    assert np.allclose(node.get_center(), point, atol=1e-4)
+
+
+# boundary — point at corner -----------------------------------------------------------
+
+
+def test_split_at_point_at_corner_places_node_at_corner() -> None:
+    wire = _make_two_segment_wire()
+    # The corner is the middle element of get_all_vertices() for a single-corner wire.
+    vertices = wire.get_all_vertices()
+    corner = vertices[1]
+
+    _start_portion, node, _end_portion = wire.split_at_point(corner)
+
+    assert np.allclose(node.get_center(), corner, atol=1e-4)
+
+
+# near-boundary — point close to but not at a pin base --------------------------------
+
+
+def test_split_at_point_very_close_to_start_is_accepted() -> None:
+    wire = _make_horizontal_wire()
+    # Pick a point 1e-3 along the wire from the start base.
+    vertices = wire.get_all_vertices()
+    direction = mn.normalize(vertices[-1] - vertices[0])
+    point = vertices[0] + direction * 1e-3
+
+    _start_portion, node, _end_portion = wire.split_at_point(point)
+
+    assert np.allclose(node.get_center(), point, atol=1e-4)
+
+
+def test_split_at_point_very_close_to_end_is_accepted() -> None:
+    wire = _make_horizontal_wire()
+    # Pick a point 1e-3 from the end base, walking backwards along the wire.
+    vertices = wire.get_all_vertices()
+    direction = mn.normalize(vertices[0] - vertices[-1])
+    point = vertices[-1] + direction * 1e-3
+
+    _start_portion, node, _end_portion = wire.split_at_point(point)
+
+    assert np.allclose(node.get_center(), point, atol=1e-4)
+
+
+# error case ---------------------------------------------------------------------------
+
+
+def test_split_at_point_raises_value_error_for_point_not_on_wire() -> None:
+    wire = _make_horizontal_wire()
+    # (0, 1, 0) is clearly off the horizontal wire that runs along y=0.
+    off_wire_point = np.array([0.0, 1.0, 0.0])
+
+    with pytest.raises(ValueError, match="does not lie on the wire"):
+        wire.split_at_point(off_wire_point)
+
+
+# --------------------------------------------------------------------------------------
 # split_at_corner
 # --------------------------------------------------------------------------------------
 
@@ -820,15 +961,15 @@ def test_get_corner_points_collinear_opposing_overlapping_pins_early_return() ->
     # than start.length + end.length ≈ 0.8).
     # mn.find_intersection returns start.base; parallel_but_pins_intersecting=True so
     # the early-return fires.
-    start = PinMockedParent(mn.ORIGIN, mn.RIGHT)  # base=(0,0,0), tip=(0.4,0,0)
+    start = PinMockedParent(mn.ORIGIN, mn.RIGHT)  # base = (0 ,0, 0), tip = (0.4, 0, 0)
     end = PinMockedParent(
         np.array([0.6, 0.0, 0.0]), mn.LEFT
-    )  # base=(0.6,0,0), tip=(0.2,0,0)
+    )  # base = (0.6, 0, 0), tip = (0.2, 0, 0)
     wire = Wire(start, end)
 
     result = wire.get_corner_points()
 
-    assert len(result) == 1
+    assert len(result) == 0
 
 
 def test_get_corner_points_parallel_same_direction_pins_skips_early_return() -> None:

@@ -1,5 +1,6 @@
 """Wire and related implementation classes."""
 
+import itertools
 from typing import Self, Sequence, cast
 
 import manim as mn
@@ -200,6 +201,66 @@ class Wire(WireBase):
 
         return start_portion, node, end_portion
 
+    def split_at_point(
+        self,
+        point: mnt.Point3D,
+        container: mn.Scene | mn.Mobject | None = None,
+    ) -> tuple[Self, Node, Self]:
+        """Split the wire at ``point`` and return the new resulting objects.
+
+        If the wire intersects with itself and the intersection point is supplied, only
+        the first point when walking from the start to the end is used.
+
+        Parameters
+        ----------
+        point : mnt.Point3D
+            The point to split the wire at. Must lie on the wire.
+        container : Scene | Mobject, optional
+            If provided, the original wire is removed from ``container`` and the
+            two new wire portions and the node are added to it. **If not used, this
+            process will have to be completed manually.**
+
+        Returns
+        -------
+        tuple[Self, Node, Self]
+            A three-element tuple of ``(start_portion, node, end_portion)``.
+
+            * ``start_portion`` — the first half of the wire as a new object,
+              retaining the original start pin.
+            * ``node`` — the node inserted at the split point.
+            * ``end_portion`` — the second half of the wire as a new object,
+              retaining the original end pin.
+
+        Raises
+        ------
+        ValueError
+            If ``point`` does not lie on the wire.
+        """
+        all_vertices = self.get_all_vertices()
+        lengths = [
+            float(np.linalg.norm(b - a)) for a, b in itertools.pairwise(all_vertices)
+        ]
+
+        total_length = sum(lengths)
+        length_to_point = 0.0
+
+        for (start, end), length in zip(
+            itertools.pairwise(all_vertices), lengths, strict=True
+        ):
+            segment_vector = end - start
+            point_vector = point - start
+
+            if not np.allclose(np.cross(segment_vector, point_vector), 0):
+                length_to_point += length
+                continue
+
+            length_to_point += float(np.linalg.norm(point_vector))
+            break
+        else:
+            raise ValueError(f"The given point {point!r} does not lie on the wire.")
+
+        return self.split_at(length_to_point / total_length, container=container)
+
     def split_at_corner(
         self,
         index: int,
@@ -251,19 +312,8 @@ class Wire(WireBase):
                 f"Corner index {index!r} is out of range for a wire with "
                 f"{n_corners} corner(s)."
             )
-        index = index % n_corners
 
-        all_vertices = self.get_all_vertices()
-
-        cumulative = [0.0]
-        for i in range(len(all_vertices) - 1):
-            dist = float(np.linalg.norm(all_vertices[i + 1] - all_vertices[i]))
-            cumulative.append(cumulative[-1] + dist)
-        total = cumulative[-1]
-        # Bump index by one to skip over initial cumulative element with value 0
-        alpha = cumulative[1 + index] / total
-
-        return self.split_at(alpha, container=container)
+        return self.split_at_point(corner_points[index], container=container)
 
     def split_at_corners(
         self, container: mn.Scene | mn.Mobject | None = None
@@ -317,9 +367,8 @@ class Wire(WireBase):
         """Get the corner points of the wire.
 
         Returns the vertices of the wire, not including the points at which the wires
-        connect to the components themselves (i.e. the pin bases). Vertices for the pin
-        tips are only included where they would be visible corners (i.e. the pin is not
-        in a cardinal direction but the wire coming out of it is).
+        connect to the components themselves (i.e. the pin bases). Vertices are only
+        included where they would be visible corners.
 
         Returns
         -------
@@ -344,12 +393,14 @@ class Wire(WireBase):
             start_is_cardinal or start_proj <= self._start.length
         ) and (end_is_cardinal or end_proj <= self._end.length)
         # mn.find_intersection() returns p0s when the lines are parallel
-        parallel_but_pins_collinear = np.isclose(
-            np.dot(self._start.direction, self._end.direction), 0
-        ) and np.isclose(
-            np.dot(self._start.direction, self._start.base - self._end.base), 0
+        parallel_but_pins_collinear = np.allclose(
+            np.cross(self._start.direction, self._end.direction), 0
+        ) and np.allclose(
+            np.cross(self._start.direction, self._start.base - self._end.base), 0
         )
 
+        if parallel_but_pins_collinear:
+            return []
         if parallel_but_pins_collinear or (
             intersection_in_front and cardinal_or_intersection_in_pin
         ):
