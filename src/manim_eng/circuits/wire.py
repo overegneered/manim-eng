@@ -9,7 +9,6 @@ import numpy as np
 
 from manim_eng._utils import utils
 from manim_eng.circuits.base.wire import WireBase
-from manim_eng.circuits.node import Node
 from manim_eng.components.base.pin import Pin
 
 __all__ = ["ManualWire", "Wire"]
@@ -50,6 +49,53 @@ class ManualWire(WireBase):
     ):
         self._corner_points = list(corner_points) if corner_points is not None else []
         super().__init__(start, end, updating)
+
+    def on_split(
+        self, first_end: Pin, second_start: Pin, alpha: float
+    ) -> tuple[Self, Self]:
+        """Split this wire into two at the given arc-length proportion.
+
+        Parameters
+        ----------
+        first_end : Pin
+            The end of the first segment.
+        second_start : Pin
+            The start of the second segment.
+        alpha : float
+            How far along the wire it has been split.
+
+        Returns
+        -------
+        tuple[ManualWire, ManualWire]
+            The two segments the wire has been split into, in order from start to end.
+
+        Warnings
+        --------
+        This disregards all updaters, since it is impossible to know how they should be
+        copied over.
+        """
+        vertices = self.get_all_vertices()
+        lengths: list[float] = [0.0]
+        for start, end in itertools.pairwise(vertices):
+            segment_length = float(np.linalg.norm(end - start))
+            lengths.append(lengths[-1] + segment_length)
+
+        cumulative_lengths = np.array(lengths)
+        alpha_as_length = float(cumulative_lengths[-1]) * alpha
+        alpha_index = int(np.sum(cumulative_lengths < alpha_as_length))
+
+        # If the split falls exactly on an intermediate vertex, that vertex becomes the
+        # node and should not appear as a corner in either half.
+        at_vertex = alpha_index < len(cumulative_lengths) and bool(
+            np.isclose(alpha_as_length, cumulative_lengths[alpha_index])
+        )
+        start_corners = vertices[1:alpha_index]
+        end_corners = vertices[alpha_index + (1 if at_vertex else 0) : -1]
+
+        start_portion = ManualWire(self._start, first_end, start_corners)
+        end_portion = ManualWire(second_start, self._end, end_corners)
+
+        return start_portion, end_portion
 
     def get_corner_points(self) -> list[mnt.Point3D]:
         """Get the corner points of the wire.
@@ -107,261 +153,13 @@ class Wire(WireBase):
     def __init__(self, start: Pin, end: Pin) -> None:
         super().__init__(start, end, updating=True)
 
-    def split_at(
-        self,
-        alpha: float,
-        container: mn.Scene | mn.Mobject | None = None,
-    ) -> tuple[Self, Node, Self]:
-        """Split the wire a given point, inserting a node at the split point.
-
-        The direction of the wire is maintained.
-
-        If the wire has an active current arrow, it is automatically placed on
-        whichever half it geometrically falls on based on its current ``alpha``
-        value, and its ``alpha`` is remapped so that its visual position along
-        that half is unchanged. If the split is directly over the current arrow, the
-        segment for which the start is maintained is given it.
-
-        Parameters
-        ----------
-        alpha : float
-            The point to split the wire at, as a proportion of the wire length.
-        container : Scene | Mobject, optional
-            If provided, the original wire is removed from ``container`` and the
-            two new wire portions and the node are added to it. **If not used, this
-            process will have to be completed manually.**
-
-        Returns
-        -------
-        tuple[Self, Node, Self]
-            A three-element tuple of ``(start_portion, node, end_portion)``.
-
-            * ``start_portion`` — the first half of the wire as a new object,
-              retaining the original start pin.
-            * ``node`` — the node inserted at the split point.
-            * ``end_portion`` — the second half of the wire as a new object,
-              retaining the original end pin.
-
-        Raises
-        ------
-        ValueError
-            If ``alpha`` is not between 0 and 1 exclusive.
-
-        See Also
-        --------
-        split_at_corner
-        split_at_corners
-        """
-        if not (0 < alpha < 1):
-            raise ValueError(
-                f"`alpha` must be strictly between 0 and 1 (exclusive), got {alpha!r}."
-            )
-        epsilon = 1e-6
-        split_point = self.point_from_proportion(alpha)
-        towards_start = self.point_from_proportion(alpha - epsilon)
-        towards_end = self.point_from_proportion(alpha + epsilon)
-
-        current_is_active = self._current._triangle in self._current.submobjects
-        if current_is_active:
-            tex_strings = self._current._label.tex_strings
-            # tex_strings is set when the triangle is active
-            assert tex_strings is not None
-            current_label: str = tex_strings[0]
-            current_alpha: float = self._current._alpha
-            current_invert: bool = self._current._invert
-
-        self._start.detach_wire()
-        self._end.detach_wire()
-
-        node = Node().move_to(split_point)
-        start_portion = Wire(self._start, node.get(towards_start - split_point))
-        end_portion = Wire(node.get(towards_end - split_point), self._end)
-
-        if current_is_active:
-            # When invert=True, _alpha is measured from the end of the wire, so the
-            # true geometric position from the start is (1 - current_alpha).
-            geometric_pos = (1 - current_alpha) if current_invert else current_alpha
-
-            if geometric_pos <= alpha:
-                new_geom_alpha = geometric_pos / alpha
-                new_alpha = (1 - new_geom_alpha) if current_invert else new_geom_alpha
-                start_portion.current.set(
-                    label=current_label, alpha=new_alpha, invert=current_invert
-                )
-            else:
-                new_geom_alpha = (geometric_pos - alpha) / (1 - alpha)
-                new_alpha = (1 - new_geom_alpha) if current_invert else new_geom_alpha
-                end_portion.current.set(
-                    label=current_label, alpha=new_alpha, invert=current_invert
-                )
-
-        if container is not None:
-            container.remove(self)
-            container.add(start_portion, node, end_portion)
-
-        return start_portion, node, end_portion
-
-    def split_at_point(
-        self,
-        point: mnt.Point3D,
-        container: mn.Scene | mn.Mobject | None = None,
-    ) -> tuple[Self, Node, Self]:
-        """Split the wire at ``point`` and return the new resulting objects.
-
-        If the wire intersects with itself and the intersection point is supplied, only
-        the first point when walking from the start to the end is used.
-
-        Parameters
-        ----------
-        point : mnt.Point3D
-            The point to split the wire at. Must lie on the wire.
-        container : Scene | Mobject, optional
-            If provided, the original wire is removed from ``container`` and the
-            two new wire portions and the node are added to it. **If not used, this
-            process will have to be completed manually.**
-
-        Returns
-        -------
-        tuple[Self, Node, Self]
-            A three-element tuple of ``(start_portion, node, end_portion)``.
-
-            * ``start_portion`` — the first half of the wire as a new object,
-              retaining the original start pin.
-            * ``node`` — the node inserted at the split point.
-            * ``end_portion`` — the second half of the wire as a new object,
-              retaining the original end pin.
-
-        Raises
-        ------
-        ValueError
-            If ``point`` does not lie on the wire.
-        """
-        all_vertices = self.get_all_vertices()
-        lengths = [
-            float(np.linalg.norm(b - a)) for a, b in itertools.pairwise(all_vertices)
-        ]
-
-        total_length = sum(lengths)
-        length_to_point = 0.0
-
-        for (start, end), length in zip(
-            itertools.pairwise(all_vertices), lengths, strict=True
-        ):
-            segment_vector = end - start
-            point_vector = point - start
-
-            if not np.allclose(np.cross(segment_vector, point_vector), 0):
-                length_to_point += length
-                continue
-
-            length_to_point += float(np.linalg.norm(point_vector))
-            break
-        else:
-            raise ValueError(f"The given point {point!r} does not lie on the wire.")
-
-        return self.split_at(length_to_point / total_length, container=container)
-
-    def split_at_corner(
-        self,
-        index: int,
-        container: mn.Scene | mn.Mobject | None = None,
-    ) -> tuple[Self, Node, Self]:
-        """Split the wire at a single corner given by index.
-
-        Parameters
-        ----------
-        index : int
-            The index of the corner to split at. Supports negative indexing.
-            Corners are ordered from start to end, matching
-            :meth:`~.Wire.get_corner_points`.
-        container : Scene | Mobject, optional
-            If provided, the original wire is removed from ``container`` and the
-            two new wire portions and the node are added to it. **If not used, this
-            process will have to be completed manually.**
-
-        Returns
-        -------
-        tuple[Self, Node, Self]
-            A three-element tuple of ``(start_portion, node, end_portion)``.
-
-            * ``start_portion`` — the first half of the wire as a new object,
-              retaining the original start pin.
-            * ``node`` — the node inserted at the split point.
-            * ``end_portion`` — the second half of the wire as a new object,
-              retaining the original end pin.
-
-        Raises
-        ------
-        ValueError
-            If the wire has no corners.
-        IndexError
-            If ``index`` is out of range for the number of corners on the wire.
-
-        See Also
-        --------
-        split_at
-        split_at_corners
-        """
-        corner_points = self.get_corner_points()
-        n_corners = len(corner_points)
-
-        if n_corners == 0:
-            raise ValueError("This wire has no corners to split at.")
-        if not (-n_corners <= index < n_corners):
-            raise IndexError(
-                f"Corner index {index!r} is out of range for a wire with "
-                f"{n_corners} corner(s)."
-            )
-
-        return self.split_at_point(corner_points[index], container=container)
-
-    def split_at_corners(
-        self, container: mn.Scene | mn.Mobject | None = None
-    ) -> tuple[list[Self], list[Node]]:
-        """Split the wire at its visual corners except those at pin tips.
-
-        Splits the wire at the points given by :meth:`~.Wire.get_corner_points`.
-
-        Parameters
-        ----------
-        container : Scene | Mobject, optional
-            If provided, the original wire is removed from ``container`` and the new
-            wire portions and nodes are added to it. **If not used, this process will
-            have to be completed manually.**
-
-        Returns
-        -------
-        tuple[list[Self], list[Node]]
-            A two-element tuple containing:
-
-            * A list of new wire segments in order from start to end.
-            * A list of new nodes in order from start to end.
-
-        See Also
-        --------
-        split_at
-        split_at_corner
-        """
-        n_corners = len(self.get_corner_points())  # snapshot BEFORE any splits
-        if n_corners == 0:
-            return [self], []
-
-        segments: list[Self] = []
-        nodes: list[Node] = []
-        remaining = self
-
-        for _ in range(n_corners):
-            segment, node, remaining = remaining.split_at_corner(0)
-            segments.append(segment)
-            nodes.append(node)
-
-        segments.append(remaining)
-
-        if container is not None:
-            container.remove(self)
-            container.add(*segments, *nodes)
-
-        return segments, nodes
+    def on_split(
+        self, first_end: Pin, second_start: Pin, _alpha: float
+    ) -> tuple[Self, Self]:
+        """See :meth:`~.WireBase.on_split`."""
+        start_portion = Wire(self._start, first_end)
+        end_portion = Wire(second_start, self._end)
+        return start_portion, end_portion
 
     def get_corner_points(self) -> list[mnt.Point3D]:
         """Get the corner points of the wire.
