@@ -297,13 +297,13 @@ def test_get_point_closest_to_with_multiple_wires_selects_globally_closest() -> 
     assert result == pytest.approx([0.0, 0.0, 0.0])
 
 
-def test_get_point_closest_to_no_wires_single_pin_returns_pin_base() -> None:
+def test_get_point_closest_to_no_wires_single_pin_returns_pin_tip() -> None:
     pin = PinMockedParent(np.array([3.0, 4.0, 0.0]), mn.RIGHT)
     net = Network(pin)
 
     result = net.get_point_closest_to(np.array([0.0, 0.0, 0.0]))
 
-    assert result == pytest.approx(pin.base)
+    assert result == pytest.approx(pin.tip)
 
 
 def test_get_point_closest_to_no_wires_no_pins_empty_node_returns_node_center() -> None:
@@ -374,7 +374,7 @@ def test_get_closest_points_with_wire_finds_global_minimum_over_all_wires() -> N
     assert q[1] == pytest.approx(1.0)
 
 
-def test_get_closest_points_with_wire_no_wires_pin_only_uses_pin_base() -> None:
+def test_get_closest_points_with_wire_no_wires_pin_only_uses_pin_tip() -> None:
     pin = PinMockedParent(np.array([0.0, 0.0, 0.0]), mn.RIGHT)
     other_wire = _wire_from_vertices(
         [np.array([1.0, 1.0, 0.0]), np.array([3.0, 1.0, 0.0])]
@@ -383,8 +383,8 @@ def test_get_closest_points_with_wire_no_wires_pin_only_uses_pin_base() -> None:
 
     p, q = net.get_closest_points_with(other_wire)
 
-    assert p == pytest.approx(pin.base)
-    assert q == pytest.approx(other_wire.get_point_closest_to(pin.base))
+    assert p == pytest.approx(pin.tip)
+    assert q == pytest.approx(other_wire.get_point_closest_to(pin.tip))
 
 
 def test_get_closest_points_with_wire_no_wires_no_pins_just_node_uses_node_center() -> (
@@ -460,7 +460,7 @@ def test_get_closest_points_with_network_crossing_wires() -> None:
     assert q == pytest.approx([0.0, 0.0, 0.0])
 
 
-def test_get_closest_points_with_network_pin_only_uses_pin_base_for_self() -> None:
+def test_get_closest_points_with_network_pin_only_uses_pin_tip_for_self() -> None:
     pin = PinMockedParent(np.array([0.0, 0.0, 0.0]), mn.RIGHT)
     wire = _wire_from_vertices([np.array([1.0, 1.0, 0.0]), np.array([3.0, 1.0, 0.0])])
     net_pin = Network(pin)
@@ -468,10 +468,10 @@ def test_get_closest_points_with_network_pin_only_uses_pin_base_for_self() -> No
 
     p, _ = net_pin.get_closest_points_with(net_wire)
 
-    assert p == pytest.approx(pin.base)
+    assert p == pytest.approx(pin.tip)
 
 
-def test_get_closest_points_with_network_pin_only_uses_pin_base_for_other() -> None:
+def test_get_closest_points_with_network_pin_only_uses_pin_tip_for_other() -> None:
     pin = PinMockedParent(np.array([3.0, 0.0, 0.0]), mn.LEFT)
     wire = _wire_from_vertices([np.array([0.0, 0.0, 0.0]), np.array([1.0, 0.0, 0.0])])
     net_wire = Network(wire)
@@ -479,7 +479,7 @@ def test_get_closest_points_with_network_pin_only_uses_pin_base_for_other() -> N
 
     _, q = net_wire.get_closest_points_with(net_pin)
 
-    assert q == pytest.approx(pin.base)
+    assert q == pytest.approx(pin.tip)
 
 
 # ---------------------------------------------------------------------------

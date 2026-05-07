@@ -289,3 +289,53 @@ def test_get_corner_points_perpendicular_corner_is_in_front_of_both_pin_tips(
     corner = result[0]
     assert np.dot(corner - start.tip, cardinalised(start.direction)) >= 0
     assert np.dot(corner - end.tip, cardinalised(end.direction)) >= 0
+
+
+# collinear early-return guard ---------------------------------------------------------
+
+
+def test_get_corner_points_collinear_same_direction_pins_returns_empty() -> None:
+    # Collinear same-direction pins: the `collinear` guard fires even though pins don't
+    # face each other.
+    start = PinMockedParent(mn.ORIGIN, mn.RIGHT)
+    end = PinMockedParent(np.array([2.0, 0.0, 0.0]), mn.RIGHT)
+    wire = Wire(start, end)
+
+    result = wire.get_corner_points()
+
+    assert len(result) == 0
+
+
+def test_get_corner_points_collinear_reversed_same_dir_pins_returns_empty() -> None:
+    # Start is to the right of end; same direction, collinear — guard still fires.
+    start = PinMockedParent(np.array([3.0, 0.0, 0.0]), mn.RIGHT)
+    end = PinMockedParent(np.array([1.0, 0.0, 0.0]), mn.RIGHT)
+    wire = Wire(start, end)
+
+    result = wire.get_corner_points()
+
+    assert len(result) == 0
+
+
+def test_get_corner_points_parallel_offset_pins_do_not_early_return() -> None:
+    # Same direction but offset vertically: parallel but NOT collinear, early return
+    # is skipped and the routing helper is invoked.
+    start = PinMockedParent(mn.ORIGIN, mn.RIGHT)
+    end = PinMockedParent(np.array([2.0, 1.0, 0.0]), mn.RIGHT)
+    wire = Wire(start, end)
+
+    result = wire.get_corner_points()
+
+    assert len(result) > 0
+
+
+def test_get_corner_points_anti_parallel_offset_pins_do_not_early_return() -> None:
+    # Anti-parallel and offset vertically: parallel but NOT collinear, early return is
+    # skipped and the routing helper is invoked.
+    start = PinMockedParent(mn.ORIGIN, mn.RIGHT)
+    end = PinMockedParent(np.array([2.0, 1.0, 0.0]), mn.LEFT)
+    wire = Wire(start, end)
+
+    result = wire.get_corner_points()
+
+    assert len(result) > 0

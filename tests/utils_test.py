@@ -251,3 +251,117 @@ def test_closest_points_t_clamps_to_one() -> None:
 
     assert p == pytest.approx([0.5, 0.0, 0.0])
     assert q == pytest.approx([0.5, -2.0, 0.0])
+
+
+# --------------------------------------------------------------------------------------
+# are_parallel
+# --------------------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("vec_a", "vec_b", "expected"),
+    [
+        pytest.param([1, 0, 0], [2, 0, 0], True, id="same_direction"),
+        pytest.param([1, 0, 0], [-3, 0, 0], True, id="opposite_direction"),
+        pytest.param([1, 0, 0], [0, 1, 0], False, id="perpendicular"),
+        pytest.param([1, 1, 0], [2, 2, 0], True, id="diagonal_parallel"),
+        pytest.param([1, 1, 0], [1, -1, 0], False, id="diagonal_not_parallel"),
+        pytest.param([0, 0, 1], [0, 0, 5], True, id="3d_vectors"),
+        pytest.param([0, 0, 0], [1, 0, 0], True, id="zero_vector"),
+    ],
+)
+def test_are_parallel(
+    vec_a: list[float],
+    vec_b: list[float],
+    expected: bool,
+) -> None:
+    result = utils.are_parallel(np.array(vec_a), np.array(vec_b))
+
+    assert result == expected
+
+
+def test_are_parallel_nearly_parallel_returns_false() -> None:
+    # Cross product magnitude of 2e-8 is just outside np.allclose default atol of 1e-8.
+    vec_a = np.array([1.0, 0.0, 0.0])
+    vec_b = np.array([1.0, 2e-8, 0.0])
+
+    result = utils.are_parallel(vec_a, vec_b)
+
+    assert result is False
+
+
+# --------------------------------------------------------------------------------------
+# are_collinear
+# --------------------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("start", "direction", "target", "expected"),
+    [
+        pytest.param(
+            np.array([0, 0, 0]),
+            np.array([1, 0, 0]),
+            np.array([3, 0, 0]),
+            True,
+            id="point_on_line",
+        ),
+        pytest.param(
+            np.array([0, 0, 0]),
+            np.array([1, 0, 0]),
+            np.array([3, 1, 0]),
+            False,
+            id="point_off_line",
+        ),
+        pytest.param(
+            np.array([0, 0, 0]),
+            np.array([1, 0, 0]),
+            np.array([-2, 0, 0]),
+            True,
+            id="point_behind_start",
+        ),
+        pytest.param(
+            np.array([0, 0, 0]),
+            np.array([1, 0, 0]),
+            np.array([0, 0, 0]),
+            True,
+            id="point_is_start",
+        ),
+        pytest.param(
+            np.array([0, 0, 0]),
+            np.array([1, 1, 0]),
+            np.array([2, 2, 0]),
+            True,
+            id="diagonal_on_line",
+        ),
+        pytest.param(
+            np.array([0, 0, 0]),
+            np.array([1, 1, 0]),
+            np.array([2, 1, 0]),
+            False,
+            id="diagonal_off_line",
+        ),
+        pytest.param(
+            np.array([0, 0, 0]),
+            np.array([0, 0, 1]),
+            np.array([0, 0, 4]),
+            True,
+            id="3d_line_on",
+        ),
+        pytest.param(
+            np.array([0, 0, 0]),
+            np.array([0, 0, 1]),
+            np.array([1, 0, 4]),
+            False,
+            id="3d_line_off",
+        ),
+    ],
+)
+def test_are_collinear(
+    start: np.ndarray,
+    direction: np.ndarray,
+    target: np.ndarray,
+    expected: bool,
+) -> None:
+    result = utils.are_collinear(start, direction, target)
+
+    assert result == expected

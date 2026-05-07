@@ -191,3 +191,30 @@ def closest_point_on_line_segment_to_point(
     """
     closest_point, _ = closest_points_of_two_line_segments(start, end, point, point)
     return closest_point
+
+
+def are_parallel(vec_a: mnt.Vector3D, vec_b: mnt.Vector3D) -> bool:
+    """Return ``True`` if the vectors ``vec_a`` and ``vec_b`` are parallel."""
+    return np.allclose(np.cross(vec_a, vec_b), 0)  # type: ignore[no-any-return]
+
+
+def are_collinear(
+    start: mnt.Point3D, direction: mnt.Vector3D, target: mnt.Point3D
+) -> bool:
+    """Calculate whether a point ``target`` is colinear with a line.
+
+    Parameters
+    ----------
+    start : mnt.Point3D
+        A point on the line.
+    direction : mnt.Vector3D
+        The direction of the line.
+    target : mnt.Point3D
+        The point to check for colinearity.
+
+    Returns
+    -------
+    bool
+        ``True`` if the ``target`` is colinear with the line (``start``, ``direction``).
+    """
+    return are_parallel(start - target, direction)

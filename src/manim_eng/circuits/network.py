@@ -110,7 +110,7 @@ class Network:
         """Get the point in the network closest to ``point``.
 
         For networks without wires, pins are represented by their
-        :attr:`~.Pin.base` point and nodes by their centre.
+        :attr:`~.Pin.tip` and nodes by their centre.
 
         Raises
         ------
@@ -133,7 +133,7 @@ class Network:
         if len(self.wires) == 0:
             # No wires, therefore network consists of a single pin or node
             if len(self.pins) > 0:
-                closest_point = next(iter(self.pins)).base
+                closest_point = next(iter(self.pins)).tip
             elif len(self.nodes) > 0:
                 closest_point = next(iter(self.nodes)).get_center()
             else:
@@ -152,7 +152,7 @@ class Network:
             The other network or wire to find the closest point to.
 
         For networks without wires, pins are represented by their
-        :attr:`~.Pin.base` point and nodes by their centre.
+        :attr:`~.Pin.tip` point and nodes by their centre.
 
         Returns
         -------
@@ -183,7 +183,7 @@ class Network:
         if len(self.wires) == 0:
             # No wires, therefore network consists of a single pin or node
             if len(self.pins) > 0:
-                point = next(iter(self.pins)).base
+                point = next(iter(self.pins)).tip
             elif len(self.nodes) > 0:
                 point = next(iter(self.nodes)).get_center()
             else:

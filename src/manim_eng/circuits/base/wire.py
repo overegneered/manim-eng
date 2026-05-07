@@ -515,6 +515,21 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
         -----
         Uses the closest points of two line segments algorithm due to Ericson, as
         published in *Real-Time Collision Detection* (2005), §5.1.9.
+
+        Where multiple segments are of identical closeness, segments that are parallel
+        and not collinear are preferred. This is to produce the 'logical' closest
+        points. Consider the example below::
+
+            +---+       +---+
+                |       |
+                *       *
+                |       |
+            +---+       +---+
+
+        The points marked with asterisks ``*`` are those a human would generally pick if
+        connecting those two wires with another wire. Without the carve-out for
+        parallelism and non collinearity, the corners would be chosen due to the order
+        the line segments are iterated through.
         """
         best_point_self = mn.ORIGIN
         best_point_other = mn.ORIGIN
@@ -527,7 +542,16 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
                 )
                 vector = point_other - point_self
                 dist = np.dot(vector, vector)
-                if dist < best_dist:
+                segments_parallel = utils.are_parallel(
+                    self_segment[1] - self_segment[0],
+                    other_segment[1] - other_segment[0],
+                )
+                segments_collinear = utils.are_collinear(
+                    self_segment[0], self_segment[1] - self_segment[0], other_segment[0]
+                )
+                if dist < best_dist or (
+                    dist <= best_dist and segments_parallel and not segments_collinear
+                ):
                     best_point_self = point_self
                     best_point_other = point_other
                     best_dist = dist

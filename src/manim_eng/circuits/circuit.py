@@ -81,6 +81,11 @@ class Circuit(mn.VMobject):
 
         Two pins are considered to be in the same network if the circuit can be
         traversed from one pin to the other while only passing over wires or nodes.
+        See :class:`~.Network` for more details.
+
+        Connections are made using the automatically-routing :class:`~.Wire`. Splits
+        involving new :class:`~.Pin` placements will have their pins oriented so as to
+        minimise the number of vertices in wires.
 
         Parameters
         ----------
@@ -95,17 +100,9 @@ class Circuit(mn.VMobject):
         """
         self.__check_pins_all_belong_to_this_circuit(list(pins))
 
-        unique_pins = list(dict.fromkeys(pins))
+        unique_pins = list(set(pins))
         if len(unique_pins) < 2:  # noqa: PLR2004
             return self
-
-        # Connect pins/wires according to the following algorithm:
-        # 1. Connect the pair of objects (where an object is either a pin or a wire)
-        #    that are closest to each other (based on the distance that separates their
-        #    closest points) with a wire between their closest points
-        # 2. Remove the original pins from consideration, but add the new wire into
-        #    consideration
-        # 3. Repeat until no pins remain unconnected
 
         # Keep references to wires that have been split so that their __del__ doesn't
         # fire mid-call and detach pins that are now owned by the replacement wires.
@@ -118,8 +115,8 @@ class Circuit(mn.VMobject):
 
             best_net_a, best_net_b = networks[0], networks[1]
             best_dist = np.inf
-            best_pa: mnt.Point3D = mn.ORIGIN
-            best_pb: mnt.Point3D = mn.ORIGIN
+            best_point_a: mnt.Point3D = mn.ORIGIN
+            best_point_b: mnt.Point3D = mn.ORIGIN
 
             for net_a, net_b in itertools.combinations(networks, 2):
                 point_a, point_b = net_a.get_closest_points_with(net_b)
@@ -127,26 +124,42 @@ class Circuit(mn.VMobject):
                 if dist < best_dist:
                     best_dist = dist
                     best_net_a, best_net_b = net_a, net_b
-                    best_pa, best_pb = point_a, point_b
+                    best_point_a, best_point_b = point_a, point_b
 
-            pin_a = self.__get_or_create_pin_at_point(
-                best_pa,
-                best_net_a.pins,
-                best_net_a.wires,
-                toward=best_pb,
-                keep_alive=_keep_alive,
-            )
-            # TODO: determine if this is actually necessary
-            # Re-derive best_net_b in case the previous call split a wire and mutated
-            # the circuit (safe no-op when nothing changed).
-            best_net_b = next(iter(best_net_b.pins)).get_network()
-            pin_b = self.__get_or_create_pin_at_point(
-                best_pb,
-                best_net_b.pins,
-                best_net_b.wires,
-                toward=best_pa,
-                keep_alive=_keep_alive,
-            )
+            pin_a_maybe = self.__try_get_pin_at_point(best_point_a, best_net_a)
+            pin_b_maybe = self.__try_get_pin_at_point(best_point_b, best_net_b)
+
+            if pin_a_maybe is not None and pin_b_maybe is not None:
+                pin_a, pin_b = pin_a_maybe, pin_b_maybe
+            elif pin_a_maybe is not None and pin_b_maybe is None:
+                pin_a = pin_a_maybe
+                pin_b = self.__create_pin_at_point(
+                    best_point_b,
+                    best_net_b,
+                    guide=pin_a,
+                    keep_alive=_keep_alive,
+                )
+            elif pin_a_maybe is None and pin_b_maybe is not None:
+                pin_b = pin_b_maybe
+                pin_a = self.__create_pin_at_point(
+                    best_point_a,
+                    best_net_a,
+                    guide=pin_b,
+                    keep_alive=_keep_alive,
+                )
+            else:
+                pin_a = self.__create_pin_at_point(
+                    best_point_a,
+                    best_net_a,
+                    guide=best_point_b,
+                    keep_alive=_keep_alive,
+                )
+                pin_b = self.__create_pin_at_point(
+                    best_point_b,
+                    best_net_b,
+                    guide=best_point_a,
+                    keep_alive=_keep_alive,
+                )
 
             new_wire = Wire(pin_a, pin_b)
             new_wire._set_visible()
@@ -306,12 +319,19 @@ class Circuit(mn.VMobject):
             networks.append(network)
         return networks
 
-    def __get_or_create_pin_at_point(
+    @staticmethod
+    def __try_get_pin_at_point(point: mnt.Point3D, network: Network) -> Pin | None:
+        """Try to find a pin in ``network`` with its tip at ``point``."""
+        for pin in network.pins:
+            if not pin.wire_currently_attached() and np.allclose(pin.tip, point):
+                return pin
+        return None
+
+    def __create_pin_at_point(
         self,
         point: mnt.Point3D,
-        net_pins: set[Pin],
-        net_wires: set[WireBase],
-        toward: mnt.Point3D,
+        net: Network,
+        guide: mnt.Point3D | Pin,
         keep_alive: list[WireBase],
     ) -> Pin:
         """Return a free pin at ``point``, splitting a wire there if necessary.
@@ -321,13 +341,13 @@ class Circuit(mn.VMobject):
         point : Point3D
             The target point, which must be either a free pin tip or a point on one
             of the wires in the network.
-        net_pins : set[Pin]
-            All pins in the network.
-        net_wires : set[WireBase]
-            All wires in the network.
-        toward : Point3D
-            The point on the *other* network being connected; used to choose the
-            outward direction of the node pin when a wire is split.
+        net : Network
+            The network that `point` sits on.
+        guide : Point3D | Pin
+            The guide to use to direct the new pin. If a ``Point3D``, the pin will face
+            the nearest cardinal direction to that point. If a ``Pin``, the pin will
+            face the cardinal direction that minimises the number of vertices required
+            to make the wire.
         keep_alive : list[WireBase]
             Accumulator for wires that have been removed from the circuit.  Keeping
             a reference here prevents their ``__del__`` from firing before the new
@@ -341,13 +361,23 @@ class Circuit(mn.VMobject):
         Raises
         ------
         RuntimeError
-            If ``point`` cannot be matched to a free pin tip or a wire segment.
+            If ``point`` cannot be matched to a free pin or a wire segment.
         """
-        for pin in net_pins:
-            if not pin.wire_currently_attached() and np.allclose(pin.base, point):
-                return pin
+        if isinstance(guide, Pin):
+            vec_to_guide = guide.tip - point
+            coincident = np.allclose(np.cross(vec_to_guide, guide.direction), 0)
+            if coincident:
+                direction = vec_to_guide
+            else:
+                guide_dir = utils.cardinalised(guide.direction)
+                direct_vec = guide.tip - point
+                direction = np.cross(guide_dir, mn.OUT)
+                if direction.dot(direct_vec) < 0:
+                    direction *= -1
+        else:
+            direction = utils.cardinalised(guide - point)
 
-        for wire in net_wires:
+        for wire in net.wires:
             start_portion, node, end_portion = wire.split_at_point(point)
             keep_alive.append(wire)
             self.wires.remove(wire)
@@ -356,11 +386,11 @@ class Circuit(mn.VMobject):
             end_portion._set_visible()
             self.add(node)
             self.nodes.update()
-            direction = utils.cardinalised(toward - node.get_center())
             return node.get(direction)
 
         raise RuntimeError(
-            f"Could not locate a free pin or wire at point {point!r} in the network."
+            f"Could not create pin on at point {point!r} on the network: could not find"
+            f" wire intersection for given point."
         )
 
     @mn.override_animate(add)
