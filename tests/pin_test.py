@@ -187,16 +187,16 @@ def test_get_network_square_loop_topology() -> None:
     assert nodes == {n1, n2, n3, n4}
 
 
-def test_get_network_node_with_unattached_pin_not_included() -> None:
+def test_get_network_node_with_unattached_pin_included() -> None:
     # Node has a left pin attached to a wire, and a right pin (sibling) that is not.
     pin_a = PinMockedParent()
     node = Node()
-    _node_unattached = node.get(mn.UP + 2 * mn.LEFT)
+    pin_unattached = node.get(mn.UP + 2 * mn.LEFT)
 
     wire = ManualWire(pin_a, node.left)
     pins, wires, nodes = pin_a.get_network()
-    # The unattached sibling node_right must not be in the network.
-    assert pins == {pin_a, node.left}
+    # The unattached sibling node_right should be in the network.
+    assert pins == {pin_a, node.left, pin_unattached}
     assert wires == {wire}
     assert nodes == {node}
 

@@ -18,10 +18,12 @@ class Network:
 
     The network is formed by following wires and nodes, starting from the given pin,
     wire, or node. It is essentially the parts of wiring that, according to circuit
-    theory, would have the same voltage.
+    theory, would have the same voltage. Note however that this does **not** follow
+    components like :class:`~.Switch`es — this is primarily a utility for wiring
+    management, not part of a circuit simulation system.
 
-    While following nodes, only pins that for an active part of the network are
-    included (i.e. pins that have wires attached to themselves).
+    While following nodes, all pins attached to that node are included in
+    :attr:`~.Network.pins` (unless ``exclude_nodal_pins`` is ``True``).
 
     **No guarantees** are made about the ordering of the collections returned.
 
@@ -29,7 +31,7 @@ class Network:
 
     Parameters
     ----------
-    start : Pin | WireBase
+    start : Pin | WireBase | Node
         The pin, wire, or node to start from.
     exclude_nodal_pins: bool
         If set to ``True``, pins attached to nodes will **not** be included in
@@ -59,14 +61,12 @@ class Network:
         self.wires: set[WireBase] = set()
         self.nodes: set[Node] = set()
 
-        stack: list[Pin] = []
-
         if isinstance(start, Pin):
             pin = start
         elif isinstance(start, WireBase):
             pin = start.start
         elif isinstance(start, Node):
-            if len(start.pins) > 0:
+            if len(start.pins) > 0 and not exclude_nodal_pins:
                 pin = start.pins[0]
             else:
                 self.nodes.add(start)
@@ -77,12 +77,11 @@ class Network:
                 "`ManualWire`), or `Node`."
             )
 
-        self.pins.add(pin)
-        stack.append(pin)
+        self.__build_network(exclude_nodal_pins, pin)
 
-        self.__build_network(exclude_nodal_pins, stack)
-
-    def __build_network(self, exclude_nodal_pins: bool, stack: list[Pin]) -> None:
+    def __build_network(self, exclude_nodal_pins: bool, start: Pin) -> None:
+        self.pins.add(start)
+        stack: list[Pin] = [start]
         while len(stack) > 0:
             current = stack.pop()
             if isinstance(current.parent, Node) and current.parent not in self.nodes:
@@ -90,8 +89,7 @@ class Network:
                 self.nodes.add(node)
                 for sibling in node.pins:
                     if sibling not in self.pins:
-                        if not exclude_nodal_pins:
-                            self.pins.add(sibling)
+                        self.pins.add(sibling)
                         stack.append(sibling)
 
             wire = current.attached_wire
@@ -104,8 +102,21 @@ class Network:
                     self.pins.add(other_end)
                     stack.append(other_end)
 
+        if exclude_nodal_pins:
+            for node in self.nodes:
+                self.pins.difference_update(node.pins)
+
     def get_point_closest_to(self, point: mnt.Point3D | Pin) -> mnt.Point3D:
-        """Get the point in the network closest to ``point``."""
+        """Get the point in the network closest to ``point``.
+
+        For networks without wires, pins are represented by their
+        :attr:`~.Pin.base` point and nodes by their centre.
+
+        Raises
+        ------
+        ValueError
+            If the network is empty (no wires, pins, or nodes).
+        """
         if isinstance(point, Pin):
             point = point.tip
 
@@ -125,6 +136,8 @@ class Network:
                 closest_point = next(iter(self.pins)).base
             elif len(self.nodes) > 0:
                 closest_point = next(iter(self.nodes)).get_center()
+            else:
+                raise ValueError("Cannot find closest point: network is empty.")
 
         return closest_point
 
@@ -138,11 +151,19 @@ class Network:
         other: Network | WireBase
             The other network or wire to find the closest point to.
 
+        For networks without wires, pins are represented by their
+        :attr:`~.Pin.base` point and nodes by their centre.
+
         Returns
         -------
         tuple[Point3D, Point3D]
             A tuple containing the pair of closest points, with the one for this network
             first and the one for the other network or wire second.
+
+        Raises
+        ------
+        ValueError
+            If this network is empty (no wires, pins, or nodes).
         """
         closest_points: tuple[mnt.Point3D, mnt.Point3D] = (mn.ORIGIN, mn.ORIGIN)
         sq_distance: float = np.inf
@@ -165,6 +186,8 @@ class Network:
                 point = next(iter(self.pins)).base
             elif len(self.nodes) > 0:
                 point = next(iter(self.nodes)).get_center()
+            else:
+                raise ValueError("Cannot find closest points: network is empty.")
             closest_points = (point, other.get_point_closest_to(point))
 
         return closest_points
