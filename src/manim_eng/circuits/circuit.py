@@ -1,9 +1,15 @@
 """Contains the Circuit class."""
 
+import itertools
 from typing import Any, Callable, Self, Sequence, cast
 
 import manim as mn
+import manim.typing as mnt
+import numpy as np
 
+from manim_eng._utils import utils
+from manim_eng.circuits.base import WireBase
+from manim_eng.circuits.network import Network
 from manim_eng.circuits.node import Node
 from manim_eng.circuits.wire import Wire
 from manim_eng.components.base.component import Component
@@ -66,30 +72,87 @@ class Circuit(mn.VMobject):
         self.components.remove(*components)
         return self
 
-    def connect(self, start: Pin, end: Pin) -> Self:
-        """Connect two pins together.
+    def connect(self, *pins: Pin) -> Self:
+        """Connect a set of pins together.
+
+        The pins are connected by creating wires between the networks attached to each
+        pin. Wires are added between the closest points of the two closest networks
+        until all pins in ``pins`` are in the same network.
+
+        Two pins are considered to be in the same network if the circuit can be
+        traversed from one pin to the other while only passing over wires or nodes.
 
         Parameters
         ----------
-        start : Pin
-            The pin the connecting wire should start at.
-        end : Pin
-            The pin the connecting wire should end at.
+        *pins : Pin
+            The pins to connect. Will be deduplicated internally. If there are fewer
+            than two unique pins present, this method does nothing.
 
         Raises
         ------
         ValueError
-            If the two pins passed are identical.
-        ValueError
-            If either pin doesn't belong to a component in this circuit.
+            If any of the pins don't belong to a component in this circuit.
         """
-        self.__check_pins_all_belong_to_this_circuit([start, end])
-        wire = Wire(start, end)
-        wire._set_visible()
-        self.wires.add(wire)
-        # Nodes will potentially change their appearance on wire attachment using an
-        # updater, but it needs kicking into gear
-        self.nodes.update()
+        self.__check_pins_all_belong_to_this_circuit(list(pins))
+
+        unique_pins = list(dict.fromkeys(pins))
+        if len(unique_pins) < 2:  # noqa: PLR2004
+            return self
+
+        # Connect pins/wires according to the following algorithm:
+        # 1. Connect the pair of objects (where an object is either a pin or a wire)
+        #    that are closest to each other (based on the distance that separates their
+        #    closest points) with a wire between their closest points
+        # 2. Remove the original pins from consideration, but add the new wire into
+        #    consideration
+        # 3. Repeat until no pins remain unconnected
+
+        # Keep references to wires that have been split so that their __del__ doesn't
+        # fire mid-call and detach pins that are now owned by the replacement wires.
+        _keep_alive: list[WireBase] = []
+
+        while True:
+            networks = self.__partition_into_networks(unique_pins)
+            if len(networks) <= 1:
+                break
+
+            best_net_a, best_net_b = networks[0], networks[1]
+            best_dist = np.inf
+            best_pa: mnt.Point3D = mn.ORIGIN
+            best_pb: mnt.Point3D = mn.ORIGIN
+
+            for net_a, net_b in itertools.combinations(networks, 2):
+                point_a, point_b = net_a.get_closest_points_with(net_b)
+                dist = float(np.linalg.norm(point_b - point_a))
+                if dist < best_dist:
+                    best_dist = dist
+                    best_net_a, best_net_b = net_a, net_b
+                    best_pa, best_pb = point_a, point_b
+
+            pin_a = self.__get_or_create_pin_at_point(
+                best_pa,
+                best_net_a.pins,
+                best_net_a.wires,
+                toward=best_pb,
+                keep_alive=_keep_alive,
+            )
+            # TODO: determine if this is actually necessary
+            # Re-derive best_net_b in case the previous call split a wire and mutated
+            # the circuit (safe no-op when nothing changed).
+            best_net_b = next(iter(best_net_b.pins)).get_network()
+            pin_b = self.__get_or_create_pin_at_point(
+                best_pb,
+                best_net_b.pins,
+                best_net_b.wires,
+                toward=best_pa,
+                keep_alive=_keep_alive,
+            )
+
+            new_wire = Wire(pin_a, pin_b)
+            new_wire._set_visible()
+            self.wires.add(new_wire)
+            self.nodes.update()
+
         return self
 
     def disconnect(self, *components_or_pins: Component | Pin) -> Self:
@@ -220,46 +283,85 @@ class Circuit(mn.VMobject):
                 f"{[tuple(pin.tip) for pin in pins_not_owned]}"
             )
 
-    def _get_connections_for_pin(
-        self, pin: Pin, existing: set[Pin] | None = None
-    ) -> set[Pin]:
-        """Get a full set of pins connected to this pin, including the original pin.
-
-        The returned set has all pins *logically* connected to ``pin``, i.e. direct
-        connections and any component connected to any pin on a connected
-        :class:`~.Node`.
+    def __partition_into_networks(self, pins: list[Pin]) -> list[Network]:
+        """Partition ``pins`` into groups that are already connected to each other.
 
         Parameters
         ----------
-        pin : Pin
-            The pin to base the search off.
+        pins : list[Pin]
+            The pins to partition.
 
         Returns
         -------
-        set[Pin]
-            All pins on the connection network the pin is a member of, including the pin
-            itself.
+        list[Network]
+            The networks the pins belong to.
         """
-        if pin.other_end is None:
-            return set()
+        networks: list[Network] = []
+        seen: set[Pin] = set()
+        for pin in pins:
+            if pin in seen:
+                continue
+            network = pin.get_network()
+            seen.update(network.pins)
+            networks.append(network)
+        return networks
 
-        other_end = pin.other_end
+    def __get_or_create_pin_at_point(
+        self,
+        point: mnt.Point3D,
+        net_pins: set[Pin],
+        net_wires: set[WireBase],
+        toward: mnt.Point3D,
+        keep_alive: list[WireBase],
+    ) -> Pin:
+        """Return a free pin at ``point``, splitting a wire there if necessary.
 
-        end_component = other_end.parent
-        if not isinstance(end_component, Node):
-            return {pin, other_end}
+        Parameters
+        ----------
+        point : Point3D
+            The target point, which must be either a free pin tip or a point on one
+            of the wires in the network.
+        net_pins : set[Pin]
+            All pins in the network.
+        net_wires : set[WireBase]
+            All wires in the network.
+        toward : Point3D
+            The point on the *other* network being connected; used to choose the
+            outward direction of the node pin when a wire is split.
+        keep_alive : list[WireBase]
+            Accumulator for wires that have been removed from the circuit.  Keeping
+            a reference here prevents their ``__del__`` from firing before the new
+            wires and node have been fully set up.
 
-        if existing is None:
-            existing = {pin}
+        Returns
+        -------
+        Pin
+            A free pin located at ``point``.
 
-        for end_pin in end_component.pins:
-            if end_pin not in existing:
-                existing.add(end_pin)
-                existing.update(
-                    self._get_connections_for_pin(end_pin, existing=existing)
-                )
+        Raises
+        ------
+        RuntimeError
+            If ``point`` cannot be matched to a free pin tip or a wire segment.
+        """
+        for pin in net_pins:
+            if not pin.wire_currently_attached() and np.allclose(pin.base, point):
+                return pin
 
-        return existing
+        for wire in net_wires:
+            start_portion, node, end_portion = wire.split_at_point(point)
+            keep_alive.append(wire)
+            self.wires.remove(wire)
+            self.wires.add(start_portion, end_portion)
+            start_portion._set_visible()
+            end_portion._set_visible()
+            self.add(node)
+            self.nodes.update()
+            direction = utils.cardinalised(toward - node.get_center())
+            return node.get(direction)
+
+        raise RuntimeError(
+            f"Could not locate a free pin or wire at point {point!r} in the network."
+        )
 
     @mn.override_animate(add)
     def __animate_add(
@@ -284,25 +386,6 @@ class Circuit(mn.VMobject):
         return mn.AnimationGroup(
             *[mn.Uncreate(component, **anim_args) for component in components]
         )
-
-    @mn.override_animate(connect)
-    def __animate_connect(
-        self,
-        start: Pin,
-        end: Pin,
-        anim_args: dict[str, Any] | None = None,
-    ) -> mn.Animation:
-        if anim_args is None:
-            anim_args = {}
-
-        self.__check_pins_all_belong_to_this_circuit([start, end])
-        new_wire = Wire(start, end)
-        self.wires.add(new_wire)
-        animation = mn.Create(new_wire, **anim_args)
-        # This call has to be here so that the wire is properly attached when the update
-        # is done
-        self.nodes.update()
-        return animation
 
     @mn.override_animate(disconnect)
     def __animate_disconnect(

@@ -245,7 +245,7 @@ def test_get_connected_pins_t_junction_with_node_exclude() -> None:
     _wire2 = ManualWire(pin_b, node.right)
     _wire3 = ManualWire(pin_c, node.up)
 
-    assert pin_a.get_connected_pins(exclude_nodes=True) == {pin_a, pin_b, pin_c}
+    assert pin_a.get_connected_pins(exclude_nodal_pins=True) == {pin_a, pin_b, pin_c}
 
 
 def test_get_connected_pins_t_junction_with_node_exclude_and_self_exclude() -> None:
@@ -262,7 +262,7 @@ def test_get_connected_pins_t_junction_with_node_exclude_and_self_exclude() -> N
     _wire2 = ManualWire(pin_b, node.right)
     _wire3 = ManualWire(pin_c, node.up)
 
-    assert pin_a.get_connected_pins(exclude_self=True, exclude_nodes=True) == {
+    assert pin_a.get_connected_pins(exclude_self=True, exclude_nodal_pins=True) == {
         pin_b,
         pin_c,
     }

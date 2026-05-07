@@ -190,18 +190,14 @@ class Wire(WireBase):
         cardinal_or_intersection_in_pin = (
             start_is_cardinal or start_proj <= self._start.length
         ) and (end_is_cardinal or end_proj <= self._end.length)
-        # mn.find_intersection() returns p0s when the lines are parallel
-        parallel_but_pins_collinear = np.allclose(
-            np.cross(self._start.direction, self._end.direction), 0
-        ) and np.allclose(
-            np.cross(self._start.direction, self._start.base - self._end.base), 0
+        parallel = np.allclose(np.cross(self._start.direction, self._end.direction), 0)
+        collinear_and_facing_one_another = np.allclose(
+            np.cross(self._start.direction, self._end.base - self._start.base), 0
         )
 
-        if parallel_but_pins_collinear:
+        if parallel and collinear_and_facing_one_another:
             return []
-        if parallel_but_pins_collinear or (
-            intersection_in_front and cardinal_or_intersection_in_pin
-        ):
+        if not parallel and intersection_in_front and cardinal_or_intersection_in_pin:
             return [intersection]
 
         from_direction = utils.cardinalised(self._start.direction)

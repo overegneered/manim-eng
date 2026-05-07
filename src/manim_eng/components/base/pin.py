@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Self, cast
+from typing import TYPE_CHECKING, Any, Self
 
 import manim as mn
 import manim.typing as mnt
@@ -15,6 +15,7 @@ from manim_eng.circuits.current import CurrentArrow
 
 if TYPE_CHECKING:
     from manim_eng.circuits.base.wire import WireBase
+    from manim_eng.circuits.network import Network
     from manim_eng.circuits.node import Node
     from manim_eng.components.base.component import Component
 
@@ -41,7 +42,7 @@ class Pin(Markable):
         self,
         position: mnt.Point3D,
         direction: mnt.Vector3D,
-        parent: "Component",
+        parent: Component,
         length: float | None = None,
     ):
         super().__init__()
@@ -118,7 +119,7 @@ class Pin(Markable):
             raise AttributeError("No wire attached to this pin.")
         return self._attached_wire.current
 
-    def get_network(self) -> tuple[set[Pin], set[WireBase], set[Node]]:
+    def get_network(self, *args: Any, **kwargs: Any) -> Network:
         """Get the wire network this pin is part of.
 
         The network is formed by following wires and nodes, starting from this pin. It
@@ -130,12 +131,18 @@ class Pin(Markable):
 
         **No guarantees** are made about the ordering of the collections returned.
 
+        Parameters
+        ----------
+        *args : Any
+            Positional arguments passed to :class:`~.Network`'s constructor.
+        **kwargs : Any
+            Keyword arguments passed to :class:`~.Network`'s constructor.
+
         Returns
         -------
-        tuple[list[Self], list[WireBase], list[Node]]
-            A tuple containing lists of: all pins reachable from this pin, **including
-            the current pin**; the wires that connect these pins; and the nodes that
-            join the wire segments together.
+        Network
+            A ``Network`` object containing all pins, wires, and nodes logically
+            reachable from this pin. Includes this pin.
 
         See Also
         --------
@@ -144,38 +151,12 @@ class Pin(Markable):
         get_connected_nodes
         """
         # Import has to be here to avoid circular import
-        from manim_eng.circuits.node import Node  # noqa: PLC0415
+        from manim_eng.circuits.network import Network  # noqa: PLC0415
 
-        pins: set[Pin] = {self}
-        wires: set[WireBase] = set()
-        nodes: set[Node] = set()
-
-        stack: list[Pin] = [self]
-
-        while len(stack) > 0:
-            current = stack.pop()
-
-            if isinstance(current.parent, Node) and current.parent not in nodes:
-                node = current.parent
-                nodes.add(node)
-                for sibling in node.connected_pins:
-                    if sibling not in pins:
-                        pins.add(sibling)
-                        stack.append(sibling)
-
-            wire = current.attached_wire
-            if wire is not None and wire not in wires:
-                wires.add(wire)
-                # Since a wire is attached, other_end must exist
-                other_end = cast(Pin, current.other_end)
-                if other_end not in pins:
-                    pins.add(other_end)
-                    stack.append(other_end)
-
-        return pins, wires, nodes
+        return Network(self, *args, **kwargs)
 
     def get_connected_pins(
-        self, exclude_nodes: bool = False, exclude_self: bool = False
+        self, exclude_nodal_pins: bool = False, exclude_self: bool = False
     ) -> set[Pin]:
         """Get the pins connected electrically to this pin.
 
@@ -184,7 +165,7 @@ class Pin(Markable):
 
         Parameters
         ----------
-        exclude_nodes : bool, optional
+        exclude_nodal_pins : bool, optional
             If set to ``True``, pins attached to nodes traversed will be excluded from
             the returned set.
         exclude_self : bool, optional
@@ -203,10 +184,7 @@ class Pin(Markable):
         get_connected_wires
         get_connected_nodes
         """
-        pins, _, nodes = self.get_network()
-        if exclude_nodes:
-            for node in nodes:
-                pins = pins.difference(node.pins)
+        pins = self.get_network(exclude_nodal_pins=exclude_nodal_pins).pins
         if exclude_self:
             pins.remove(self)
         return pins
@@ -228,8 +206,7 @@ class Pin(Markable):
         get_connected_pins
         get_connected_nodes
         """
-        _, wires, _ = self.get_network()
-        return wires
+        return self.get_network().wires
 
     def get_connected_nodes(self) -> set[Node]:
         """Get the nodes connected electrically to this pin.
@@ -248,8 +225,7 @@ class Pin(Markable):
         get_connected_wires
         get_connected_nodes
         """
-        _, _, nodes = self.get_network()
-        return nodes
+        return self.get_network().nodes
 
     def attach_wire(self, wire: "WireBase") -> Self:
         """Register that a wire is attached to this pin.

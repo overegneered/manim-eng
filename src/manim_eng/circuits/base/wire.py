@@ -123,6 +123,11 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
         return self._end
 
     @property
+    def pins(self) -> tuple[Pin, Pin]:
+        """The pins connected to the wire."""
+        return self.start, self.end
+
+    @property
     def current(self) -> CurrentArrow:
         """A current arrow attached to the wire."""
         return self._current
