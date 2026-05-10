@@ -74,7 +74,6 @@ class _UnwriteWire(_WireHideMixin, mn.Unwrite): ...
 class _ShrinkToCenterWire(_WireHideMixin, mn.ShrinkToCenter): ...
 
 
-# TODO: make this a subclass of Markable to move the label control stuff into it
 class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
     """Base class for wire objects.
 
