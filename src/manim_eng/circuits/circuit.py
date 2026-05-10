@@ -98,74 +98,14 @@ class Circuit(mn.VMobject):
         ValueError
             If any of the pins don't belong to a component in this circuit.
         """
-        self.__check_pins_all_belong_to_this_circuit(list(pins))
+        new_wires, new_nodes = self.__core_connect_logic(*pins)
 
-        unique_pins = list(set(pins))
-        if len(unique_pins) < 2:  # noqa: PLR2004
-            return self
-
-        # Keep references to wires that have been split so that their __del__ doesn't
-        # fire mid-call and detach pins that are now owned by the replacement wires.
-        _keep_alive: list[WireBase] = []
-
-        while True:
-            networks = self.__partition_into_networks(unique_pins)
-            if len(networks) <= 1:
-                break
-
-            best_net_a, best_net_b = networks[0], networks[1]
-            best_dist = np.inf
-            best_point_a: mnt.Point3D = mn.ORIGIN
-            best_point_b: mnt.Point3D = mn.ORIGIN
-
-            for net_a, net_b in itertools.combinations(networks, 2):
-                point_a, point_b = net_a.get_closest_points_with(net_b)
-                dist = float(np.linalg.norm(point_b - point_a))
-                if dist < best_dist:
-                    best_dist = dist
-                    best_net_a, best_net_b = net_a, net_b
-                    best_point_a, best_point_b = point_a, point_b
-
-            pin_a_maybe = self.__try_get_pin_at_point(best_point_a, best_net_a)
-            pin_b_maybe = self.__try_get_pin_at_point(best_point_b, best_net_b)
-
-            if pin_a_maybe is not None and pin_b_maybe is not None:
-                pin_a, pin_b = pin_a_maybe, pin_b_maybe
-            elif pin_a_maybe is not None and pin_b_maybe is None:
-                pin_a = pin_a_maybe
-                pin_b = self.__create_pin_at_point(
-                    best_point_b,
-                    best_net_b,
-                    guide=pin_a,
-                    keep_alive=_keep_alive,
-                )
-            elif pin_a_maybe is None and pin_b_maybe is not None:
-                pin_b = pin_b_maybe
-                pin_a = self.__create_pin_at_point(
-                    best_point_a,
-                    best_net_a,
-                    guide=pin_b,
-                    keep_alive=_keep_alive,
-                )
-            else:
-                pin_a = self.__create_pin_at_point(
-                    best_point_a,
-                    best_net_a,
-                    guide=best_point_b,
-                    keep_alive=_keep_alive,
-                )
-                pin_b = self.__create_pin_at_point(
-                    best_point_b,
-                    best_net_b,
-                    guide=best_point_a,
-                    keep_alive=_keep_alive,
-                )
-
-            new_wire = Wire(pin_a, pin_b)
-            new_wire._set_visible()
-            self.wires.add(new_wire)
-            self.nodes.update()
-
+        for wire in new_wires:
+            self.wires.add(wire)
+            wire._set_visible()
+        for node in new_nodes:
+            self.nodes.add(node)
+        self.nodes.update()
         return self
 
     def disconnect(self, *components_or_pins: Component | Pin) -> Self:
@@ -296,6 +236,107 @@ class Circuit(mn.VMobject):
                 f"{[tuple(pin.tip) for pin in pins_not_owned]}"
             )
 
+    def __core_connect_logic(self, *pins: Pin) -> tuple[set[WireBase], set[Node]]:
+        """Perform the circuit connection logic, returning the resulting new objects.
+
+        Parameters
+        ----------
+        *pins : Pin
+            The pins to connect. Will be deduplicated internally.
+
+        Returns
+        -------
+        tuple[set[WireBase], set[Node]]
+            A tuple containing visually new wires created and new nodes created.
+            'Visually new' means that wires not created as part of this connection
+            session that were split into two new wires will *not* have these two new
+            wires included in the returned set of wires. This is because the change is
+            seamless, and including it would lead to this being animated, leading to
+            visual glitches. New nodes are always included as they are always visible.
+
+        See Also
+        --------
+        connect
+        __create_pin_at_point
+        """
+        self.__check_pins_all_belong_to_this_circuit(list(pins))
+
+        unique_pins = list(set(pins))
+        if len(unique_pins) < 2:  # noqa: PLR2004
+            return set(), set()
+
+        wires_created_this_session: set[WireBase] = set()
+        nodes_created_this_session: set[Node] = set()
+
+        # Keep references to wires that have been split so that their __del__ doesn't
+        # fire mid-call and detach pins that are now owned by the replacement wires.
+        _keep_alive: list[WireBase] = []
+
+        while True:
+            networks = self.__partition_into_networks(unique_pins)
+            if len(networks) <= 1:
+                break
+
+            best_net_a, best_net_b = networks[0], networks[1]
+            best_dist = np.inf
+            best_point_a: mnt.Point3D = mn.ORIGIN
+            best_point_b: mnt.Point3D = mn.ORIGIN
+
+            for net_a, net_b in itertools.combinations(networks, 2):
+                point_a, point_b = net_a.get_closest_points_with(net_b)
+                dist = float(np.linalg.norm(point_b - point_a))
+                if dist < best_dist:
+                    best_dist = dist
+                    best_net_a, best_net_b = net_a, net_b
+                    best_point_a, best_point_b = point_a, point_b
+
+            pin_a_maybe = self.__try_get_pin_at_point(best_point_a, best_net_a)
+            pin_b_maybe = self.__try_get_pin_at_point(best_point_b, best_net_b)
+
+            if pin_a_maybe is not None and pin_b_maybe is not None:
+                pin_a, pin_b = pin_a_maybe, pin_b_maybe
+            elif pin_a_maybe is not None and pin_b_maybe is None:
+                pin_a = pin_a_maybe
+                pin_b = self.__create_pin_at_point(
+                    best_point_b,
+                    best_net_b,
+                    guide=pin_a,
+                    keep_alive=_keep_alive,
+                    wires_created_this_session=wires_created_this_session,
+                    nodes_created_this_session=nodes_created_this_session,
+                )
+            elif pin_a_maybe is None and pin_b_maybe is not None:
+                pin_b = pin_b_maybe
+                pin_a = self.__create_pin_at_point(
+                    best_point_a,
+                    best_net_a,
+                    guide=pin_b,
+                    keep_alive=_keep_alive,
+                    wires_created_this_session=wires_created_this_session,
+                    nodes_created_this_session=nodes_created_this_session,
+                )
+            else:
+                pin_a = self.__create_pin_at_point(
+                    best_point_a,
+                    best_net_a,
+                    guide=best_point_b,
+                    keep_alive=_keep_alive,
+                    wires_created_this_session=wires_created_this_session,
+                    nodes_created_this_session=nodes_created_this_session,
+                )
+                pin_b = self.__create_pin_at_point(
+                    best_point_b,
+                    best_net_b,
+                    guide=best_point_a,
+                    keep_alive=_keep_alive,
+                    wires_created_this_session=wires_created_this_session,
+                    nodes_created_this_session=nodes_created_this_session,
+                )
+
+            wires_created_this_session.add(Wire(pin_a, pin_b))
+
+        return wires_created_this_session, nodes_created_this_session
+
     def __partition_into_networks(self, pins: list[Pin]) -> list[Network]:
         """Partition ``pins`` into groups that are already connected to each other.
 
@@ -333,6 +374,8 @@ class Circuit(mn.VMobject):
         net: Network,
         guide: mnt.Point3D | Pin,
         keep_alive: list[WireBase],
+        wires_created_this_session: set[WireBase],
+        nodes_created_this_session: set[Node],
     ) -> Pin:
         """Return a free pin at ``point``, splitting a wire there if necessary.
 
@@ -352,6 +395,14 @@ class Circuit(mn.VMobject):
             Accumulator for wires that have been removed from the circuit.  Keeping
             a reference here prevents their ``__del__`` from firing before the new
             wires and node have been fully set up.
+        wires_created_this_session : set[WireBase]
+            Wires created so far in this connection session. This allows the splitting
+            of wires to be handled differently based on whether they were created in
+            this session or a previous one, which is important for animations to work
+            properly. May be mutated.
+        nodes_created_this_session : set[Node]
+            Nodes created so far in this connection session. This allows them to be
+            animated nicely if animations are being used. Will be mutated.
 
         Returns
         -------
@@ -382,12 +433,17 @@ class Circuit(mn.VMobject):
                 continue
             start_portion, node, end_portion = wire.split_at_point(point)
             keep_alive.append(wire)
-            self.wires.remove(wire)
-            self.wires.add(start_portion, end_portion)
-            start_portion._set_visible()
-            end_portion._set_visible()
-            self.add(node)
-            self.nodes.update()
+            if wire in wires_created_this_session:
+                wires_created_this_session.remove(wire)
+                wires_created_this_session.update({start_portion, end_portion})
+                nodes_created_this_session.add(node)
+            else:
+                self.wires.remove(wire)
+                self.wires.add(start_portion, end_portion)
+                start_portion._set_visible()
+                end_portion._set_visible()
+                nodes_created_this_session.add(node)
+                self.nodes.update()
             return node.get(direction)
 
         raise RuntimeError(
@@ -418,6 +474,25 @@ class Circuit(mn.VMobject):
         return mn.AnimationGroup(
             *[mn.Uncreate(component, **anim_args) for component in components]
         )
+
+    @mn.override_animate(connect)
+    def __animate_connect(
+        self, *pins: Pin, anim_args: dict[str, Any] | None = None
+    ) -> mn.Animation:
+        if anim_args is None:
+            anim_args = {}
+
+        animations = []
+        new_wires, new_nodes = self.__core_connect_logic(*pins)
+        for wire in new_wires:
+            self.wires.add(wire)
+            wire._set_visible()
+            animations.append(mn.Create(wire, introducer=False, **anim_args))
+        for node in new_nodes:
+            self.nodes.add(node)
+            animations.append(mn.Create(node, introducer=False, **anim_args))
+
+        return mn.AnimationGroup(*animations)
 
     @mn.override_animate(disconnect)
     def __animate_disconnect(
