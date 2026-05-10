@@ -332,30 +332,10 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
         ValueError
             If ``point`` does not lie on the wire.
         """
-        all_vertices = self.get_all_vertices()
-        lengths = [
-            float(np.linalg.norm(b - a)) for a, b in itertools.pairwise(all_vertices)
-        ]
-
-        total_length = sum(lengths)
-        length_to_point = 0.0
-
-        for (start, end), length in zip(
-            itertools.pairwise(all_vertices), lengths, strict=True
-        ):
-            segment_vector = end - start
-            point_vector = point - start
-
-            if not np.allclose(np.cross(segment_vector, point_vector), 0):
-                length_to_point += length
-                continue
-
-            length_to_point += float(np.linalg.norm(point_vector))
-            break
-        else:
-            raise ValueError(f"The given point {point!r} does not lie on the wire.")
-
-        return self.split_at(length_to_point / total_length, container=container)
+        alpha = self.get_alpha_at_point(point)
+        if alpha is None:
+            raise ValueError(f"The given point {point} does not lie on the wire")
+        return self.split_at(alpha, container=container)
 
     def split_at_corner(
         self,
@@ -557,6 +537,63 @@ class WireBase(mn.VMobject, metaclass=abc.ABCMeta):
                     best_dist = dist
 
         return best_point_self, best_point_other
+
+    def get_alpha_at_point(self, point: mnt.Point3D) -> float | None:
+        """Get the proportion of the wire from the start to ``point``.
+
+        Parameters
+        ----------
+        point : mnt.Point3D
+            The point to query.
+
+        Returns
+        -------
+        float | None
+            If the point lies on the wire, returns the proportion of the wire (alpha)
+            between ``self.start.base`` and ``point``. If not, returns ``None``.
+        """
+        all_vertices = self.get_all_vertices()
+        lengths = [
+            float(np.linalg.norm(b - a)) for a, b in itertools.pairwise(all_vertices)
+        ]
+
+        total_length = sum(lengths)
+        length_to_point = 0.0
+
+        for (start, end), length in zip(
+            itertools.pairwise(all_vertices), lengths, strict=True
+        ):
+            segment_vector = end - start
+            point_vector = point - start
+
+            if utils.are_parallel(segment_vector, point_vector) and np.all(
+                0
+                <= np.dot(segment_vector, point_vector)
+                <= np.dot(segment_vector, segment_vector)
+            ):
+                length_to_point += float(np.linalg.norm(point_vector))
+                return length_to_point / total_length
+            length_to_point += length
+        return None
+
+    def coincident_with(self, point: mnt.Point3D) -> bool:
+        """Compute whether ``point`` lies along the wire.
+
+        Parameters
+        ----------
+        point : mnt.Point3D
+            The point to query.
+
+        Returns
+        -------
+        bool
+            ``True`` if the point lies on the wire, ``False`` otherwise.
+
+        See Also
+        --------
+        get_alpha_at_point
+        """
+        return self.get_alpha_at_point(point) is not None
 
     @staticmethod
     def _update_points(mob: mn.Mobject) -> None:

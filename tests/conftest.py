@@ -1,4 +1,6 @@
 import os
+import sys
+from pathlib import Path
 from typing import Any
 
 import manim as mn
@@ -14,6 +16,9 @@ from .utils.dummy_component import (
     DummyComponentOffCentre,
 )
 from .utils.pin_mocked import PinMockedParent
+
+# Add the test root to the path to allow absolute addressing to the `utils` subdirectory
+sys.path.insert(0, str(Path(__file__).parent))
 
 
 class _MockMathTex(mn.VMobject):

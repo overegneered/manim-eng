@@ -3,22 +3,7 @@ import manim.typing as mnt
 import numpy as np
 import pytest
 from utils.pin_mocked import PinMockedParent
-
-from manim_eng import ManualWire
-
-
-def _wire_from_vertices(vertices: list[mnt.Point3D]) -> ManualWire:
-    """Create a ManualWire whose ``get_all_vertices()`` equals ``vertices``.
-
-    The first and last entries in ``vertices`` become ``start.base`` and
-    ``end.base`` respectively. Everything in between becomes the list of
-    explicit corner points passed to ``ManualWire``.
-    """
-    start = PinMockedParent(vertices[0], mn.RIGHT)
-    end = PinMockedParent(vertices[-1], mn.RIGHT)
-    corners = vertices[1:-1]
-    return ManualWire(start, end, corners)
-
+from utils.wire_from_vertices import manual_wire_from_vertices
 
 # --------------------------------------------------------------------------------------
 # get_point_closest_to
@@ -48,7 +33,7 @@ L_WIRE_VERTICES_B: list[mnt.Point3D] = [
 
 def test_get_closest_point_to_projects_onto_interior() -> None:
     # Point at (0, 1, 0) projects perpendicularly onto the midpoint of the segment.
-    wire = _wire_from_vertices(HORIZONTAL_WIRE_VERTICES)
+    wire = manual_wire_from_vertices(HORIZONTAL_WIRE_VERTICES)
     point = np.array([0.0, 1.0, 0.0])
 
     closest = wire.get_point_closest_to(point)
@@ -59,7 +44,7 @@ def test_get_closest_point_to_projects_onto_interior() -> None:
 def test_get_closest_point_to_clamps_to_start() -> None:
     # Point before the start of the segment — clamps to start.
     # Point before the start of the segment — clamps to start.
-    wire = _wire_from_vertices(HORIZONTAL_WIRE_VERTICES)
+    wire = manual_wire_from_vertices(HORIZONTAL_WIRE_VERTICES)
     point = np.array([-3.0, 1.0, 0.0])
 
     closest = wire.get_point_closest_to(point)
@@ -69,7 +54,7 @@ def test_get_closest_point_to_clamps_to_start() -> None:
 
 def test_get_closest_point_to_clamps_to_end() -> None:
     # Point past the end of the segment — clamps to end.
-    wire = _wire_from_vertices(HORIZONTAL_WIRE_VERTICES)
+    wire = manual_wire_from_vertices(HORIZONTAL_WIRE_VERTICES)
     point = np.array([3.0, 1.0, 0.0])
 
     closest = wire.get_point_closest_to(point)
@@ -79,7 +64,7 @@ def test_get_closest_point_to_clamps_to_end() -> None:
 
 def test_get_closest_point_to_pin_on_segment() -> None:
     # Point lies exactly on the segment
-    wire = _wire_from_vertices(HORIZONTAL_WIRE_VERTICES)
+    wire = manual_wire_from_vertices(HORIZONTAL_WIRE_VERTICES)
     point = np.array([0.0, 0.0, 0.0])
 
     closest = wire.get_point_closest_to(point)
@@ -89,7 +74,7 @@ def test_get_closest_point_to_pin_on_segment() -> None:
 
 def test_get_closest_point_to_pin_at_start_vertex() -> None:
     # Point coincides with the start vertex.
-    wire = _wire_from_vertices(HORIZONTAL_WIRE_VERTICES)
+    wire = manual_wire_from_vertices(HORIZONTAL_WIRE_VERTICES)
     point = np.array([-1.0, 0.0, 0.0])
 
     closest = wire.get_point_closest_to(point)
@@ -100,7 +85,7 @@ def test_get_closest_point_to_pin_at_start_vertex() -> None:
 def test_get_closest_point_to_degenerate_segment() -> None:
     # Wire is a degenerate zero-length segment; both vertices at (0, 0, 0).
     # Two distinct points at the same position satisfy start != end.
-    degenerate_wire = _wire_from_vertices(
+    degenerate_wire = manual_wire_from_vertices(
         [
             np.array([0.0, 0.0, 0.0]),
             np.array([0.0, 0.0, 0.0]),
@@ -115,7 +100,7 @@ def test_get_closest_point_to_degenerate_segment() -> None:
 
 def test_get_closest_point_to_multi_segment_second_wins() -> None:
     # L-shaped wire; the point is on the second (vertical) segment.
-    wire = _wire_from_vertices(L_WIRE_VERTICES_A)
+    wire = manual_wire_from_vertices(L_WIRE_VERTICES_A)
     point = np.array([2.0, 1.0, 0.0])
 
     closest = wire.get_point_closest_to(point)
@@ -125,7 +110,7 @@ def test_get_closest_point_to_multi_segment_second_wins() -> None:
 
 def test_get_closest_point_to_pin_at_corner_vertex() -> None:
     # Point coincides with the corner vertex shared by both segments.
-    wire = _wire_from_vertices(L_WIRE_VERTICES_B)
+    wire = manual_wire_from_vertices(L_WIRE_VERTICES_B)
     point = np.array([1.0, 0.0, 0.0])
 
     closest = wire.get_point_closest_to(point)
@@ -135,7 +120,7 @@ def test_get_closest_point_to_pin_at_corner_vertex() -> None:
 
 def test_get_closest_point_to_equidistant_from_two_segments() -> None:
     # Point equidistant from both segments; the earlier segment takes priority.
-    wire = _wire_from_vertices(L_WIRE_VERTICES_B)
+    wire = manual_wire_from_vertices(L_WIRE_VERTICES_B)
     point = np.array([0.5, 0.5, 0.0])
 
     closest = wire.get_point_closest_to(point)
@@ -145,7 +130,7 @@ def test_get_closest_point_to_equidistant_from_two_segments() -> None:
 
 def test_get_closest_point_to_accepts_pin_and_takes_tip() -> None:
     # Passing a Pin should give the same result as passing pin.tip directly.
-    wire = _wire_from_vertices(HORIZONTAL_WIRE_VERTICES)
+    wire = manual_wire_from_vertices(HORIZONTAL_WIRE_VERTICES)
     pin = PinMockedParent(np.array([0.0, 1.0, 0.0]), mn.RIGHT)
 
     closest_via_pin = wire.get_point_closest_to(pin)
@@ -161,8 +146,10 @@ def test_get_closest_point_to_accepts_pin_and_takes_tip() -> None:
 
 def test_get_closest_points_with_crossing_wires() -> None:
     # Two perpendicular wires that cross; closest points are both at the intersection.
-    first = _wire_from_vertices([np.array([-1.0, 0.0, 0.0]), np.array([1.0, 0.0, 0.0])])
-    second = _wire_from_vertices(
+    first = manual_wire_from_vertices(
+        [np.array([-1.0, 0.0, 0.0]), np.array([1.0, 0.0, 0.0])]
+    )
+    second = manual_wire_from_vertices(
         [np.array([0.0, -1.0, 0.0]), np.array([0.0, 1.0, 0.0])]
     )
 
@@ -174,8 +161,12 @@ def test_get_closest_points_with_crossing_wires() -> None:
 
 def test_get_closest_points_with_parallel_overlapping() -> None:
     # Parallel wires at different y-offsets with overlapping x-ranges.
-    first = _wire_from_vertices([np.array([0.0, 0.0, 0.0]), np.array([2.0, 0.0, 0.0])])
-    second = _wire_from_vertices([np.array([1.0, 1.0, 0.0]), np.array([3.0, 1.0, 0.0])])
+    first = manual_wire_from_vertices(
+        [np.array([0.0, 0.0, 0.0]), np.array([2.0, 0.0, 0.0])]
+    )
+    second = manual_wire_from_vertices(
+        [np.array([1.0, 1.0, 0.0]), np.array([3.0, 1.0, 0.0])]
+    )
 
     p, _q = first.get_closest_points_with(second)
 
@@ -185,8 +176,12 @@ def test_get_closest_points_with_parallel_overlapping() -> None:
 
 def test_get_closest_points_with_parallel_non_overlapping() -> None:
     # Parallel wires with a gap between them; closest points are the facing endpoints.
-    first = _wire_from_vertices([np.array([0.0, 0.0, 0.0]), np.array([1.0, 0.0, 0.0])])
-    second = _wire_from_vertices([np.array([3.0, 0.0, 0.0]), np.array([4.0, 0.0, 0.0])])
+    first = manual_wire_from_vertices(
+        [np.array([0.0, 0.0, 0.0]), np.array([1.0, 0.0, 0.0])]
+    )
+    second = manual_wire_from_vertices(
+        [np.array([3.0, 0.0, 0.0]), np.array([4.0, 0.0, 0.0])]
+    )
 
     p, q = first.get_closest_points_with(second)
 
@@ -197,14 +192,16 @@ def test_get_closest_points_with_parallel_non_overlapping() -> None:
 def test_get_closest_points_with_multi_segment_global_minimum_selected() -> None:
     # L-shaped first wire vs horizontal second wire; the closest pair is on the
     # vertical segment of the first wire, not the horizontal one.
-    first = _wire_from_vertices(
+    first = manual_wire_from_vertices(
         [
             np.array([0.0, 0.0, 0.0]),
             np.array([1.0, 0.0, 0.0]),
             np.array([1.0, 1.0, 0.0]),
         ]
     )
-    second = _wire_from_vertices([np.array([0.0, 0.5, 0.0]), np.array([2.0, 0.5, 0.0])])
+    second = manual_wire_from_vertices(
+        [np.array([0.0, 0.5, 0.0]), np.array([2.0, 0.5, 0.0])]
+    )
 
     p, q = first.get_closest_points_with(second)
 
@@ -217,14 +214,14 @@ def test_get_closest_points_with_closest_pair_on_second_segments() -> None:
     # closest pair on the second segment of both wires, which would return wrong results
     # if self.get_all_vertices() were replaced by other.get_all_vertices() in the outer
     # loop.
-    first = _wire_from_vertices(
+    first = manual_wire_from_vertices(
         [
             np.array([0.0, 0.0, 0.0]),
             np.array([0.0, 2.0, 0.0]),
             np.array([0.0, 4.0, 0.0]),
         ]
     )
-    second = _wire_from_vertices(
+    second = manual_wire_from_vertices(
         [
             np.array([5.0, 0.0, 0.0]),
             np.array([5.0, 2.0, 0.0]),
@@ -241,8 +238,12 @@ def test_get_closest_points_with_closest_pair_on_second_segments() -> None:
 
 def test_get_closest_points_with_return_order() -> None:
     # First element of the tuple must be on self, second on other.
-    first = _wire_from_vertices([np.array([0.0, 0.0, 0.0]), np.array([1.0, 0.0, 0.0])])
-    second = _wire_from_vertices([np.array([0.0, 2.0, 0.0]), np.array([1.0, 2.0, 0.0])])
+    first = manual_wire_from_vertices(
+        [np.array([0.0, 0.0, 0.0]), np.array([1.0, 0.0, 0.0])]
+    )
+    second = manual_wire_from_vertices(
+        [np.array([0.0, 2.0, 0.0]), np.array([1.0, 2.0, 0.0])]
+    )
 
     p, q = first.get_closest_points_with(second)
 
@@ -268,7 +269,7 @@ def test_get_closest_points_with_c_shape_prefers_parallel_facing_segments() -> N
     # (1,1), dist²=4. Sets best.
     # (first.seg1, second.seg1): vertical x=-1 vs vertical x=1, parallel, NOT collinear.
     # Overlap y∈[-1,1]. Midpoint (-1,0) and (1,0), dist²=4. Tie + parallel → overrides.
-    first = _wire_from_vertices(
+    first = manual_wire_from_vertices(
         [
             np.array([-2.0, 1.0, 0.0]),
             np.array([-1.0, 1.0, 0.0]),
@@ -276,7 +277,7 @@ def test_get_closest_points_with_c_shape_prefers_parallel_facing_segments() -> N
             np.array([-2.0, -1.0, 0.0]),
         ]
     )
-    second = _wire_from_vertices(
+    second = manual_wire_from_vertices(
         [
             np.array([2.0, 1.0, 0.0]),
             np.array([1.0, 1.0, 0.0]),
@@ -308,13 +309,13 @@ def test_get_closest_points_with_parallel_non_collinear_tie_overrides() -> None:
     # (first.seg0, second.seg1): horizontal y=0 vs horizontal y=-1, parallel, NOT
     # collinear. x-overlap [1,2]; midpoint (1.5,0) and (1.5,-1), dist²=1.
     # Tie + parallel -> overrides.
-    first = _wire_from_vertices(
+    first = manual_wire_from_vertices(
         [
             np.array([0.0, 0.0, 0.0]),
             np.array([2.0, 0.0, 0.0]),
         ]
     )
-    second = _wire_from_vertices(
+    second = manual_wire_from_vertices(
         [
             np.array([3.0, 1.0, 0.0]),
             np.array([3.0, -1.0, 0.0]),
@@ -340,14 +341,14 @@ def test_get_closest_points_with_collinear_tie_does_not_override() -> None:
     # (first.seg1, second.seg0): horizontal y=0 vs horizontal y=0, parallel AND
     # collinear. Closest (0,0,0) and (1,0,0), dist²=1. Tie, but collinear — guard
     # fires, no override.
-    first = _wire_from_vertices(
+    first = manual_wire_from_vertices(
         [
             np.array([0.0, 2.0, 0.0]),
             np.array([0.0, 0.0, 0.0]),
             np.array([-2.0, 0.0, 0.0]),
         ]
     )
-    second = _wire_from_vertices(
+    second = manual_wire_from_vertices(
         [
             np.array([1.0, 0.0, 0.0]),
             np.array([3.0, 0.0, 0.0]),
@@ -375,14 +376,14 @@ def test_get_closest_points_with_strictly_closer_non_parallel_wins() -> None:
     # (first.seg1, second.seg0): vertical x=2 vs horizontal y=0.5, perpendicular.
     # Closest (2,0.5,0) and (2,0.5,0), dist²=0. Strictly closer — overrides via
     # `dist < best_dist`.
-    first = _wire_from_vertices(
+    first = manual_wire_from_vertices(
         [
             np.array([0.0, 0.0, 0.0]),
             np.array([2.0, 0.0, 0.0]),
             np.array([2.0, 2.0, 0.0]),
         ]
     )
-    second = _wire_from_vertices(
+    second = manual_wire_from_vertices(
         [
             np.array([1.0, 0.5, 0.0]),
             np.array([3.0, 0.5, 0.0]),
@@ -407,7 +408,7 @@ def test_get_closest_points_with_c_shape_horiz_prefers_parallel_facing_segments(
     # The facing segments (-1,1)->(1,1) and (-1,-1)->(1,-1) are horizontal, parallel,
     # and not collinear. The corners are equidistant; the parallel tie-break selects
     # midpoints.
-    first = _wire_from_vertices(
+    first = manual_wire_from_vertices(
         [
             np.array([-1.0, 2.0, 0.0]),
             np.array([-1.0, 1.0, 0.0]),
@@ -415,7 +416,7 @@ def test_get_closest_points_with_c_shape_horiz_prefers_parallel_facing_segments(
             np.array([1.0, 2.0, 0.0]),
         ]
     )
-    second = _wire_from_vertices(
+    second = manual_wire_from_vertices(
         [
             np.array([-1.0, -2.0, 0.0]),
             np.array([-1.0, -1.0, 0.0]),
@@ -448,14 +449,14 @@ def test_get_closest_points_with_parallel_non_collinear_tie_on_second_segments()
     # (first.seg1, second.seg1): vertical x=-2 vs vertical x=2, parallel, NOT collinear.
     # y-overlap [0,1]; midpoint (-2,0.5) and (2,0.5), dist²=16. Tie + parallel
     # -> overrides.
-    first = _wire_from_vertices(
+    first = manual_wire_from_vertices(
         [
             np.array([-3.0, 1.0, 0.0]),
             np.array([-2.0, 1.0, 0.0]),
             np.array([-2.0, 0.0, 0.0]),
         ]
     )
-    second = _wire_from_vertices(
+    second = manual_wire_from_vertices(
         [
             np.array([3.0, 1.0, 0.0]),
             np.array([2.0, 1.0, 0.0]),
@@ -484,14 +485,14 @@ def test_get_closest_points_with_parallel_non_coll_tie_self_second_other_first()
     # (first.seg1, second.seg0): horizontal y=-1 vs horizontal y=0, parallel, NOT
     # collinear. x-overlap [1,2]; midpoint (1.5,-1,0) and (1.5,0,0), dist²=1.
     # Tie + parallel -> overrides.
-    first = _wire_from_vertices(
+    first = manual_wire_from_vertices(
         [
             np.array([3.0, 1.0, 0.0]),
             np.array([3.0, -1.0, 0.0]),
             np.array([1.0, -1.0, 0.0]),
         ]
     )
-    second = _wire_from_vertices(
+    second = manual_wire_from_vertices(
         [
             np.array([0.0, 0.0, 0.0]),
             np.array([2.0, 0.0, 0.0]),
@@ -514,13 +515,13 @@ def test_get_closest_points_with_collinear_endpoints_does_not_trigger_override()
     #
     # first:  (0,0)->(1,0)     (horizontal at y=0)
     # second: (3,0)->(4,0)     (horizontal at y=0, collinear, 2-unit gap)
-    first = _wire_from_vertices(
+    first = manual_wire_from_vertices(
         [
             np.array([0.0, 0.0, 0.0]),
             np.array([1.0, 0.0, 0.0]),
         ]
     )
-    second = _wire_from_vertices(
+    second = manual_wire_from_vertices(
         [
             np.array([3.0, 0.0, 0.0]),
             np.array([4.0, 0.0, 0.0]),

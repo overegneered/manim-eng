@@ -378,6 +378,8 @@ class Circuit(mn.VMobject):
             direction = utils.cardinalised(guide - point)
 
         for wire in net.wires:
+            if not wire.coincident_with(point):
+                continue
             start_portion, node, end_portion = wire.split_at_point(point)
             keep_alive.append(wire)
             self.wires.remove(wire)
